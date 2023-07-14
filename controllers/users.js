@@ -1,8 +1,9 @@
 import { User } from "../models/users.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-export async function getUser(req, res) {
-    res.send("getting Users");
-}
+dotenv.config();
 
 export const createUser = async (req, res) => {
     try {
@@ -17,6 +18,9 @@ export const createUser = async (req, res) => {
             role,
         } = req.body;
 
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         // Create a new user in the database
         const newUser = await User.create({
             name,
@@ -24,15 +28,22 @@ export const createUser = async (req, res) => {
             phone,
             email,
             profile_picture,
-            password,
+            password: hashedPassword,
             specialty,
             role,
         });
 
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: newUser.id, email: newUser.email },
+            process.env.TOKEN_SECRET,
+            { expiresIn: "1h" }
+        );
+
         res.status(201).json({
             success: true,
             message: "User created successfully",
-            user: newUser,
+            token: token,
         });
     } catch (error) {
         console.error(error);
@@ -56,16 +67,29 @@ export const loginUser = async (req, res) => {
                 .json({ success: false, message: "Email not found" });
         }
 
-        // Check if the password matches
-        const isPasswordValid = await user.comparePassword(password);
+        // Check if the provided password matches the stored hashed password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
         if (!isPasswordValid) {
             return res
                 .status(401)
                 .json({ success: false, message: "Invalid password" });
         }
 
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            process.env.TOKEN_SECRET,
+            { expiresIn: "1h" }
+        );
+
         // Return successful response with user ID
-        res.status(200).json({ success: true, userId: user.id });
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            // user: { id: user.id, email: user.email},
+            token: token,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -104,4 +128,23 @@ export const resetPassword = async (req, res) => {
             error: error.message,
         });
     }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Find the user by ID
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Return the user data
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Failed to get user', error: error.message });
+  }
 };
