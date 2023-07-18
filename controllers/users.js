@@ -2,6 +2,7 @@ import { User } from "../models/users.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { sendSms } from "../helpers/sms.js";
 
 dotenv.config();
 
@@ -39,7 +40,7 @@ export const createUser = async (req, res) => {
             process.env.TOKEN_SECRET,
             { expiresIn: "1h" }
         );
-
+        // sendSms();
         res.status(201).json({
             success: true,
             message: "User created successfully",
@@ -131,20 +132,57 @@ export const resetPassword = async (req, res) => {
 };
 
 export const getUser = async (req, res) => {
-  try {
-    const userId = req.params.id;
+    try {
+        const userId = req.params.id;
 
-    // Find the user by ID
-    const user = await User.findByPk(userId);
+        // Find the user by ID
+        const user = await User.findByPk(userId);
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+        if (!user) {
+            return res
+                .status(404)
+                .json({ success: false, message: "User not found" });
+        }
+
+        // Return the user data
+        res.status(200).json({ success: true, user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to get user",
+            error: error.message,
+        });
     }
+};
 
-    // Return the user data
-    res.status(200).json({ success: true, user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Failed to get user', error: error.message });
-  }
+export const deactivateUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // Find the user by ID
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+            return res
+                .status(404)
+                .json({ success: false, message: "User not found" });
+        }
+
+        // Update the user's "is_valid" flag to false
+        user.is_valid = false;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "User deactivated successfully",
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to deactivate user",
+            error: error.message,
+        });
+    }
 };
