@@ -17,6 +17,7 @@
     "infobip": "^0.1.0",
     "jsonwebtoken": "^9.0.1",
     "morgan": "^1.10.0",
+    "openai": "^4.0.0",
     "pg": "^8.11.1",
     "sequelize": "^6.32.1",
     "swagger": "^0.7.5",

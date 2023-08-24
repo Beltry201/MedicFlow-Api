@@ -1,22 +1,22 @@
-import { Router } from "express";
-import { validateToken } from "../helpers/jwt.js"; // Import the validateToken middleware
+import { Router } from 'express';
+import { validateToken } from '../helpers/jwt.js';
 import {
-    // getPatient,
-    createPatient,
-    // deactivatePatient,
-} from "../controllers/patients.js";
-import { ValidationError } from "sequelize";
+  createPatient,
+  listPatients,
+  getPatientDetails,
+  updatePatient,
+  deletePatient,
+  getDoctorPatients, // Import the new controller function
+} from '../controllers/patients.js';
 
 const router = Router();
-// TODO:
-// - Update
-// - Deactivate / Delete
-// - Get Patient Details
-// - Get Patients List
-
 
 // Routes
-router.post("/", validateToken, createPatient);
-
+router.post('/', validateToken, createPatient);
+router.get('/', validateToken, listPatients);
+router.get('/doctor/:doctorId', validateToken, getDoctorPatients); // New route for getting doctor patients
+router.get('/:id', validateToken, getPatientDetails);
+router.put('/:id', validateToken, updatePatient);
+router.delete('/:id', validateToken, deletePatient);
 
 export default router;

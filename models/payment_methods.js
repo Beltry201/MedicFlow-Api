@@ -1,11 +1,10 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
-import { User } from "./users.js";
 
 export const PaymentMethod = sequelize.define(
     "PaymentMethod",
     {
-        id: {
+        _id_payment_method: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
@@ -21,6 +20,10 @@ export const PaymentMethod = sequelize.define(
         },
         cvv: {
             type: DataTypes.STRING(4),
+        },
+        _id_doctor: {
+            type: DataTypes.INTEGER,
+            // You can add a foreign key constraint here if necessary
         },
     },
     {

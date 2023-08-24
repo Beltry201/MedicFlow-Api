@@ -2,11 +2,14 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 import { PaymentMethod } from "./payment_methods.js";
 import { Patient } from "./patients.js";
+import { TreatmentCatalog } from "./treatments_catalogs.js";
+import { Consult } from "./consults.js"
+import { ParameterType } from "./parameter_types.js";
 
 export const User = sequelize.define(
     "User",
     {
-      id: {
+      _id_user: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -62,30 +65,85 @@ User.prototype.comparePassword = function (password) {
 
 // ------------- PAYMENT METHOD -------------
 User.hasMany(PaymentMethod, {
-    foreignKey: "user_id",
-    sourceKey: "id",
-    onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
-    onUpdate: "CASCADE"  // Update related doctor_id in patients if the doctor's id is updated
-});
-
-PaymentMethod.belongsTo(User, {
-    foreignKey: "user_id",
-    targetId: "id",
-    onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
-    onUpdate: "CASCADE"  // Update related doctor_id in patients if the doctor's id is updated
-});
-
-// ------------- PATIENT -------------
-Patient.belongsTo(User, {
-  foreignKey: "doctor_id",
-  targetKey: "id",
+  foreignKey: "_id_doctor",
+  sourceKey: "_id_user",
   onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
   onUpdate: "CASCADE"  // Update related doctor_id in patients if the doctor's id is updated
 });
 
-User.hasMany(Patient, {
-  foreignKey: "doctor_id",
-  sourceKey: "id",
-  onDelete: "CASCADE", // Automatically delete related patients when the user is deleted
-  onUpdate: "CASCADE"  // Update related user_id in patients if the user's id is updated
+PaymentMethod.belongsTo(User, {
+  foreignKey: "_id_doctor",
+  targetId: "_id_user",
+  onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
+  onUpdate: "CASCADE",  // Update related doctor_id in patients if the doctor's id is updated
+  allowNull: false,
 });
+
+
+// ------------- PATIENT -------------
+User.hasMany(Patient, {
+  foreignKey: "_id_doctor",
+  targetId: "_id_user",
+  onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
+  onUpdate: "CASCADE",  // Update related doctor_id in patients if the doctor's id is updated
+  allowNull: false,
+});
+
+Patient.belongsTo(User, {
+  foreignKey: "_id_doctor",
+  targetId: "_id_user",
+  onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
+  onUpdate: "CASCADE",  // Update related doctor_id in patients if the doctor's id is updated
+  allowNull: false,
+});  
+
+// ------------- TREATMENT CATALOG -------------
+User.hasMany(TreatmentCatalog, {
+  foreignKey: "_id_doctor",
+  targetId: "_id_user",
+  onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
+  onUpdate: "CASCADE",  // Update related doctor_id in patients if the doctor's id is updated
+  allowNull: false,
+});
+
+TreatmentCatalog.belongsTo(User, {
+  foreignKey: "_id_doctor",
+  targetId: "_id_user",
+  onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
+  onUpdate: "CASCADE",  // Update related doctor_id in patients if the doctor's id is updated
+  allowNull: false,
+});
+
+// ------------- CONSULT -------------
+User.hasMany(Consult, {
+  foreignKey: "_id_doctor",
+  targetId: "_id_user",
+  onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
+  onUpdate: "CASCADE",  // Update related doctor_id in patients if the doctor's id is updated
+  allowNull: false,
+});
+
+Consult.belongsTo(User, {
+  foreignKey: "_id_doctor",
+  targetId: "_id_user",
+  onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
+  onUpdate: "CASCADE",  // Update related doctor_id in patients if the doctor's id is updated
+  allowNull: false,
+});
+
+// ------------- PARAMETERS -------------
+User.hasMany(ParameterType, {
+  foreignKey: "_id_doctor",
+  targetId: "_id_user",
+  onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
+  onUpdate: "CASCADE",  // Update related doctor_id in patients if the doctor's id is updated
+  allowNull: false,
+});
+
+ParameterType.belongsTo(User, {
+  foreignKey: "_id_doctor",
+  targetId: "_id_user",
+  onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
+  onUpdate: "CASCADE",  // Update related doctor_id in patients if the doctor's id is updated
+  allowNull: false,
+}); 
