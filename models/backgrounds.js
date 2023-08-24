@@ -2,15 +2,14 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 import { Consult } from "./consults.js";
 import { ParameterType } from "./parameter_types.js";
-import { SubParameterType } from "./subparameters_types.js";
 
 export const Background = sequelize.define(
     "Background",
     {
         _id_background: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
-            autoIncrement: true,
         },
         title: {
             type: DataTypes.STRING,
@@ -21,11 +20,11 @@ export const Background = sequelize.define(
             allowNull: true,
         },
         _id_consult: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             allowNull: false,
         },
         _id_parameter: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             allowNull: false,
         },
     },

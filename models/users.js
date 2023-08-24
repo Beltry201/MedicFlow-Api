@@ -10,9 +10,9 @@ export const User = sequelize.define(
     "User",
     {
       _id_user: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-        autoIncrement: true,
       },
       name: {
         type: DataTypes.STRING(255),

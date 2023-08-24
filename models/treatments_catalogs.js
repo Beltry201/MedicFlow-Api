@@ -5,9 +5,9 @@ export const TreatmentCatalog = sequelize.define(
   "TreatmentCatalog",
   {
     _id_treatment_catalog: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
     },
     name: {
       type: DataTypes.STRING(255),
@@ -25,7 +25,7 @@ export const TreatmentCatalog = sequelize.define(
       type: DataTypes.TEXT,
     },
     _id_doctor: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
     },
   },
   {

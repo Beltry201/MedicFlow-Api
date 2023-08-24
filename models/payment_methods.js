@@ -5,9 +5,9 @@ export const PaymentMethod = sequelize.define(
     "PaymentMethod",
     {
         _id_payment_method: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
-            autoIncrement: true,
         },
         card_number: {
             type: DataTypes.STRING(16),
@@ -22,7 +22,7 @@ export const PaymentMethod = sequelize.define(
             type: DataTypes.STRING(4),
         },
         _id_doctor: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             // You can add a foreign key constraint here if necessary
         },
     },

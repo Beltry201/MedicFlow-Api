@@ -16,6 +16,6 @@ router.post("/login", loginUser);
 router.post("/", createUser);
 router.put("/resetPass", validateToken, resetPassword); // Protect the route with validateToken middleware
 // router.put("/:id", validateToken, updateUser); // Example for protecting another route
-router.delete("/deactivate/:id", validateToken, deactivateUser);
+router.delete("/deactivate/:_id_user", validateToken, deactivateUser);
 
 export default router;

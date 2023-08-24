@@ -7,9 +7,9 @@ export const Consult = sequelize.define(
     "Consult",
     {
         _id_consult: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
-            autoIncrement: true,
         },
         audio_transcript: {
             type: DataTypes.STRING(10000),
@@ -30,14 +30,14 @@ export const Consult = sequelize.define(
             defaultValue: true,
         },
         _id_doctor: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
         },
         _id_patient: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             allowNull: false,
         },
         _id_treatment_catalog: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             allowNull: false,
         },
     },

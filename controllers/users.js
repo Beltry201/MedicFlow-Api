@@ -44,6 +44,7 @@ export const createUser = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "User created successfully",
+            user: newUser,
             token: token,
         });
     } catch (error) {
@@ -159,7 +160,7 @@ export const getUser = async (req, res) => {
 
 export const deactivateUser = async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = req.params._id_user;
 
         // Find the user by ID
         const user = await User.findByPk(userId);

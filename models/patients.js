@@ -6,9 +6,9 @@ export const Patient = sequelize.define(
     "Patient",
     {
         _id_patient: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
-            autoIncrement: true,
         },
         name: {
             type: DataTypes.STRING(255),
@@ -42,7 +42,7 @@ export const Patient = sequelize.define(
             defaultValue: true,
         },
         _id_doctor: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             // You can add a foreign key constraint here if necessary
         },
     },

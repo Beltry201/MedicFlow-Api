@@ -5,9 +5,9 @@ export const ParameterType = sequelize.define(
     "ParameterType",
     {
         _id_parameter_type: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
-            autoIncrement: true,
         },
         parameter_type_name: {
             type: DataTypes.STRING,
@@ -22,7 +22,7 @@ export const ParameterType = sequelize.define(
             allowNull: false,
         },
         _id_doctor: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             allowNull: false
         }
 
