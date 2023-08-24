@@ -38,7 +38,7 @@ export const createUser = async (req, res) => {
         const token = jwt.sign(
             { id: newUser.id, email: newUser.email },
             process.env.TOKEN_SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "1w" }
         );
         // sendSms();
         res.status(201).json({
@@ -81,8 +81,8 @@ export const loginUser = async (req, res) => {
         console.log("\n-- ID: ",user._id_user)
         const token = jwt.sign(
             { id: user._id_user, email: user.email },
-            process.env.TOKEN_SECRET,
-            { expiresIn: "10d" }
+            process.env.TOKEN_SECRET},
+            { expiresIn: "1w" }
         );
 
         // Return successful response with user ID
