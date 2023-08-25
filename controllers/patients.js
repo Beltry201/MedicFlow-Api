@@ -4,27 +4,23 @@ import { Patient } from '../models/patients.js';
 export const createPatient = async (req, res) => {
   try {
     const {
+      is_valid,
       name,
+      last_name,
       gender,
       birth_date,
-      job,
-      job_date,
-      civil_status,
       phone_number,
-      mail,
       _id_doctor,
     } = req.body;
 
     // Create the patient in the database
     const newPatient = await Patient.create({
+      is_valid,
       name,
+      last_name,
       gender,
       birth_date,
-      job,
-      job_date,
-      civil_status,
       phone_number,
-      mail,
       _id_doctor,
     });
 

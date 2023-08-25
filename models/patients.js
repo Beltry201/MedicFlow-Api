@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
-import { Consult } from "./consults.js"
+import { Consult } from "./consults.js";
 
 export const Patient = sequelize.define(
     "Patient",
@@ -14,6 +14,10 @@ export const Patient = sequelize.define(
             type: DataTypes.STRING(255),
             allowNull: false,
         },
+        last_name: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
         gender: {
             type: DataTypes.ENUM("male", "female", "non-binary", "other"),
             allowNull: false,
@@ -24,25 +28,32 @@ export const Patient = sequelize.define(
         },
         job: {
             type: DataTypes.STRING(255),
+            allowNull: true
         },
         job_date: {
             type: DataTypes.DATE,
+            allowNull: true
         },
         civil_status: {
             type: DataTypes.STRING(50),
+            allowNull: true
         },
         phone_number: {
             type: DataTypes.STRING(20),
+            allowNull: false
         },
         mail: {
             type: DataTypes.STRING(255),
+            allowNull: true
         },
         is_valid: {
             type: DataTypes.BOOLEAN,
-            defaultValue: true,
+            defaultValue: false,
+            allowNull: false,
         },
         _id_doctor: {
             type: DataTypes.UUID,
+            allowNull: false
             // You can add a foreign key constraint here if necessary
         },
     },

@@ -35,6 +35,36 @@ export const getParameterType = async (req, res) => {
   }
 };
 
+export const getAllParameterTypesForDoctor = async (req, res) => {
+  try {
+    const _id_doctor = req.params._id_doctor; // Replace with the correct parameter name
+
+    const parameterTypes = await ParameterType.findAll({
+      where: {
+        _id_doctor: _id_doctor,
+      },
+      order: [['category', 'ASC']],
+    });
+
+    const categorizedParameterTypes = parameterTypes.reduce((result, parameterType) => {
+      if (!result[parameterType.category]) {
+        result[parameterType.category] = [];
+      }
+      result[parameterType.category].push(parameterType);
+      return result;
+    }, {});
+
+    res.status(200).json({ success: true, parameterTypes: categorizedParameterTypes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve parameter types",
+      error: error.message,
+    });
+  }
+};
+
 export const updateParameterType = async (req, res) => {
     try {
       const parameterType = await ParameterType.findByPk(req.params.id);
