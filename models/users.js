@@ -46,6 +46,11 @@ export const User = sequelize.define(
         type: DataTypes.ENUM("doctor", "admin", "staff", "patient"),
         allowNull: false,
       },
+      access_code: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        unique: true
+      },
       is_valid: {
         type: DataTypes.BOOLEAN,
         defaultValue: true, // Set a default value of true for new users

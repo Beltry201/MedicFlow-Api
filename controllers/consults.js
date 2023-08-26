@@ -3,6 +3,7 @@ import { Background } from "../models/backgrounds.js";
 import { Treatment } from "../models/treatments.js";
 import { generateText } from "../helpers/openai_generate.js";
 import { ParameterType } from "../models/parameter_types.js";
+import { Patient } from "../models/patients.js";
 
 export const createConsult = async (req, res) => {
     try {
@@ -233,7 +234,7 @@ export const storeJsonData = async (req, res) => {
             _id_treatment_catalog,
             consult,
         } = req.body;
-        console.log("\n-- CONSULT JSON: ", consult);
+
         // Create a new consult in the database
         const newConsult = await Consult.create({
             audio_transcript,
@@ -245,75 +246,66 @@ export const storeJsonData = async (req, res) => {
         });
 
         // Process and store consult into the database here
-        // Loop through the generated JSON and insert data into the Background table
-        const categories = {
-            INF: undefined, // No corresponding category
-            AHF: "AHF",
-            APNP: "APNP",
-            APP: "APP",
-            AGO: "AGO",
-            DGN: "DGN",
-            EN: "EN",
-        };
-
-        // Loop through the generated JSON and insert data into the Background and Treatment tables
         for (const categoryName in consult) {
-            if (categoryName !== "INF") {
-                const categoryData = consult[categoryName];
+            const categoryData = consult[categoryName];
 
-                for (const parameterName in categoryData) {
-                    const content = categoryData[parameterName];
+            for (const title in categoryData) {
+                const content = categoryData[title];
 
-                    if (content.trim() !== "") {
-                        // Check if content is not empty
-                        console.log("\n-- CATEGORY NAME:", categoryName);
-                        console.log("-- PARAMETER NAME:", parameterName);
-                        console.log("-- CONTENT:", content);
+                if (content.trim() !== "") {
+                    let parameter;
 
-                        // Find the corresponding parameter in the ParameterType table
-                        const parameter = await ParameterType.findOne({
+                    if (
+                        categoryName === "AHF" ||
+                        categoryName === "APNP" ||
+                        categoryName === "APP" ||
+                        categoryName === "AGO"
+                    ) {
+                        // Find the corresponding parameter in the ParameterType table for backgrounds
+                        console.log("\n-- CATEGROY NAME: ", categoryName)
+                        parameter = await ParameterType.findOne({
                             where: {
                                 _id_doctor: _id_doctor,
+                                parameter_belongs_to: "background",
                                 category: categoryName,
-                                parameter_type_name: parameterName,
+                                parameter_type_name: title,
                             },
                         });
-
-                        if (parameter) {
-                            console.log("-- FOUND PARAMETER:", parameter);
-                            // Insert data into the Background table
-                            await Background.create({
+                        await Background.create({
+                            _id_consult: newConsult._id_consult,
+                            _id_parameter: parameter._id_parameter_type,
+                            title,
+                            content,
+                        });
+                    } else if (
+                        categoryName === "DGN" ||
+                        categoryName === "EN"
+                    ) {
+                        // Find the corresponding parameter in the ParameterType table for treatments
+                        parameter = await ParameterType.findOne({
+                            where: {
+                                _id_doctor: _id_doctor,
+                                parameter_belongs_to: "treatment",
+                                category: categoryName,
+                                parameter_type_name: title,
+                            },
+                        });
+                        if (content.trim() !== "") {
+                            await Treatment.create({
                                 _id_consult: newConsult._id_consult,
                                 _id_parameter: parameter._id_parameter_type,
-                                title: parameterName,
+                                title,
                                 content,
                             });
-                            // Insert data into the Treatment table
-                            if (
-                                categoryName === "DGN" ||
-                                categoryName === "EN"
-                            ) {
-                                const treatmentType =
-                                    categoryName === "DGN" ? "DGN" : "EV";
-                                await Treatment.create({
-                                    _id_consult: newConsult._id_consult,
-                                    _id_parameter: parameter._id_parameter_type,
-                                    title: parameterName,
-                                    content,
-                                });
-                            }
-                        } else {
-                            console.log("-- PARAMETER NOT FOUND");
                         }
                     }
                 }
-            } else {
-                console.log("-- SKIPPING CATEGORY:", categoryName);
             }
         }
 
         res.status(201).json({
             success: true,
+            message: "JSON data stored successfully",
             consult: newConsult,
         });
     } catch (error) {
@@ -321,6 +313,65 @@ export const storeJsonData = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to store JSON data",
+            error: error.message,
+        });
+    }
+};
+
+export const getConsultById = async (req, res) => {
+    try {
+        const { _id_consult } = req.query;
+
+        // Find the consult by ID
+        const consult = await Consult.findOne({
+            where: { _id_consult: _id_consult },
+            include: [
+                {
+                    model: Patient,
+                },
+                {
+                    model: Background,
+                },
+                {
+                    model: Treatment,
+                },
+            ],
+        });
+
+        if (!consult) {
+            return res
+                .status(404)
+                .json({ success: false, message: "Consult not found" });
+        }
+
+        const formattedConsult = {
+            id: consult._id_consult,
+            date: consult.date,
+            Paciente: {
+                name: consult.Patient.name,
+                birth_date: consult.Patient.birth_date,
+                gender: consult.Patient.gender,
+            },
+            Antecedentes: consult.Backgrounds.map((background) => ({
+                title: background.title,
+                content: background.content,
+            })),
+            SOAP: consult.Treatments.map((treatment) => ({
+                title: treatment.title,
+                content: treatment.content,
+            })),
+        };
+
+        res.status(200).json({
+            success: true,
+            message: "Consult retrieved successfully",
+            consult: formattedConsult,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to retrieve consult",
             error: error.message,
         });
     }
