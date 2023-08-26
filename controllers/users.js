@@ -79,7 +79,7 @@ export const loginUser = async (req, res) => {
         }
 
         // Generate JWT token
-        console.log("\n-- ID: ",user._id_user)
+        console.log("\n-- ID: ", user._id_user);
         const token = jwt.sign(
             { id: user._id_user, email: user.email },
             process.env.TOKEN_SECRET,
@@ -91,6 +91,42 @@ export const loginUser = async (req, res) => {
             success: true,
             message: "Login successful",
             // user: { id: user.id, email: user.email},
+            token: token,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to login",
+            error: error.message,
+        });
+    }
+};
+
+export const access_code = async (req, res) => {
+    const { code } = req.params;
+    try {
+        
+        // Check if the code exists in the database
+        const user = await User.findOne({ where: { access_code: code } });
+        if (!user) {
+            return res
+                .status(404)
+                .json({ success: false, message: "Code not found" });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user._id_user },
+            process.env.TOKEN_SECRET,
+            { expiresIn: "1w" }
+        );
+
+        // Return successful response with user ID and token
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            userId: user._id_user,
             token: token,
         });
     } catch (error) {

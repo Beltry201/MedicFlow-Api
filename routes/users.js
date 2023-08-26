@@ -4,6 +4,7 @@ import {
     getUser,
     createUser,
     loginUser,
+    access_code,
     resetPassword,
     deactivateUser,
 } from "../controllers/users.js";
@@ -11,11 +12,12 @@ import {
 const router = Router();
 
 // Routes
-router.get("/:id", validateToken, getUser); // Protect the route with validateToken middleware
+router.get("/:id", validateToken, getUser);
 router.post("/login", loginUser);
+router.get("/access_code/:code", access_code);
 router.post("/", createUser);
-router.put("/resetPass", validateToken, resetPassword); // Protect the route with validateToken middleware
-// router.put("/:id", validateToken, updateUser); // Example for protecting another route
+router.put("/resetPass", validateToken, resetPassword); 
+// router.put("/:id", validateToken, updateUser); 
 router.delete("/deactivate/:_id_user", validateToken, deactivateUser);
 
 export default router;

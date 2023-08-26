@@ -3,6 +3,7 @@ import {
   createConsult,
   generateJsonResponse,
   storeJsonData,
+  getConsultById
   // getConsultDetails,
   // getDoctorConsults,
   // updateConsult,
@@ -16,6 +17,7 @@ const router = Router();
 // router.post("/", validateToken, createConsult);
 router.post("/", validateToken, storeJsonData);
 router.get("/", validateToken, generateJsonResponse);
+router.get("/consult_details/", validateToken, getConsultById);
 
 // router.get("/:id", validateToken, getConsultDetails);
 // router.get("/doctor/:doctorId", validateToken, getDoctorConsults);
