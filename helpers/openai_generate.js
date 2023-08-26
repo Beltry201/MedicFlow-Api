@@ -1,11 +1,13 @@
 import OpenAIApi from "openai";
 import dotenv from "dotenv";
+import { execSync } from 'child_process';
 dotenv.config();
 
 const openai = new OpenAIApi({
-    apiKey: process.env["OPENAI_API_KEY"],
-});
-
+    apiKey : execSync('source ~/.zshrc && echo $OPENAI_API_KEY', {
+        encoding: 'utf-8'
+      }).trim()
+})
 // Function to generate the JSON response structure
 const requestJson = (jsonStructure) => `
 
