@@ -3,11 +3,8 @@ import {
   createConsult,
   generateJsonResponse,
   storeJsonData,
-  getConsultById
-  // getConsultDetails,
-  // getDoctorConsults,
-  // updateConsult,
-  // deactivateConsult,
+  getConsultById,
+  getUserConsults
 } from "../controllers/consults.js";
 import { validateToken } from "../helpers/jwt.js";
 
@@ -18,6 +15,7 @@ const router = Router();
 router.post("/", validateToken, storeJsonData);
 router.get("/", validateToken, generateJsonResponse);
 router.get("/consult_details/", validateToken, getConsultById);
+router.get("/consults_list/", validateToken, getUserConsults);
 
 // router.get("/:id", validateToken, getConsultDetails);
 // router.get("/doctor/:doctorId", validateToken, getDoctorConsults);

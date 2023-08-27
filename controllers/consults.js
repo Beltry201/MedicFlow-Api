@@ -376,3 +376,63 @@ export const getConsultById = async (req, res) => {
         });
     }
 };
+
+export const getUserConsults = async (req, res) => {
+    try {
+        const { _id_doctor } = req.query;
+
+        // Retrieve all consults for the given doctor
+        const consults = await Consult.findAll({
+            where: {
+                _id_doctor: _id_doctor,
+            },
+            include: [
+                {
+                    model: Treatment,
+                    as: 'Treatments', // Make sure this matches the name in the association
+                    attributes: ["title", "content"],
+                },
+                {
+                    model: Patient, // Assuming you have a Patient model
+                    as: 'Patient', // Make sure this matches the name in the association
+                    attributes: ["name", "birth_date", "gender"],
+                },
+            ],
+        });
+
+        if (consults.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No consults found for the given doctor",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            consults: consults.map((consult) => {
+                return {
+                    _id_consult: consult._id_consult,
+                    date: consult.date,
+                    patient: {
+                        name: consult.Patient.name,
+                        birth_date: consult.Patient.birth_date,
+                        gender: consult.Patient.gender,
+                    },
+                    treatments: consult.Treatments.map((treatment) => {
+                        return {
+                            title: treatment.title,
+                            content: treatment.content,
+                        };
+                    }),
+                };
+            }),
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch user consults",
+            error: error.message,
+        });
+    }
+};
