@@ -14,11 +14,11 @@ export const ParameterType = sequelize.define(
             allowNull: false,
         },
         parameter_belongs_to: {
-            type: DataTypes.ENUM("treatment", "background"),
+            type: DataTypes.ENUM("soap", "background"),
             allowNull: false,
         },
         category: {
-            type: DataTypes.ENUM("AHF", "APNP", "APP", "AGO", "EN", "DGN"),
+            type: DataTypes.ENUM("AHF", "APNP", "APP", "AGO", "SOAP"),
             allowNull: false,
         },
         _id_doctor: {
