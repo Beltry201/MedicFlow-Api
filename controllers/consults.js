@@ -244,13 +244,13 @@ export const storeJsonData = async (req, res) => {
             _id_patient,
             _id_treatment_catalog,
         });
-        
-        console.log("\n-- .CONSULT ID: ", consult._id_consult)
+
+        console.log("\n-- .CONSULT ID: ", consult._id_consult);
 
         // Process and store consult into the database here
         for (const categoryName in consult_json) {
             const categoryData = consult_json[categoryName];
-            
+
             for (const title in categoryData) {
                 const content = categoryData[title];
 
@@ -264,7 +264,7 @@ export const storeJsonData = async (req, res) => {
                         categoryName === "AGO"
                     ) {
                         // Find the corresponding parameter in the ParameterType table for backgrounds
-                        console.log("\n-- CATEGROY NAME: ", categoryName)
+                        console.log("\n-- CATEGROY NAME: ", categoryName);
                         parameter = await ParameterType.findOne({
                             where: {
                                 _id_doctor: _id_doctor,
@@ -279,10 +279,8 @@ export const storeJsonData = async (req, res) => {
                             title,
                             content,
                         });
-                    } else if (
-                        categoryName === "SOAP"
-                    ) {
-                        console.log("\n-- CATEGROY NAME: ", categoryName)
+                    } else if (categoryName === "SOAP") {
+                        console.log("\n-- CATEGROY NAME: ", categoryName);
                         // Find the corresponding parameter in the ParameterType table for treatments
                         parameter = await ParameterType.findOne({
                             where: {
@@ -304,7 +302,7 @@ export const storeJsonData = async (req, res) => {
                 }
             }
         }
-        // Find the consult by ID 
+        // Find the consult by ID
         const newConsult = await Consult.findOne({
             where: { _id_consult: consult._id_consult },
             include: [
@@ -319,16 +317,22 @@ export const storeJsonData = async (req, res) => {
                 },
             ],
         });
-        console.log("\n-- NEW CONSULT ID: ", newConsult._id_consult)
-        const treatmentsFormatted = newConsult.Treatments.reduce((formatted, treatment) => {
-            formatted[treatment.title] = treatment.content;
-            return formatted;
-        }, {});
-        
-        const backgroundsFormatted = newConsult.Backgrounds.reduce((formatted, background) => {
-            formatted[background.title] = background.content;
-            return formatted;
-        }, {});
+        console.log("\n-- NEW CONSULT ID: ", newConsult._id_consult);
+        const treatmentsFormatted = newConsult.Treatments.reduce(
+            (formatted, treatment) => {
+                formatted[treatment.title] = treatment.content;
+                return formatted;
+            },
+            {}
+        );
+
+        const backgroundsFormatted = newConsult.Backgrounds.reduce(
+            (formatted, background) => {
+                formatted[background.title] = background.content;
+                return formatted;
+            },
+            {}
+        );
 
         const formattedConsult = {
             id_consult: newConsult._id_consult,
@@ -382,16 +386,22 @@ export const getConsultById = async (req, res) => {
                 .status(404)
                 .json({ success: false, message: "Consult not found" });
         }
-        
-        const treatmentsFormatted = newConsult.Treatments.reduce((formatted, treatment) => {
-            formatted[treatment.title] = treatment.content;
-            return formatted;
-        }, {});
-        
-        const backgroundsFormatted = newConsult.Backgrounds.reduce((formatted, background) => {
-            formatted[background.title] = background.content;
-            return formatted;
-        }, {});
+
+        const treatmentsFormatted = consult.Treatments.reduce(
+            (formatted, treatment) => {
+                formatted[treatment.title] = treatment.content;
+                return formatted;
+            },
+            {}
+        );
+
+        const backgroundsFormatted = consult.Backgrounds.reduce(
+            (formatted, background) => {
+                formatted[background.title] = background.content;
+                return formatted;
+            },
+            {}
+        );
 
         const formattedConsult = {
             id_consult: consult._id_consult,
@@ -404,13 +414,12 @@ export const getConsultById = async (req, res) => {
             background: backgroundsFormatted,
             soap: treatmentsFormatted,
         };
-        
+
         res.status(200).json({
             success: true,
             message: "Consult retrieved successfully",
             consult: formattedConsult,
         });
-        
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -433,12 +442,12 @@ export const getUserConsults = async (req, res) => {
             include: [
                 {
                     model: Treatment,
-                    as: 'Treatments', // Make sure this matches the name in the association
+                    as: "Treatments", // Make sure this matches the name in the association
                     attributes: ["title", "content"],
                 },
                 {
                     model: Patient, // Assuming you have a Patient model
-                    as: 'Patient', // Make sure this matches the name in the association
+                    as: "Patient", // Make sure this matches the name in the association
                     attributes: ["name", "birth_date", "gender"],
                 },
             ],
