@@ -232,11 +232,11 @@ export const storeJsonData = async (req, res) => {
             _id_doctor,
             _id_patient,
             _id_treatment_catalog,
-            consult,
+            consult_json,
         } = req.body;
 
         // Create a new consult in the database
-        const newConsult = await Consult.create({
+        const consult = await Consult.create({
             audio_transcript,
             date,
             is_valid: true,
@@ -244,11 +244,13 @@ export const storeJsonData = async (req, res) => {
             _id_patient,
             _id_treatment_catalog,
         });
+        
+        console.log("\n-- .CONSULT ID: ", consult._id_consult)
 
         // Process and store consult into the database here
-        for (const categoryName in consult) {
-            const categoryData = consult[categoryName];
-
+        for (const categoryName in consult_json) {
+            const categoryData = consult_json[categoryName];
+            
             for (const title in categoryData) {
                 const content = categoryData[title];
 
@@ -272,7 +274,7 @@ export const storeJsonData = async (req, res) => {
                             },
                         });
                         await Background.create({
-                            _id_consult: newConsult._id_consult,
+                            _id_consult: consult._id_consult,
                             _id_parameter: parameter._id_parameter_type,
                             title,
                             content,
@@ -280,6 +282,7 @@ export const storeJsonData = async (req, res) => {
                     } else if (
                         categoryName === "SOAP"
                     ) {
+                        console.log("\n-- CATEGROY NAME: ", categoryName)
                         // Find the corresponding parameter in the ParameterType table for treatments
                         parameter = await ParameterType.findOne({
                             where: {
@@ -291,7 +294,7 @@ export const storeJsonData = async (req, res) => {
                         });
                         if (content.trim() !== "") {
                             await Treatment.create({
-                                _id_consult: newConsult._id_consult,
+                                _id_consult: consult._id_consult,
                                 _id_parameter: parameter._id_parameter_type,
                                 title,
                                 content,
@@ -301,11 +304,48 @@ export const storeJsonData = async (req, res) => {
                 }
             }
         }
+        // Find the consult by ID 
+        const newConsult = await Consult.findOne({
+            where: { _id_consult: consult._id_consult },
+            include: [
+                {
+                    model: Patient,
+                },
+                {
+                    model: Background,
+                },
+                {
+                    model: Treatment,
+                },
+            ],
+        });
+        console.log("\n-- NEW CONSULT ID: ", newConsult._id_consult)
+        const treatmentsFormatted = newConsult.Treatments.reduce((formatted, treatment) => {
+            formatted[treatment.title] = treatment.content;
+            return formatted;
+        }, {});
+        
+        const backgroundsFormatted = newConsult.Backgrounds.reduce((formatted, background) => {
+            formatted[background.title] = background.content;
+            return formatted;
+        }, {});
+
+        const formattedConsult = {
+            id_consult: newConsult._id_consult,
+            date: newConsult.date,
+            patient: {
+                name: newConsult.Patient.name,
+                birth_date: newConsult.Patient.birth_date,
+                gender: newConsult.Patient.gender,
+            },
+            background: backgroundsFormatted,
+            soap: treatmentsFormatted,
+        };
 
         res.status(201).json({
             success: true,
             message: "JSON data stored successfully",
-            consult: newConsult,
+            consult: formattedConsult,
         });
     } catch (error) {
         console.error(error);
@@ -343,21 +383,26 @@ export const getConsultById = async (req, res) => {
                 .json({ success: false, message: "Consult not found" });
         }
         
-        const treatmentsFormatted = consult.Treatments.reduce((formatted, treatment) => {
+        const treatmentsFormatted = newConsult.Treatments.reduce((formatted, treatment) => {
             formatted[treatment.title] = treatment.content;
             return formatted;
         }, {});
         
+        const backgroundsFormatted = newConsult.Backgrounds.reduce((formatted, background) => {
+            formatted[background.title] = background.content;
+            return formatted;
+        }, {});
+
         const formattedConsult = {
-            id: consult._id_consult,
+            id_consult: consult._id_consult,
             date: consult.date,
-            Paciente: {
+            patient: {
                 name: consult.Patient.name,
                 birth_date: consult.Patient.birth_date,
                 gender: consult.Patient.gender,
             },
-            Antecedentes: consult.Backgrounds,
-            SOAP: treatmentsFormatted,
+            background: backgroundsFormatted,
+            soap: treatmentsFormatted,
         };
         
         res.status(200).json({
@@ -417,7 +462,7 @@ export const getUserConsults = async (req, res) => {
                         birth_date: consult.Patient.birth_date,
                         gender: consult.Patient.gender,
                     },
-                    treatments: consult.Treatments.map((treatment) => {
+                    SOAP: consult.Treatments.map((treatment) => {
                         return {
                             title: treatment.title,
                             content: treatment.content,

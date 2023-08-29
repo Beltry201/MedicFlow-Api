@@ -55,16 +55,11 @@ function generatePrompt(transcript, background, treatment) {
 
     const jsonStructure = {
         "INF": {
-            "Nombre": "[Nombre del paciente]",
-            "Sexo": "[Sexo del paciente]",
-            "Edad": "[Edad del paciente]",
             "Estado Civil": "[Estado civil del paciente]",
             "Ocupación": "[Ocupación del paciente]",
             "Escolaridad": "[Nivel de escolaridad del paciente]",
             "Religión": "[Religión del paciente]",
             "Lugar de Origen": "[Lugar de origen del paciente]",
-            "Lugar de Residencia": "[Lugar de residencia actual del paciente]",
-            "Teléfono": "[Número de teléfono de contacto del paciente]",
         },
     };
 
