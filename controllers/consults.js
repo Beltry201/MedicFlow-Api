@@ -235,6 +235,7 @@ export const storeJsonData = async (req, res) => {
             consult_json,
         } = req.body;
 
+        console.log("\n-- CONSULT JSON: ", consult_json)
         // Create a new consult in the database
         const consult = await Consult.create({
             audio_transcript,
@@ -317,6 +318,9 @@ export const storeJsonData = async (req, res) => {
                 },
             ],
         });
+
+
+        console.log("\n-- NEW PATIENT ID: ", newConsult.Patient);
         console.log("\n-- NEW CONSULT ID: ", newConsult._id_consult);
         const treatmentsFormatted = newConsult.Treatments.reduce(
             (formatted, treatment) => {
@@ -338,12 +342,13 @@ export const storeJsonData = async (req, res) => {
             id_consult: newConsult._id_consult,
             date: newConsult.date,
             patient: {
+                _id_patient,
                 name: newConsult.Patient.name,
                 birth_date: newConsult.Patient.birth_date,
                 gender: newConsult.Patient.gender,
+                phone_number: newConsult.Patient.phone_number,
             },
-            background: backgroundsFormatted,
-            soap: treatmentsFormatted,
+            consult_json
         };
 
         res.status(201).json({
@@ -374,12 +379,23 @@ export const getConsultById = async (req, res) => {
                 },
                 {
                     model: Background,
+                    include: [
+                        {
+                            model: ParameterType,
+                        },
+                    ],
                 },
                 {
                     model: Treatment,
+                    include: [
+                        {
+                            model: ParameterType,
+                        },
+                    ],
                 },
             ],
         });
+        
 
         if (!consult) {
             return res
@@ -387,32 +403,40 @@ export const getConsultById = async (req, res) => {
                 .json({ success: false, message: "Consult not found" });
         }
 
-        const treatmentsFormatted = consult.Treatments.reduce(
-            (formatted, treatment) => {
-                formatted[treatment.title] = treatment.content;
-                return formatted;
-            },
-            {}
-        );
+        const consult_json = {};
+        
+        // Group backgrounds by category
+        consult.Backgrounds.forEach((background) => {
+            const parameterType = background.ParameterType;
+            if (!consult_json[parameterType.category]) {
+                consult_json[parameterType.category] = {};
+            }
+            consult_json[parameterType.category][background.title] =
+                background.content;
+        });
 
-        const backgroundsFormatted = consult.Backgrounds.reduce(
-            (formatted, background) => {
-                formatted[background.title] = background.content;
-                return formatted;
-            },
-            {}
-        );
+        // Group treatments by category
+        consult.Treatments.forEach((treatment) => {
+            const parameterType = treatment.ParameterType;
+            if (!consult_json[parameterType.category]) {
+                consult_json[parameterType.category] = {};
+            }
+            consult_json[parameterType.category][treatment.title] =
+                treatment.content;
+        });
+
 
         const formattedConsult = {
             id_consult: consult._id_consult,
             date: consult.date,
             patient: {
+                _id_patient: consult.Patient._id_patient,
                 name: consult.Patient.name,
                 birth_date: consult.Patient.birth_date,
                 gender: consult.Patient.gender,
+                phone_number: consult.Patient.phone_number,
             },
-            background: backgroundsFormatted,
-            soap: treatmentsFormatted,
+            consult_json: consult_json,
         };
 
         res.status(200).json({
@@ -429,6 +453,7 @@ export const getConsultById = async (req, res) => {
         });
     }
 };
+
 
 export const getUserConsults = async (req, res) => {
     try {
