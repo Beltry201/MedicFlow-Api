@@ -228,14 +228,13 @@ export const storeJsonData = async (req, res) => {
     try {
         const {
             audio_transcript,
-            date,
             _id_doctor,
             _id_patient,
-            _id_treatment_catalog,
             consult_json,
         } = req.body;
 
         console.log("\n-- CONSULT JSON: ", consult_json)
+        let date = new Date();
         // Create a new consult in the database
         const consult = await Consult.create({
             audio_transcript,
@@ -243,9 +242,9 @@ export const storeJsonData = async (req, res) => {
             is_valid: true,
             _id_doctor,
             _id_patient,
-            _id_treatment_catalog,
+            _id_treatment_catalog: "ba09a5ec-4638-4fa7-b141-b58068faed5c",
         });
-
+        //TODO: Delete constant uuid
         console.log("\n-- .CONSULT ID: ", consult._id_consult);
 
         // Process and store consult into the database here
@@ -404,7 +403,7 @@ export const getConsultById = async (req, res) => {
         }
 
         const consult_json = {};
-        
+
         // Group backgrounds by category
         consult.Backgrounds.forEach((background) => {
             const parameterType = background.ParameterType;

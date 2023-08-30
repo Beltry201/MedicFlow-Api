@@ -38,7 +38,8 @@ export const Consult = sequelize.define(
         },
         _id_treatment_catalog: {
             type: DataTypes.UUID,
-            allowNull: false,
+            allowNull: true,
+            defaultValue: null
         },
     },
     {
