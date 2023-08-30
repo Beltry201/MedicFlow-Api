@@ -471,7 +471,7 @@ export const getUserConsults = async (req, res) => {
                         birth_date: consult.Patient.birth_date,
                         gender: consult.Patient.gender,
                     },
-                    SOAP: consult.Treatments.map((treatment) => {
+                    soap: consult.Treatments.map((treatment) => {
                         return {
                             title: treatment.title,
                             content: treatment.content,
