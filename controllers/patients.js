@@ -203,7 +203,7 @@ export const getDoctorPatients = async (req, res) => {
                 });
         }
 
-        res.status(200).json({ success: true, patients: { patients } });
+        res.status(200).json({ success: true, patients: patients });
     } catch (error) {
         console.error(error);
         res.status(500).json({
