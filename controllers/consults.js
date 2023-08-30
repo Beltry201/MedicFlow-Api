@@ -343,6 +343,7 @@ export const storeJsonData = async (req, res) => {
             patient: {
                 _id_patient,
                 name: newConsult.Patient.name,
+                last_name: newConsult.Patient.last_name,
                 birth_date: newConsult.Patient.birth_date,
                 gender: newConsult.Patient.gender,
                 phone_number: newConsult.Patient.phone_number,
@@ -431,6 +432,7 @@ export const getConsultById = async (req, res) => {
             patient: {
                 _id_patient: consult.Patient._id_patient,
                 name: consult.Patient.name,
+                last_name: consult.Patient.last_name,
                 birth_date: consult.Patient.birth_date,
                 gender: consult.Patient.gender,
                 phone_number: consult.Patient.phone_number,
