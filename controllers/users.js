@@ -2,6 +2,8 @@ import { User } from "../models/users.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { generateAccessCode } from "../helpers/access_code_generator.js";
+import { createDefaultParameters } from "../helpers/default_parameters.js";
 import { sendSms } from "../helpers/sms.js";
 
 dotenv.config();
@@ -33,6 +35,14 @@ export const createUser = async (req, res) => {
             specialty,
             role,
         });
+
+        // Generate and set the access code
+        const accessCode = generateAccessCode();
+        newUser.access_code = accessCode;
+        await newUser.save();
+
+        // Generate default parameters for the user
+        await createDefaultParameters(newUser);
 
         // Generate JWT token
         const token = jwt.sign(
@@ -106,7 +116,6 @@ export const loginUser = async (req, res) => {
 export const access_code = async (req, res) => {
     const { code } = req.params;
     try {
-        
         // Check if the code exists in the database
         const user = await User.findOne({ where: { access_code: code } });
         if (!user) {
