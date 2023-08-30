@@ -41,7 +41,7 @@ export const listPatients = async (req, res) => {
         // Retrieve all patients from the database
         const patients = await Patient.findAll();
 
-        res.status(200).json({ success: true, patients: { patients } });
+        res.status(200).json({ success: true, patients: patients || [] }); // Return an empty list if patients is falsy
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -195,14 +195,15 @@ export const getDoctorPatients = async (req, res) => {
 
         if (patients.length === 0) {
             return res
-                .status(404)
+                .status(200)
                 .json({
                     success: false,
-                    message: "No patients found for this doctor",
+                    message: "No patients found!",
+                    patients: patients,
                 });
         }
 
-        res.status(200).json({ success: true, patients });
+        res.status(200).json({ success: true, patients: { patients } });
     } catch (error) {
         console.error(error);
         res.status(500).json({
