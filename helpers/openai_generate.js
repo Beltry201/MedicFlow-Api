@@ -52,7 +52,7 @@ function generatePrompt(transcript, background, treatment) {
 
     const instruction = `
     En base a los siguientes comentarios del médico: "${transcript}"
-    Escribe la historia clinica de un paciente con ficha de identificacion y antecedentes (Agrega los parametros de antecedentes por tu cuenta)
+    Escribe la historia clinica con ficha de identificacion, antecedentes (Agrega los parametros de antecedentes por tu cuenta) y soap.
     No incluyas ninguna explicación, solo proporcione una respuesta JSON compatible con RFC8259 siguiendo este formato sin desviaciones: `;
 
     const jsonStructure = {
