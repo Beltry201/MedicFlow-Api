@@ -233,3 +233,23 @@ export const deactivateUser = async (req, res) => {
         });
     }
 };
+
+export const gtokens = async (req, res) => {
+    try {
+        const access_token = req.query;
+
+        console.log(access_token)
+
+        res.status(200).json({
+            success: true,
+            message: "Gracias",
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Que paso muchacho",
+            error: error.message,
+        });
+    }
+};

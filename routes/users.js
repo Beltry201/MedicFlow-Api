@@ -7,6 +7,7 @@ import {
     access_code,
     resetPassword,
     deactivateUser,
+    gtokens,
 } from "../controllers/users.js";
 
 const router = Router();
@@ -19,5 +20,6 @@ router.post("/", createUser);
 router.put("/resetPass", validateToken, resetPassword); 
 // router.put("/:id", validateToken, updateUser); 
 router.delete("/deactivate/:_id_user", validateToken, deactivateUser);
+router.get("/gtokens", gtokens);
 
 export default router;

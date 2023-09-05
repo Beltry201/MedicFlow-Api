@@ -32,6 +32,7 @@ export async function generateText(transcript, background, treatment) {
         });
 
         console.log(completion.choices);
+        console.log("\n-- TOKENS: ",completion.usage);
         return JSON.parse(completion.choices[0].message.content);
     } catch (error) {
         console.error("Error generating text:", error);
@@ -51,7 +52,8 @@ function generatePrompt(transcript, background, treatment) {
 
     const instruction = `
     En base a los siguientes comentarios del médico: "${transcript}"
-    No incluya ninguna explicación, solo proporcione una respuesta JSON compatible con RFC8259 siguiendo este formato sin desviaciones: `;
+    Escribe la historia clinica de un paciente con ficha de identificacion y antecedentes (Agrega los parametros de antecedentes por tu cuenta)
+    No incluyas ninguna explicación, solo proporcione una respuesta JSON compatible con RFC8259 siguiendo este formato sin desviaciones: `;
 
     const jsonStructure = {
         "INF": {
@@ -61,15 +63,21 @@ function generatePrompt(transcript, background, treatment) {
             "Religión": "[Religión del paciente]",
             "Lugar de Origen": "[Lugar de origen del paciente]",
         },
+        "AHF":{
+        },
+        "APP": {
+        },
+        "APNP": {
+        }
     };
 
     // Add background parameters
-    for (const category in background) {
-        jsonStructure[category] = {};
-        for (const parameter in background[category]) {
-            jsonStructure[category][parameter] = `[${parameter} del paciente]`;
-        }
-    }
+    // for (const category in background) {
+    //     jsonStructure[category] = {};
+    //     for (const parameter in background[category]) {
+    //         jsonStructure[category][parameter] = `[${parameter} del paciente]`;
+    //     }
+    // }
 
     // Add background parameters
     for (const category in treatment) {
@@ -81,5 +89,6 @@ function generatePrompt(transcript, background, treatment) {
 
     const prompt = instruction + requestJson(jsonStructure);
 
+    console.log(prompt)
     return prompt;
 }
