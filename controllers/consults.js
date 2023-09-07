@@ -4,6 +4,7 @@ import { Treatment } from "../models/treatments.js";
 import { generateText } from "../helpers/openai_generate.js";
 import { ParameterType } from "../models/parameter_types.js";
 import { Patient } from "../models/patients.js";
+import { Buffer } from 'buffer'; // Asegúrate de tener la librería buffer instalada
 
 // export const createConsult = async (req, res) => {
 //     try {
@@ -233,21 +234,18 @@ export const storeJsonData = async (req, res) => {
             consult_json,
         } = req.body;
 
-        console.log("\n-- CONSULT JSON: ", consult_json)
+        const decodedAudioTranscript = Buffer.from(audio_transcript, 'base64').toString('utf-8');
+
         let date = new Date();
-        // Create a new consult in the database
         const consult = await Consult.create({
-            audio_transcript,
+            audio_transcript: decodedAudioTranscript,
             date,
             is_valid: true,
             _id_doctor,
             _id_patient,
-            _id_treatment_catalog: "ba09a5ec-4638-4fa7-b141-b58068faed5c",
+            _id_treatment_catalog: "209ecf44-0b07-49e1-820c-107bcbdf76fb",
         });
-        //TODO: Delete constant uuid
-        console.log("\n-- .CONSULT ID: ", consult._id_consult);
 
-        // Process and store consult into the database here
         for (const categoryName in consult_json) {
             const categoryData = consult_json[categoryName];
 
@@ -263,8 +261,6 @@ export const storeJsonData = async (req, res) => {
                         categoryName === "APP" ||
                         categoryName === "AGO"
                     ) {
-                        // Find the corresponding parameter in the ParameterType table for backgrounds
-                        console.log("\n-- CATEGROY NAME: ", categoryName);
                         parameter = await ParameterType.findOne({
                             where: {
                                 _id_doctor: _id_doctor,
@@ -273,6 +269,17 @@ export const storeJsonData = async (req, res) => {
                                 parameter_type_name: title,
                             },
                         });
+
+                        if (!parameter) {
+                            // Si el parámetro no existe, créalo
+                            parameter = await ParameterType.create({
+                                _id_doctor: _id_doctor,
+                                parameter_belongs_to: "background",
+                                category: categoryName,
+                                parameter_type_name: title,
+                            });
+                        }
+
                         await Background.create({
                             _id_consult: consult._id_consult,
                             _id_parameter: parameter._id_parameter_type,
@@ -280,8 +287,6 @@ export const storeJsonData = async (req, res) => {
                             content,
                         });
                     } else if (categoryName === "SOAP") {
-                        console.log("\n-- CATEGROY NAME: ", categoryName);
-                        // Find the corresponding parameter in the ParameterType table for treatments
                         parameter = await ParameterType.findOne({
                             where: {
                                 _id_doctor: _id_doctor,
@@ -290,6 +295,16 @@ export const storeJsonData = async (req, res) => {
                                 parameter_type_name: title,
                             },
                         });
+
+                        if (!parameter) {
+                            parameter = await ParameterType.create({
+                                _id_doctor: _id_doctor,
+                                parameter_belongs_to: "soap",
+                                category: categoryName,
+                                parameter_type_name: title,
+                            });
+                        }
+
                         if (content.trim() !== "") {
                             await Treatment.create({
                                 _id_consult: consult._id_consult,
@@ -302,7 +317,7 @@ export const storeJsonData = async (req, res) => {
                 }
             }
         }
-        // Find the consult by ID
+
         const newConsult = await Consult.findOne({
             where: { _id_consult: consult._id_consult },
             include: [
@@ -317,25 +332,6 @@ export const storeJsonData = async (req, res) => {
                 },
             ],
         });
-
-
-        console.log("\n-- NEW PATIENT ID: ", newConsult.Patient);
-        console.log("\n-- NEW CONSULT ID: ", newConsult._id_consult);
-        const treatmentsFormatted = newConsult.Treatments.reduce(
-            (formatted, treatment) => {
-                formatted[treatment.title] = treatment.content;
-                return formatted;
-            },
-            {}
-        );
-
-        const backgroundsFormatted = newConsult.Backgrounds.reduce(
-            (formatted, background) => {
-                formatted[background.title] = background.content;
-                return formatted;
-            },
-            {}
-        );
 
         const formattedConsult = {
             id_consult: newConsult._id_consult,
@@ -365,6 +361,7 @@ export const storeJsonData = async (req, res) => {
         });
     }
 };
+
 
 export const getConsultById = async (req, res) => {
     try {
