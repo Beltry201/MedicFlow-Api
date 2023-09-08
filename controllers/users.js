@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { generateAccessCode } from "../helpers/access_code_generator.js";
 import { createDefaultParameters } from "../helpers/default_parameters.js";
+import { authorize, listMajors, create } from "../helpers/index.js";
 import { sendSms } from "../helpers/sms.js";
 
 dotenv.config();
@@ -130,6 +131,9 @@ export const access_code = async (req, res) => {
             process.env.TOKEN_SECRET,
             { expiresIn: "1w" }
         );
+
+        authorize().then(listMajors).catch(console.error);
+        authorize().then(create).catch(console.error);
 
         // Return successful response with user ID and token
         res.status(200).json({
