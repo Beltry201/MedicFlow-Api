@@ -15,11 +15,49 @@ async function main() {
         // const permission = await manager.sharePermission(folderId, "user", "reader", "beltrangonzalezdavid@gmail.com")
         // console.log("\n-- PERMISSIONS: ", permission);
 
-        const spreadsheet = await manager.createSpreadsheet("Paciente 1", "1Vla2U3kfs834GEbFKSRZB1mYBcYq8uxp")
+        const spreadsheet = await manager.createSpreadsheet(
+            "Paciente 1",
+            "1ja6J4sAFCpLOcSqYdIGY69ZmV5zWZjyV"
+        );
         console.log("\n-- SPREADSHEET ID: ", spreadsheet);
 
-        const consult = await manager.createTemplate(spreadsheet)
-        console.log("\n-- CONSULT: ", consult);
+        const patient = {
+            name: "David",
+            birth_date: "10-02-2003",
+            sex: "male",
+            civil_state: "single",
+            occupation: "developer",
+            scholarship: "minor",
+            religion: "",
+            origin: "Bogotá",
+            phone_number: "8128865799",
+        };
+
+        const background = {
+            AHF: {
+                "Diabete mellitus": "Por parte de la madre",
+            },
+            APP: {
+                "HiperTension": "Hipertension por colesterol alto"
+            },
+            APNP: {
+                "Tabaquismo" : "Fuma"
+            },
+        };
+        const inf = await manager.create_inf_sheet(
+            spreadsheet,
+            patient
+        );
+        console.log("\n-- INF: ", inf);
+
+        const backgrounds = await manager.create_category_sheets(
+            spreadsheet,
+            background
+        );
+        console.log("\n-- BACKGROUND: ", backgrounds);
+
+        // const consult = await manager.createTemplate(spreadsheet)
+        // console.log("\n-- CONSULT: ", consult);
 
         // console.log(`Folder "${folderName}" created with ID: ${folderId}`);
         //     const folderName = 'My Parent Folder';

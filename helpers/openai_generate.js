@@ -13,8 +13,8 @@ const requestJson = (jsonStructure) => `
 
 ${JSON.stringify(jsonStructure, null, 2)}`;
 
-export async function generateText(transcript, background, treatment) {
-    let prompt = generatePrompt(transcript, background, treatment);
+export async function generateText(transcript, background, note) {
+    let prompt = generatePrompt(transcript, background, note);
     console.log("\n-- PROMPT: ", prompt);
 
     try {
@@ -40,29 +40,31 @@ export async function generateText(transcript, background, treatment) {
     }
 }
 
-function generatePrompt(transcript, background, treatment) {
+function generatePrompt(transcript, background, note) {
     console.log(
         "\n-- TRANSCRIPT: ",
         transcript,
         "\n-- BACKGROUND: ",
         background,
         "\n-- TREATMENT: ",
-        treatment
+        note
     );
 
     const instruction = `
     En base a los siguientes comentarios del médico: "${transcript}"
+
     Escribe la historia clinica con antecedentes (Agrega los parametros de antecedentes por tu cuenta) y soap.
-    - Si no encutras datos sobre algún parametro deja el obejeto de JSON como null
+    - Si no hay INF deja los campos como string vacio.
+    - Las llaves de los antecedentes siempre serán el subjetivo (principal causa) de la consulta
     - No incluyas ninguna explicación, solo proporcione una respuesta JSON compatible con RFC8259 siguiendo este formato sin desviaciones: `;
 
     const jsonStructure = {
         INF: {
-            "Estado Civil": "[Estado civil del paciente]",
-            Ocupación: "[Ocupación del paciente]",
-            Escolaridad: "[Nivel de escolaridad del paciente]",
-            Religión: "[Religión del paciente]",
-            "Lugar de Origen": "[Lugar de origen del paciente]",
+            "Estado Civil": "",
+            "Ocupación": "",
+            "Escolaridad": "",
+            "Religión": "",
+            "Lugar de Origen": "",
         },
         AHF: {},
         APP: {},
@@ -77,10 +79,10 @@ function generatePrompt(transcript, background, treatment) {
     //     }
     // }
 
-    // Add background parameters
-    for (const category in treatment) {
+    // Add notes parameters
+    for (const category in note) {
         jsonStructure[category] = {};
-        for (const parameter in treatment[category]) {
+        for (const parameter in note[category]) {
             jsonStructure[category][parameter] = `[${parameter} del paciente]`;
         }
     }

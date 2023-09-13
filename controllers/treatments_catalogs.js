@@ -4,7 +4,7 @@ export const createTreatmentCatalog = async (req, res) => {
   try {
     const { name, price, duration_weeks, description, _id_doctor } = req.body;
 
-    // Create a new treatment in the database
+    // Create a new treatment catalog into catalog in the database
     const newTreatmentCatalog = await TreatmentCatalog.create({
       name,
       price,
@@ -13,10 +13,10 @@ export const createTreatmentCatalog = async (req, res) => {
       _id_doctor,
     });
 
-    res.status(201).json({ success: true, treatment: newTreatmentCatalog });
+    res.status(201).json({ success: true, treatment_catalog: newTreatmentCatalog });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Failed to create treatment', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to create treatment in catalog', error: error.message });
   }
 };
 
@@ -24,20 +24,20 @@ export const deleteTreatmentCatalog = async (req, res) => {
   try {
     const treatmentId = req.params.id;
 
-    // Find the treatment by ID
-    const treatment = await TreatmentCatalog.findByPk(treatmentId);
+    // Find the treatment_catalog by ID
+    const treatment_catalog = await TreatmentCatalog.findByPk(treatmentId);
 
-    if (!treatment) {
-      return res.status(404).json({ success: false, message: 'TreatmentCatalog not found' });
+    if (!treatmentreatment_catalogt) {
+      return res.status(404).json({ success: false, message: 'Treatment catalog not found' });
     }
 
-    // Delete the treatment from the database
-    await treatment.destroy();
+    // Delete the treatment_catalog from the database
+    await treatment_catalog.destroy();
 
-    res.status(200).json({ success: true, message: 'TreatmentCatalog deleted successfully' });
+    res.status(200).json({ success: true, message: 'Treatment catalog deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Failed to delete treatment', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to delete treatment catalog', error: error.message });
   }
 };
 
@@ -46,15 +46,15 @@ export const updateTreatmentCatalog = async (req, res) => {
     const treatmentId = req.params.id;
     const { name, price, duration_weeks, description, _id_doctor } = req.body;
 
-    // Find the treatment by ID
-    const treatment = await TreatmentCatalog.findByPk(treatmentId);
+    // Find the treatment_catalog by ID
+    const treatment_catalog = await TreatmentCatalog.findByPk(treatmentId);
 
-    if (!treatment) {
-      return res.status(404).json({ success: false, message: 'TreatmentCatalog not found' });
+    if (!treatment_catalog) {
+      return res.status(404).json({ success: false, message: 'Treatment catalog not found' });
     }
 
-    // Update the treatment in the database
-    await treatment.update({
+    // Update the tretreatment_catalogatment in the database
+    await treatment_catalog.update({
       name,
       price,
       duration_weeks,
@@ -62,10 +62,10 @@ export const updateTreatmentCatalog = async (req, res) => {
       _id_doctor,
     });
 
-    res.status(200).json({ success: true, message: 'TreatmentCatalog updated successfully', treatment });
+    res.status(200).json({ success: true, message: 'Treatment catalog updated successfully', treatment_catalog });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Failed to update treatment', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to update treatment catalog ', error: error.message });
   }
 };
 
@@ -73,29 +73,29 @@ export const getTreatmentCatalogDetails = async (req, res) => {
   try {
     const treatmentId = req.params.id;
 
-    // Find the treatment by ID
-    const treatment = await TreatmentCatalog.findByPk(treatmentId);
+    // Find the treatment_catalog by ID
+    const treatment_catalog = await TreatmentCatalog.findByPk(treatmentId);
 
-    if (!treatment) {
-      return res.status(404).json({ success: false, message: 'TreatmentCatalog not found' });
+    if (!treatment_catalog) {
+      return res.status(404).json({ success: false, message: 'Treatment catalog not found' });
     }
 
-    res.status(200).json({ success: true, treatment });
+    res.status(200).json({ success: true, treatment_catalog });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Failed to get treatment details', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to get treatment catalog details', error: error.message });
   }
 };
 
 export const listTreatmentCatalogs = async (req, res) => {
   try {
     // Retrieve all treatments from the database
-    const treatments = await TreatmentCatalog.findAll();
+    const treatments_catalog = await TreatmentCatalog.findAll();
 
-    res.status(200).json({ success: true, treatments });
+    res.status(200).json({ success: true, treatments_catalog });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Failed to retrieve treatments', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to retrieve treatments catalog', error: error.message });
   }
 };
 
@@ -103,20 +103,20 @@ export const getDoctorTreatmentCatalogs = async (req, res) => {
     try {
       const doctorId = req.params._id_doctor; // Assuming you are passing the doctor's ID as a URL parameter (e.g., /treatments/doctor/:doctorId)
   
-      // Find all treatments for the given doctor ID
-      const treatments = await TreatmentCatalog.findAll({
+      // Find all treatments_catalog for the given doctor ID
+      const treatments_catalog = await TreatmentCatalog.findAll({
         where: {
           _id_doctor: doctorId,
         },
       });
   
-      if (treatments.length === 0) {
-        return res.status(404).json({ success: false, message: 'No treatments found for this doctor' });
+      if (treatments_catalog.length === 0) {
+        return res.status(404).json({ success: false, message: 'No treatments catalog found for this doctor' });
       }
   
-      res.status(200).json({ success: true, treatments });
+      res.status(200).json({ success: true, treatments_catalog });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ success: false, message: 'Failed to get doctor treatments', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to get doctor treatments catalog', error: error.message });
     }
   };

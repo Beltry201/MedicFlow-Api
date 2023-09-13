@@ -2,10 +2,10 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 import { ParameterType } from "./parameter_types.js";
 
-export const Treatment = sequelize.define(
-    "Treatment",
+export const Note = sequelize.define(
+    "Note",
     {
-        _id_treatment: {
+        _id_note: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
@@ -32,16 +32,16 @@ export const Treatment = sequelize.define(
         },
     },
     {
-        tableName: "treatments",
+        tableName: "notes",
         timestamps: true,
     }
 );
 
 // ------------- PARAMETER_TYPES -------------
-Treatment.belongsTo(ParameterType, {
+Note.belongsTo(ParameterType, {
     foreignKey: "_id_parameter",
 });
 
-ParameterType.hasMany(Treatment, {
+ParameterType.hasMany(Note, {
     foreignKey: "_id_parameter",
 });

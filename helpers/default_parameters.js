@@ -3,7 +3,7 @@ import { ParameterType } from "../models/parameter_types.js";
 export const createDefaultParameters = async function createDefaultParameters(user) {
 
     const defaultSoapCategories = {
-        SOAP: ["Subjetivo", "Análisis", "Observaciones Extra", "Plan", "Objetivo"],
+        SOAP: ["Subjetivo", "Análisis", "Plan", "Objetivo"],
     };
 
     const soapPromises = [];

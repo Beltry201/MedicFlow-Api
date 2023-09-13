@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 import { Background } from "./backgrounds.js";
-import { Treatment } from "./treatments.js";
+import { Note } from "./notes.js";
 
 export const Consult = sequelize.define(
     "Consult",
@@ -56,8 +56,8 @@ Consult.hasMany(
     Background, { foreignKey: "_id_consult" });
 
 // ------------- TREATMENT -------------
-Treatment.belongsTo(Consult, {
+Note.belongsTo(Consult, {
     foreignKey: "_id_consult",
 });
 Consult.hasMany(
-    Treatment, { foreignKey: "_id_consult" });
+    Note, { foreignKey: "_id_consult" });

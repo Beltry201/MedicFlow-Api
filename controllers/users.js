@@ -1,9 +1,9 @@
 import { User } from "../models/users.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
 import { generateAccessCode } from "../helpers/access_code_generator.js";
 import { createDefaultParameters } from "../helpers/default_parameters.js";
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import GoogleSheetsManager from "../helpers/sheets.js";
 
 dotenv.config();
@@ -121,7 +121,6 @@ export const createUser = async (req, res) => {
             message: "User created successfully",
             user: newUser,
             token: token,
-            folderId: folderId,
         });
     } catch (error) {
         console.error(error);
