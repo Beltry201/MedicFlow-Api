@@ -14,7 +14,7 @@ app.use(router);
 // Excepto la de tu corazón
 
 async function main() {
-  await sequelize.sync({force: false});
+  await sequelize.sync({force: true});
   app.listen(4000);
   console.log("Server on port", 4000);
 }

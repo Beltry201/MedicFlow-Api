@@ -1,13 +1,13 @@
 import OpenAIApi from "openai";
 import dotenv from "dotenv";
-import { execSync } from 'child_process';
+import { execSync } from "child_process";
 dotenv.config();
 
 const openai = new OpenAIApi({
-    apiKey : execSync('source ~/.zshrc && echo $OPENAI_API_KEY', {
-        encoding: 'utf-8'
-      }).trim()
-})
+    apiKey: execSync("source ~/.zshrc && echo $OPENAI_API_KEY", {
+        encoding: "utf-8",
+    }).trim(),
+});
 // Function to generate the JSON response structure
 const requestJson = (jsonStructure) => `
 
@@ -32,7 +32,7 @@ export async function generateText(transcript, background, treatment) {
         });
 
         console.log(completion.choices);
-        console.log("\n-- TOKENS: ",completion.usage);
+        console.log("\n-- TOKENS: ", completion.usage);
         return JSON.parse(completion.choices[0].message.content);
     } catch (error) {
         console.error("Error generating text:", error);
@@ -55,22 +55,18 @@ function generatePrompt(transcript, background, treatment) {
     Escribe la historia clinica con antecedentes (Agrega los parametros de antecedentes por tu cuenta) y soap.
     - Si no encutras datos sobre algún parametro deja el obejeto de JSON como null
     - No incluyas ninguna explicación, solo proporcione una respuesta JSON compatible con RFC8259 siguiendo este formato sin desviaciones: `;
-    
 
     const jsonStructure = {
-        "INF": {
+        INF: {
             "Estado Civil": "[Estado civil del paciente]",
-            "Ocupación": "[Ocupación del paciente]",
-            "Escolaridad": "[Nivel de escolaridad del paciente]",
-            "Religión": "[Religión del paciente]",
+            Ocupación: "[Ocupación del paciente]",
+            Escolaridad: "[Nivel de escolaridad del paciente]",
+            Religión: "[Religión del paciente]",
             "Lugar de Origen": "[Lugar de origen del paciente]",
         },
-        "AHF":{
-        },
-        "APP": {
-        },
-        "APNP": {
-        }
+        AHF: {},
+        APP: {},
+        APNP: {},
     };
 
     // Add background parameters
@@ -91,6 +87,6 @@ function generatePrompt(transcript, background, treatment) {
 
     const prompt = instruction + requestJson(jsonStructure);
 
-    console.log(prompt)
+    console.log(prompt);
     return prompt;
 }
