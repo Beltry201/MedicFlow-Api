@@ -5,6 +5,7 @@ import { generateText } from "../helpers/openai_generate.js";
 import { ParameterType } from "../models/parameter_types.js";
 import { Patient } from "../models/patients.js";
 import { Buffer } from "buffer";
+import { User } from "../models/users.js";
 
 import GoogleSheetsManager from "../helpers/sheets.js";
 
@@ -16,38 +17,26 @@ export const generateJsonResponse = async (req, res) => {
         const treatmentParameterDictionary = {};
 
         // Fetch treatment parameters for the doctor
-        const treatmentParameters =
-            await ParameterType.findAll({
-                where: {
-                    _id_doctor,
-                    parameter_belongs_to: "soap",
-                },
-                attributes: [
-                    "parameter_type_name",
-                    "category",
-                ], // Include category in the result
-            });
+        const treatmentParameters = await ParameterType.findAll({
+            where: {
+                _id_doctor,
+                parameter_belongs_to: "soap",
+            },
+            attributes: ["parameter_type_name", "category"], // Include category in the result
+        });
 
-        const backgroundParameters =
-            await ParameterType.findAll({
-                where: {
-                    parameter_belongs_to: "background",
-                },
-                attributes: [
-                    "parameter_type_name",
-                    "category",
-                ],
-            });
+        const backgroundParameters = await ParameterType.findAll({
+            where: {
+                parameter_belongs_to: "background",
+            },
+            attributes: ["parameter_type_name", "category"],
+        });
 
         // Create dictionaries for treatment and background parameters
         backgroundParameters.forEach((parameter) => {
             const categoryName = parameter.category;
-            if (
-                !backgroundParameterDictionary[categoryName]
-            ) {
-                backgroundParameterDictionary[
-                    categoryName
-                ] = {};
+            if (!backgroundParameterDictionary[categoryName]) {
+                backgroundParameterDictionary[categoryName] = {};
             }
             backgroundParameterDictionary[categoryName][
                 parameter.parameter_type_name
@@ -56,11 +45,8 @@ export const generateJsonResponse = async (req, res) => {
 
         treatmentParameters.forEach((parameter) => {
             const categoryName = parameter.category;
-            if (
-                !treatmentParameterDictionary[categoryName]
-            ) {
-                treatmentParameterDictionary[categoryName] =
-                    {};
+            if (!treatmentParameterDictionary[categoryName]) {
+                treatmentParameterDictionary[categoryName] = {};
             }
             treatmentParameterDictionary[categoryName][
                 parameter.parameter_type_name
@@ -89,13 +75,11 @@ export const generateJsonResponse = async (req, res) => {
 };
 
 export const storeJsonData = async (req, res) => {
+    const manager = new GoogleSheetsManager();
+    await manager.authorize();
     try {
-        const {
-            audio_transcript,
-            _id_doctor,
-            _id_patient,
-            consult_json,
-        } = req.body;
+        const { audio_transcript, _id_doctor, _id_patient, consult_json } =
+            req.body;
 
         const decodedAudioTranscript = Buffer.from(
             audio_transcript,
@@ -109,17 +93,50 @@ export const storeJsonData = async (req, res) => {
             is_valid: true,
             _id_doctor,
             _id_patient,
-            _id_treatment_catalog:
-                "209ecf44-0b07-49e1-820c-107bcbdf76fb",
+            _id_treatment_catalog: "209ecf44-0b07-49e1-820c-107bcbdf76fb",
         });
+
+        // USER
+        const consultDoctor = await User.findOne({
+            where: { _id_user: consult._id_doctor },
+        });
+        const folderId = consultDoctor._id_folder;
+        const email = consultDoctor.email
+
+        // PATIENT
+        const consultPatient = await Patient.findOne({
+            where: { _id_patient: consult._id_patient },
+        });
+        const consultFileName = consultPatient.name + "_" + date;
+        const patient = {
+            name: consultPatient.name,
+            birth_date: consultPatient.birth_date,
+            sex: consultPatient.gender,
+            civil_state: consult_json.INF.civil_state,
+            occupation: consult_json.INF.Ocupación,
+            scholarship: consult_json.INF.Escolaridad,
+            religion: consult_json.INF.Religión,
+            origin: consult_json.INF["Lugar de Origen"],
+        };
+
+        // SPREADSHEET
+        const { AHF, APNP, APP } = consult_json;
+        const backgrounds_list = { AHF, APNP, APP };
 
         for (const categoryName in consult_json) {
             const categoryData = consult_json[categoryName];
 
-            for (const title in categoryData) {
-                const content = categoryData[title];
-
-                if (content.trim() !== "") {
+            const titles = Object.keys(categoryData);
+            for (let i = 0; i < titles.length; i++) {
+                const title = titles[i];
+                console.log("TITLE: ", title);
+                let content = categoryData[title];
+                console.log("CONTENT: ", content);
+                // Replace null or undefined with "Na"
+                if (content === null || content === undefined) {
+                    content = "Na";
+                }
+                if (content !== "") {
                     let parameter;
 
                     if (
@@ -127,70 +144,54 @@ export const storeJsonData = async (req, res) => {
                         categoryName === "APNP" ||
                         categoryName === "APP"
                     ) {
-                        parameter =
-                            await ParameterType.findOne({
-                                where: {
-                                    _id_doctor: _id_doctor,
-                                    parameter_belongs_to:
-                                        "background",
-                                    category: categoryName,
-                                    parameter_type_name:
-                                        title,
-                                },
-                            });
+                        parameter = await ParameterType.findOne({
+                            where: {
+                                _id_doctor: _id_doctor,
+                                parameter_belongs_to: "background",
+                                category: categoryName,
+                                parameter_type_name: title,
+                            },
+                        });
 
                         if (!parameter) {
                             // Si el parámetro no existe, créalo
-                            parameter =
-                                await ParameterType.create({
-                                    _id_doctor: _id_doctor,
-                                    parameter_belongs_to:
-                                        "background",
-                                    category: categoryName,
-                                    parameter_type_name:
-                                        title,
-                                });
+                            parameter = await ParameterType.create({
+                                _id_doctor: _id_doctor,
+                                parameter_belongs_to: "background",
+                                category: categoryName,
+                                parameter_type_name: title,
+                            });
                         }
 
                         await Background.create({
-                            _id_consult:
-                                consult._id_consult,
-                            _id_parameter:
-                                parameter._id_parameter_type,
+                            _id_consult: consult._id_consult,
+                            _id_parameter: parameter._id_parameter_type,
                             title,
                             content,
                         });
                     } else if (categoryName === "SOAP") {
-                        parameter =
-                            await ParameterType.findOne({
-                                where: {
-                                    _id_doctor: _id_doctor,
-                                    parameter_belongs_to:
-                                        "soap",
-                                    category: categoryName,
-                                    parameter_type_name:
-                                        title,
-                                },
-                            });
+                        parameter = await ParameterType.findOne({
+                            where: {
+                                _id_doctor: _id_doctor,
+                                parameter_belongs_to: "soap",
+                                category: categoryName,
+                                parameter_type_name: title,
+                            },
+                        });
 
                         if (!parameter) {
-                            parameter =
-                                await ParameterType.create({
-                                    _id_doctor: _id_doctor,
-                                    parameter_belongs_to:
-                                        "soap",
-                                    category: categoryName,
-                                    parameter_type_name:
-                                        title,
-                                });
+                            parameter = await ParameterType.create({
+                                _id_doctor: _id_doctor,
+                                parameter_belongs_to: "soap",
+                                category: categoryName,
+                                parameter_type_name: title,
+                            });
                         }
 
                         if (content.trim() !== "") {
                             await Note.create({
-                                _id_consult:
-                                    consult._id_consult,
-                                _id_parameter:
-                                    parameter._id_parameter_type,
+                                _id_consult: consult._id_consult,
+                                _id_parameter: parameter._id_parameter_type,
                                 title,
                                 content,
                             });
@@ -200,6 +201,36 @@ export const storeJsonData = async (req, res) => {
             }
         }
 
+        const spreadsheet = await manager.createSpreadsheet(
+            consultFileName,
+            folderId,
+            email
+        );
+        console.log("\n-- SPREADSHEET ID: ", spreadsheet);
+
+        const inf = await manager.create_inf_sheet(spreadsheet, patient);
+        console.log("\n-- INF: ", inf);
+
+        const backgrounds_sheet = await manager.create_category_sheets(
+            spreadsheet,
+            backgrounds_list
+        );
+        console.log("\n-- BACKGROUND SHEET: ", backgrounds_sheet);
+
+        const soap_sheet = await manager.create_soap_sheet(
+            spreadsheet,
+            consult_json.SOAP
+        );
+        console.log("\n-- SOAP SHEET: ", soap_sheet);
+
+        const complete_sheet = await manager.create_complete_consult_sheet(
+            spreadsheet,
+            consult_json
+        );
+
+        console.log("\n-- COMPLETE SHEET: ", complete_sheet);
+
+        // TODO: unecessary use the created object instead of calling new one
         const newConsult = await Consult.findOne({
             where: { _id_consult: consult._id_consult },
             include: [
@@ -224,8 +255,7 @@ export const storeJsonData = async (req, res) => {
                 last_name: newConsult.Patient.last_name,
                 birth_date: newConsult.Patient.birth_date,
                 gender: newConsult.Patient.gender,
-                phone_number:
-                    newConsult.Patient.phone_number,
+                phone_number: newConsult.Patient.phone_number,
             },
             consult_json,
         };
@@ -290,9 +320,8 @@ export const getConsultDetails = async (req, res) => {
             if (!consult_json[parameterType.category]) {
                 consult_json[parameterType.category] = {};
             }
-            consult_json[parameterType.category][
-                background.title
-            ] = background.content;
+            consult_json[parameterType.category][background.title] =
+                background.content;
         });
 
         // Group notes by category
@@ -301,9 +330,7 @@ export const getConsultDetails = async (req, res) => {
             if (!consult_json[parameterType.category]) {
                 consult_json[parameterType.category] = {};
             }
-            consult_json[parameterType.category][
-                note.title
-            ] = note.content;
+            consult_json[parameterType.category][note.title] = note.content;
         });
 
         const formattedConsult = {
@@ -353,11 +380,7 @@ export const getUserConsults = async (req, res) => {
                 {
                     model: Patient, // Assuming you have a Patient model
                     as: "Patient", // Make sure this matches the name in the association
-                    attributes: [
-                        "name",
-                        "birth_date",
-                        "gender",
-                    ],
+                    attributes: ["name", "birth_date", "gender"],
                 },
             ],
         });
@@ -365,8 +388,7 @@ export const getUserConsults = async (req, res) => {
         if (consults.length === 0) {
             return res.status(404).json({
                 success: false,
-                message:
-                    "No consults found for the given doctor",
+                message: "No consults found for the given doctor",
             });
         }
 
@@ -378,8 +400,7 @@ export const getUserConsults = async (req, res) => {
                     date: consult.date,
                     patient: {
                         name: consult.Patient.name,
-                        birth_date:
-                            consult.Patient.birth_date,
+                        birth_date: consult.Patient.birth_date,
                         gender: consult.Patient.gender,
                     },
                     soap: consult.Notes.map((note) => {

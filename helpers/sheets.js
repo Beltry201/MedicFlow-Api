@@ -89,7 +89,7 @@ class GoogleSheetsManager {
         return client; // Return the client if successful
     }
 
-    async createSpreadsheet(title, folderId) {
+    async createSpreadsheet(title, folderId, emailAddress) {
         const fileMetadata = {
             name: title,
             mimeType: "application/vnd.google-apps.spreadsheet",
@@ -101,7 +101,11 @@ class GoogleSheetsManager {
                 resource: fileMetadata,
                 fields: "id",
             });
-            return response.data.id;
+
+            const fileId = response.data.id;
+            await this.sharePermission(fileId, "user", "writer", emailAddress);
+
+            return fileId;
         } catch (error) {
             throw new Error(`Error creating spreadsheet: ${error.message}`);
         }
@@ -248,12 +252,13 @@ class GoogleSheetsManager {
             resource: {
                 type: type,
                 role: role,
+                emailAddress: emailAddress,
             },
         };
 
         if (type === "user" || type === "group") {
             request.resource.emailAddress = emailAddress;
-        } else if (type === "domain") {
+        } else if (type === "domain") { 
             request.resource.domain = domain;
         }
 
