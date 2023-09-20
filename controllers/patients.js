@@ -28,7 +28,6 @@ export const createPatient = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({
-            success: false,
             message: "Failed to create patient",
             error: error.message,
         });

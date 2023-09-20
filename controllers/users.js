@@ -22,10 +22,7 @@ export const createUser = async (req, res) => {
         } = req.body;
 
         // Hash the password
-        const hashedPassword = await bcrypt.hash(
-            password,
-            10
-        );
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Step 1: Create User
         const newUser = await User.create({
@@ -56,8 +53,7 @@ export const createUser = async (req, res) => {
             );
             return res.status(500).json({
                 success: false,
-                message:
-                    "Failed to authorize Google Sheets Manager",
+                message: "Failed to authorize Google Sheets Manager",
                 error: error.message,
             });
         }
@@ -66,13 +62,9 @@ export const createUser = async (req, res) => {
         let folderId;
         try {
             const folderName = `Dr. ${name} ${last_name}`;
-            folderId = await sheetsManager.createFolder(
-                folderName
-            );
+            folderId = await sheetsManager.createFolder(folderName);
         } catch (error) {
-            console.error(
-                `Error creating folder: ${error.message}`
-            );
+            console.error(`Error creating folder: ${error.message}`);
             return res.status(500).json({
                 success: false,
                 message: "Failed to create folder",
@@ -81,13 +73,16 @@ export const createUser = async (req, res) => {
         }
 
         try {
-            const permission = await sheetsManager.sharePermission(folderId, "user", "reader", email);
-
-            console.log("\n-- PERMISSION: ", permission)
-        } catch (error) {
-            console.error(
-                `Error granting permission: ${error.message}`
+            const permission = await sheetsManager.sharePermission(
+                folderId,
+                "user",
+                "reader",
+                email
             );
+
+            console.log("\n-- PERMISSION: ", permission);
+        } catch (error) {
+            console.error(`Error granting permission: ${error.message}`);
             return res.status(500).json({
                 success: false,
                 message: "Failed to grant permission",
@@ -100,9 +95,7 @@ export const createUser = async (req, res) => {
             newUser._id_folder = folderId;
             await newUser.save();
         } catch (error) {
-            console.error(
-                `Error updating user: ${error.message}`
-            );
+            console.error(`Error updating user: ${error.message}`);
             return res.status(500).json({
                 success: false,
                 message: "Failed to update user",
@@ -148,10 +141,7 @@ export const loginUser = async (req, res) => {
         }
 
         // Check if the provided password matches the stored hashed password
-        const isPasswordValid = await bcrypt.compare(
-            password,
-            user.password
-        );
+        const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
             return res.status(401).json({

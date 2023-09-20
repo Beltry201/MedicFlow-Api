@@ -55,6 +55,7 @@ function generatePrompt(transcript, background, note) {
 
     Escribe la historia clinica con antecedentes (Agrega los parametros de antecedentes por tu cuenta) y soap.
     - Si no hay INF deja los campos como string vacio.
+    - El SOAP siempre debe estar completo, menciona que no hay datos en cualquier caso que no se identifique un objeto de soap.
     - Las llaves de los antecedentes siempre serán el subjetivo (principal causa) de la consulta
     - No incluyas ninguna explicación, solo proporcione una respuesta JSON compatible con RFC8259 siguiendo este formato sin desviaciones: `;
 

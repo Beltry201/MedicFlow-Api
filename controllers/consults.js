@@ -101,7 +101,7 @@ export const storeJsonData = async (req, res) => {
             where: { _id_user: consult._id_doctor },
         });
         const folderId = consultDoctor._id_folder;
-        const email = consultDoctor.email
+        const email = consultDoctor.email;
 
         // PATIENT
         const consultPatient = await Patient.findOne({
@@ -325,12 +325,16 @@ export const getConsultDetails = async (req, res) => {
         });
 
         // Group notes by category
-        consult.Treatments.forEach((note) => {
+        consult.Notes.forEach((note) => {
             const parameterType = note.ParameterType;
+            const title = note.title || "Na";
+            const content = note.content || "Na";
+
             if (!consult_json[parameterType.category]) {
                 consult_json[parameterType.category] = {};
             }
-            consult_json[parameterType.category][note.title] = note.content;
+
+            consult_json[parameterType.category][title] = content;
         });
 
         const formattedConsult = {
