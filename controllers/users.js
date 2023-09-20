@@ -206,9 +206,6 @@ export const access_code = async (req, res) => {
             { expiresIn: "1w" }
         );
 
-        authorize().then(listMajors).catch(console.error);
-        authorize().then(create).catch(console.error);
-
         // Return successful response with user ID and token
         res.status(200).json({
             success: true,
