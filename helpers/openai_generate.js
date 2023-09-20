@@ -70,6 +70,12 @@ function generatePrompt(transcript, background, note) {
         AHF: {},
         APP: {},
         APNP: {},
+        SOAP: {
+            Subjetivo: "--Lo que el paciente dice o describe sobre su situación o síntomas.--",
+            Objetivo: "--Observaciones y datos concretos obtenidos por el profesional (ej. examen físico, pruebas).--",
+            Analisis: "--Evaluación o diagnóstico del problema basado en 'S' y 'O'.--",
+            Plan: "--Estrategia o tratamiento propuesto para abordar el problema identificado.--"
+        }
     };
 
     // Add background parameters
@@ -81,12 +87,12 @@ function generatePrompt(transcript, background, note) {
     // }
 
     // Add notes parameters
-    for (const category in note) {
-        jsonStructure[category] = {};
-        for (const parameter in note[category]) {
-            jsonStructure[category][parameter] = `[${parameter} del paciente]`;
-        }
-    }
+    // for (const category in note) {
+    //     jsonStructure[category] = {};
+    //     for (const parameter in note[category]) {
+    //         jsonStructure[category][parameter] = `[${parameter} del paciente]`;
+    //     }
+    // }
 
     const prompt = instruction + requestJson(jsonStructure);
 
