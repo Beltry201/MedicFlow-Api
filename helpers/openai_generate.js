@@ -27,8 +27,8 @@ export async function generateText(transcript, background, note) {
                 },
                 { role: "user", content: prompt },
             ],
-            model: "gpt-3.5-turbo",
-            temperature: 0.1,
+            model: "gpt-4",
+            temperature: 0.81,
         });
 
         console.log(completion.choices);
@@ -51,48 +51,62 @@ function generatePrompt(transcript, background, note) {
     );
 
     const instruction = `
-    En base a los siguientes comentarios del médico: "${transcript}"
+    HISTORIA CLÍNICA ELECTRÓNICA
 
-    Escribe la historia clinica con antecedentes (Agrega los parametros de antecedentes por tu cuenta) y soap.
-    - Si no hay INF deja los campos como string vacio.
-    - El SOAP siempre debe estar completo, menciona que no hay datos en cualquier caso que no se identifique un objeto de soap.
-    - Las llaves de los antecedentes siempre serán el subjetivo (principal causa) de la consulta
-    - No incluyas ninguna explicación, solo proporcione una respuesta JSON compatible con RFC8259 siguiendo este formato sin desviaciones: `;
+    Instrucciones:
+
+    - A continuación, se le pedirá que ingrese detalles específicos sobre la interacción médico-paciente basándose en la conversación proporcionada.
+    - Complete las secciones únicamente con la información proporcionada en el diálogo. NO añada información adicional o suposiciones.
+    - Si no hay informacion deja los campos como string vacio.
+    - Proporcione la información de manera estructurada y clara en el formato JSON compatible con RFC8259.
+    - Una vez que haya completado el formato JSON, revíselo para asegurarse de que sea 100% preciso y que haya incluido toda la información relevante del diálogo.
+    - Evite repetir información, ser redundante o incluir detalles no mencionados en el diálogo.
+    - NO OMITA NINGÚN DATO, incluso si parece redundante o poco relevante.
+
+    Datos del Paciente:
+    Nombre: [Nombre del paciente - Ejemplo: "Juan Pérez"]
+    Edad: [Escriba la edad en números, seguida de la palabra 'años'. Ejemplo: "40 años". Si la edad no se menciona, déjelo en blanco.]
+    Género: [Masculino/Femenino/Otro - basado en el diálogo]
+    "Estado Civil": "",
+    "Ocupación": "",
+    "Escolaridad": "",
+    "Religión": "",
+    "Lugar de Origen": ""
+
+    Motivo de consulta: [Razón principal por la que el paciente busca atención médica]
+
+    Diálogo Médico-Paciente:
+    ["${transcript}"]
+    
+    Por favor, cree una historia clínica estructurada con los siguientes apartados, usando el formato JSON proporcionado a continuación:
+
+    Datos del paciente
+    Antecedentes Familiares (AHF): Mencione enfermedades o condiciones relevantes de familiares directos, como padre, madre, hermanos o abuelos.
+    Antecedentes Patológicos Personales (APP): Incluye patologías, alergias, cirugías y hospitalizaciones e inmunizaciones.
+    Antecedentes No Patológicos (ANP): Incluya hábitos, medicación actual y otras características relevantes mencionadas.
+    S.O.A.P (Subjetivo, Objetivo, Análisis, Plan)
+
+    Formato JSON:
+     `;
 
     const jsonStructure = {
         INF: {
             "Estado Civil": "",
-            "Ocupación": "",
-            "Escolaridad": "",
-            "Religión": "",
+            Ocupación: "",
+            Escolaridad: "",
+            Religión: "",
             "Lugar de Origen": "",
         },
         AHF: {},
         APP: {},
         APNP: {},
         SOAP: {
-            Subjetivo: "--Lo que el paciente dice o describe sobre su situación o síntomas.--",
-            Objetivo: "--Observaciones y datos concretos obtenidos por el profesional (ej. examen físico, pruebas).--",
-            Analisis: "--Evaluación o diagnóstico del problema basado en 'S' y 'O'.--",
-            Plan: "--Estrategia o tratamiento propuesto para abordar el problema identificado.--"
-        }
+            Subjetivo: "",
+            Objetivo: "",
+            Analisis: "",
+            Plan: "",
+        },
     };
-
-    // Add background parameters
-    // for (const category in background) {
-    //     jsonStructure[category] = {};
-    //     for (const parameter in background[category]) {
-    //         jsonStructure[category][parameter] = `[${parameter} del paciente]`;
-    //     }
-    // }
-
-    // Add notes parameters
-    // for (const category in note) {
-    //     jsonStructure[category] = {};
-    //     for (const parameter in note[category]) {
-    //         jsonStructure[category][parameter] = `[${parameter} del paciente]`;
-    //     }
-    // }
 
     const prompt = instruction + requestJson(jsonStructure);
 
