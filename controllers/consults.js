@@ -6,6 +6,7 @@ import { ParameterType } from "../models/parameter_types.js";
 import { Patient } from "../models/patients.js";
 import { Buffer } from "buffer";
 import { User } from "../models/users.js";
+import { ConsultRating } from "../models/consult_rating.js";
 
 import GoogleSheetsManager from "../helpers/sheets.js";
 
@@ -78,8 +79,14 @@ export const storeJsonData = async (req, res) => {
     const manager = new GoogleSheetsManager();
     await manager.authorize();
     try {
-        const { audio_transcript, _id_doctor, _id_patient, consult_json } =
-            req.body;
+        const {
+            audio_transcript,
+            _id_doctor,
+            _id_patient,
+            rating,
+            attributes,
+            consult_json,
+        } = req.body;
 
         const decodedAudioTranscript = Buffer.from(
             audio_transcript,
@@ -245,6 +252,19 @@ export const storeJsonData = async (req, res) => {
                 },
             ],
         });
+
+        if (rating !== undefined && attributes !== undefined) {
+            const newConsultRating = await ConsultRating.create({
+                rating, // Cambio de magnitud a rating
+                attributes,
+                _id_doctor,
+                _id_consult: newConsult._id_consult,
+            });
+        } else {
+            console.log(
+                "Rating or attributes missing. Skipping consult rating creation."
+            );
+        }
 
         const formattedConsult = {
             id_consult: newConsult._id_consult,
