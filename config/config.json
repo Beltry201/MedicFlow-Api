@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "medicflow",
+    "password": "medic.ADMIN.flow",
+    "database": "medicflow_db",
+    "host": "medic-flow-db-test.coqggqdudqzf.us-east-2.rds.amazonaws.com",
+    "dialect": "postgres",
+    "port": "5432"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

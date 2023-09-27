@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 import { Background } from "./backgrounds.js";
+import { ConsultRating } from "./consult_rating.js";
 import { Note } from "./notes.js";
 
 export const Consult = sequelize.define(
@@ -39,7 +40,7 @@ export const Consult = sequelize.define(
         _id_treatment_catalog: {
             type: DataTypes.UUID,
             allowNull: true,
-            defaultValue: null
+            defaultValue: null,
         },
     },
     {
@@ -52,12 +53,20 @@ export const Consult = sequelize.define(
 Background.belongsTo(Consult, {
     foreignKey: "_id_consult",
 });
-Consult.hasMany(
-    Background, { foreignKey: "_id_consult" });
+Consult.hasMany(Background, { foreignKey: "_id_consult" });
 
 // ------------- TREATMENT -------------
 Note.belongsTo(Consult, {
     foreignKey: "_id_consult",
 });
-Consult.hasMany(
-    Note, { foreignKey: "_id_consult" });
+Consult.hasMany(Note, { foreignKey: "_id_consult" });
+
+// ------------- CONSULT RATING -------------
+ConsultRating.belongsTo(Consult, {
+    foreignKey: "_id_consult",
+    targetId: "_id_consult",
+});
+Consult.hasMany(ConsultRating, {
+    foreignKey: "_id_consult",
+    targetId: "_id_consult",
+});

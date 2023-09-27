@@ -21,6 +21,7 @@
     "infobip": "^0.1.0",
     "jsonwebtoken": "^9.0.1",
     "morgan": "^1.10.0",
+    "mysql2": "^3.6.1",
     "openai": "^4.0.0",
     "path": "^0.12.7",
     "pg": "^8.11.1",
@@ -31,6 +32,7 @@
     "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "sequelize-cli": "^6.6.1"
   }
 }

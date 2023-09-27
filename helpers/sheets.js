@@ -258,7 +258,7 @@ class GoogleSheetsManager {
 
         if (type === "user" || type === "group") {
             request.resource.emailAddress = emailAddress;
-        } else if (type === "domain") { 
+        } else if (type === "domain") {
             request.resource.domain = domain;
         }
 
@@ -409,9 +409,10 @@ class GoogleSheetsManager {
     }
 
     async create_category_sheets(spreadsheetId, backgrounds) {
+        console.log("\n-- BACKGROUNDS: ", backgrounds);
         try {
             for (const [category, data] of Object.entries(backgrounds)) {
-                if (Object.keys(data).length === 0) {
+                if (!data || Object.keys(data).length === 0) {
                     continue; // Skip empty categories
                 }
                 const sourceSpreadsheetId =
@@ -617,8 +618,8 @@ class GoogleSheetsManager {
                 },
                 SOAP: {
                     range: "D36",
-                    value: consult_json.SOAP
-                }
+                    value: consult_json.SOAP,
+                },
             };
 
             const infData = {
@@ -720,10 +721,12 @@ class GoogleSheetsManager {
                                         range: {
                                             sheetId: response.sheetId,
                                             startRowIndex:
-                                                Number(range.match(/\d+/g)) - 1 + index,
-                                            endRowIndex: Number(
-                                                range.match(/\d+/g)
-                                            ) + index,
+                                                Number(range.match(/\d+/g)) -
+                                                1 +
+                                                index,
+                                            endRowIndex:
+                                                Number(range.match(/\d+/g)) +
+                                                index,
                                             startColumnIndex: 2, // Column C
                                             endColumnIndex: 3, // Column D
                                         },
@@ -740,10 +743,12 @@ class GoogleSheetsManager {
                                         range: {
                                             sheetId: response.sheetId,
                                             startRowIndex:
-                                                Number(range.match(/\d+/g)) - 1 + index,
-                                            endRowIndex: Number(
-                                                range.match(/\d+/g)
-                                            ) + index,
+                                                Number(range.match(/\d+/g)) -
+                                                1 +
+                                                index,
+                                            endRowIndex:
+                                                Number(range.match(/\d+/g)) +
+                                                index,
                                             startColumnIndex: 3, // Column D
                                             endColumnIndex: 4, // Column E
                                         },
@@ -775,29 +780,32 @@ class GoogleSheetsManager {
                             console.log("\n-- CATEGORY: ", category);
                             console.log("\n-- CAT_VALUE: ", categoryValue);
                             console.log("\n-- INDEX_TEST: ", index);
-                            console.log("\n-- CAT_RANGE: ", Number(range.match(/\d+/g)) - 1 + index,);
-                            requests.push(
-                                {
-                                    repeatCell: {
-                                        range: {
-                                            sheetId: response.sheetId,
-                                            startRowIndex:
-                                                Number(range.match(/\d+/g)) - 1 + index*2,
-                                            endRowIndex: Number(
-                                                range.match(/\d+/g)
-                                            ) + index*2,
-                                            startColumnIndex: 3, // Column D
-                                            endColumnIndex: 4, // Column E
-                                        },
-                                        cell: {
-                                            userEnteredValue: {
-                                                stringValue: categoryValue,
-                                            },
-                                        },
-                                        fields: "userEnteredValue",
-                                    },
-                                }
+                            console.log(
+                                "\n-- CAT_RANGE: ",
+                                Number(range.match(/\d+/g)) - 1 + index
                             );
+                            requests.push({
+                                repeatCell: {
+                                    range: {
+                                        sheetId: response.sheetId,
+                                        startRowIndex:
+                                            Number(range.match(/\d+/g)) -
+                                            1 +
+                                            index * 2,
+                                        endRowIndex:
+                                            Number(range.match(/\d+/g)) +
+                                            index * 2,
+                                        startColumnIndex: 3, // Column D
+                                        endColumnIndex: 4, // Column E
+                                    },
+                                    cell: {
+                                        userEnteredValue: {
+                                            stringValue: categoryValue,
+                                        },
+                                    },
+                                    fields: "userEnteredValue",
+                                },
+                            });
                         }
                     );
                 }
