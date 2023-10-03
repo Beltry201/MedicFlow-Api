@@ -16,6 +16,10 @@ export const Consult = sequelize.define(
             type: DataTypes.STRING(10000),
             allowNull: false,
         },
+        consult_json: {
+            type: DataTypes.JSON,
+            allowNull: false,
+        },
         date: {
             type: DataTypes.DATE,
             allowNull: false,

@@ -88,14 +88,18 @@ export const storeJsonData = async (req, res) => {
             consult_json,
         } = req.body;
 
+        console.log(consult_json.ANP);
+
         const decodedAudioTranscript = Buffer.from(
             audio_transcript,
             "base64"
         ).toString("utf-8");
 
         let date = new Date();
+
         const consult = await Consult.create({
             audio_transcript: decodedAudioTranscript,
+            consult_json: consult_json,
             date,
             is_valid: true,
             _id_doctor,
@@ -151,24 +155,24 @@ export const storeJsonData = async (req, res) => {
                         categoryName === "APNP" ||
                         categoryName === "APP"
                     ) {
-                        parameter = await ParameterType.findOne({
-                            where: {
-                                _id_doctor: _id_doctor,
-                                parameter_belongs_to: "background",
-                                category: categoryName,
-                                parameter_type_name: title,
-                            },
-                        });
+                        // parameter = await ParameterType.findOne({
+                        //     where: {
+                        //         _id_doctor: _id_doctor,
+                        //         parameter_belongs_to: "background",
+                        //         category: categoryName,
+                        //         parameter_type_name: title,
+                        //     },
+                        // });
 
-                        if (!parameter) {
-                            // Si el parámetro no existe, créalo
-                            parameter = await ParameterType.create({
-                                _id_doctor: _id_doctor,
-                                parameter_belongs_to: "background",
-                                category: categoryName,
-                                parameter_type_name: title,
-                            });
-                        }
+                        // if (!parameter) {
+                        //     // Si el parámetro no existe, créalo
+                        //     parameter = await ParameterType.create({
+                        //         _id_doctor: _id_doctor,
+                        //         parameter_belongs_to: "background",
+                        //         category: categoryName,
+                        //         parameter_type_name: title,
+                        //     });
+                        // }
 
                         await Background.create({
                             _id_consult: consult._id_consult,
@@ -215,47 +219,27 @@ export const storeJsonData = async (req, res) => {
         );
         console.log("\n-- SPREADSHEET ID: ", spreadsheet);
 
-        const inf = await manager.create_inf_sheet(spreadsheet, patient);
-        console.log("\n-- INF: ", inf);
+        await manager.create_inf_sheet(spreadsheet, patient);
 
-        const backgrounds_sheet = await manager.create_category_sheets(
-            spreadsheet,
-            backgrounds_list
-        );
-        console.log("\n-- BACKGROUND SHEET: ", backgrounds_sheet);
+        await manager.create_category_sheets(spreadsheet, backgrounds_list);
 
-        const soap_sheet = await manager.create_soap_sheet(
-            spreadsheet,
-            consult_json.SOAP
-        );
-        console.log("\n-- SOAP SHEET: ", soap_sheet);
+        await manager.create_soap_sheet(spreadsheet, consult_json.SOAP);
 
-        const complete_sheet = await manager.create_complete_consult_sheet(
-            spreadsheet,
-            consult_json
-        );
+        await manager.create_complete_consult_sheet(spreadsheet, consult_json);
 
-        console.log("\n-- COMPLETE SHEET: ", complete_sheet);
-
-        // TODO: unecessary use the created object instead of calling new one
         const newConsult = await Consult.findOne({
             where: { _id_consult: consult._id_consult },
             include: [
-                {
-                    model: Patient,
-                },
-                {
-                    model: Background,
-                },
-                {
-                    model: Note,
-                },
+                { model: Patient },
+                { model: Background },
+                { model: Note },
             ],
         });
 
+        // RATING
         if (rating !== undefined && attributes !== undefined) {
-            const newConsultRating = await ConsultRating.create({
-                rating, // Cambio de magnitud a rating
+            await ConsultRating.create({
+                rating,
                 attributes,
                 _id_doctor,
                 _id_consult: newConsult._id_consult,
@@ -332,31 +316,6 @@ export const getConsultDetails = async (req, res) => {
             });
         }
 
-        const consult_json = {};
-
-        // Group backgrounds by category
-        consult.Backgrounds.forEach((background) => {
-            const parameterType = background.ParameterType;
-            if (!consult_json[parameterType.category]) {
-                consult_json[parameterType.category] = {};
-            }
-            consult_json[parameterType.category][background.title] =
-                background.content;
-        });
-
-        // Group notes by category
-        consult.Notes.forEach((note) => {
-            const parameterType = note.ParameterType;
-            const title = note.title || "Na";
-            const content = note.content || "Na";
-
-            if (!consult_json[parameterType.category]) {
-                consult_json[parameterType.category] = {};
-            }
-
-            consult_json[parameterType.category][title] = content;
-        });
-
         const formattedConsult = {
             id_consult: consult._id_consult,
             date: consult.date,
@@ -368,7 +327,7 @@ export const getConsultDetails = async (req, res) => {
                 gender: consult.Patient.gender,
                 phone_number: consult.Patient.phone_number,
             },
-            consult_json: consult_json,
+            consult_json: consult.consult_json,
         };
 
         res.status(200).json({
@@ -424,6 +383,7 @@ export const getUserConsults = async (req, res) => {
                     date: consult.date,
                     patient: {
                         name: consult.Patient.name,
+                        last_name: consult.Patient.last_name,
                         birth_date: consult.Patient.birth_date,
                         gender: consult.Patient.gender,
                     },
