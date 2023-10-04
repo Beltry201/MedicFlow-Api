@@ -375,6 +375,10 @@ export const getUserConsults = async (req, res) => {
         res.status(200).json({
             success: true,
             consults: consults.map((consult) => {
+                console.log(
+                    "\n-- CONSULTA: ",
+                    consult.consult_json.INF["Motivo"]
+                );
                 return {
                     _id_consult: consult._id_consult,
                     date: consult.date,
@@ -384,7 +388,7 @@ export const getUserConsults = async (req, res) => {
                         birth_date: consult.Patient.birth_date,
                         gender: consult.Patient.gender,
                     },
-                    motivo: consult.consult_json.INF["Motivo de Consulta"],
+                    motivo: consult.consult_json.INF["Motivo"],
                 };
             }),
         });

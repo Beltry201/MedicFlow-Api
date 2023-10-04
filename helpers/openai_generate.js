@@ -65,7 +65,7 @@ function generatePrompt(transcript, background, note) {
     - NO OMITA NINGÚN DATO, incluso si parece redundante o poco relevante.
 
     INF:
-    Motivo de consulta: Razón principal por la que el paciente busca atención médica (obligatorio)
+    Motivo: Razón principal por la que el paciente busca atención médica (obligatorio)
     Estado Civil.
     Ocupación.
     Escolaridad.
@@ -88,6 +88,7 @@ function generatePrompt(transcript, background, note) {
 
     const jsonStructure = {
         INF: {
+            Motivo: "",
             "Estado Civil": "",
             Ocupación: "",
             Escolaridad: "",
