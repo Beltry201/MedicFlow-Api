@@ -130,7 +130,6 @@ export const storeJsonData = async (req, res) => {
             origin: consult_json.INF["Lugar de Origen"],
         };
 
-        // SPREADSHEET
         const { AHF, APNP, APP } = consult_json;
         const backgrounds_list = { AHF, APNP, APP };
 
@@ -140,9 +139,7 @@ export const storeJsonData = async (req, res) => {
             const titles = Object.keys(categoryData);
             for (let i = 0; i < titles.length; i++) {
                 const title = titles[i];
-                console.log("TITLE: ", title);
                 let content = categoryData[title];
-                console.log("CONTENT: ", content);
                 // Replace null or undefined with "Na"
                 if (content === null || content === undefined) {
                     content = "Na";
@@ -155,24 +152,24 @@ export const storeJsonData = async (req, res) => {
                         categoryName === "APNP" ||
                         categoryName === "APP"
                     ) {
-                        // parameter = await ParameterType.findOne({
-                        //     where: {
-                        //         _id_doctor: _id_doctor,
-                        //         parameter_belongs_to: "background",
-                        //         category: categoryName,
-                        //         parameter_type_name: title,
-                        //     },
-                        // });
+                        parameter = await ParameterType.findOne({
+                            where: {
+                                _id_doctor: _id_doctor,
+                                parameter_belongs_to: "background",
+                                category: categoryName,
+                                parameter_type_name: title,
+                            },
+                        });
 
-                        // if (!parameter) {
-                        //     // Si el parámetro no existe, créalo
-                        //     parameter = await ParameterType.create({
-                        //         _id_doctor: _id_doctor,
-                        //         parameter_belongs_to: "background",
-                        //         category: categoryName,
-                        //         parameter_type_name: title,
-                        //     });
-                        // }
+                        if (!parameter) {
+                            // Si el parámetro no existe, créalo
+                            parameter = await ParameterType.create({
+                                _id_doctor: _id_doctor,
+                                parameter_belongs_to: "background",
+                                category: categoryName,
+                                parameter_type_name: title,
+                            });
+                        }
 
                         await Background.create({
                             _id_consult: consult._id_consult,
@@ -212,12 +209,12 @@ export const storeJsonData = async (req, res) => {
             }
         }
 
+        // SPREADSHEET
         const spreadsheet = await manager.createSpreadsheet(
             consultFileName,
             folderId,
             email
         );
-        console.log("\n-- SPREADSHEET ID: ", spreadsheet);
 
         await manager.create_inf_sheet(spreadsheet, patient);
 
@@ -387,12 +384,7 @@ export const getUserConsults = async (req, res) => {
                         birth_date: consult.Patient.birth_date,
                         gender: consult.Patient.gender,
                     },
-                    soap: consult.Notes.map((note) => {
-                        return {
-                            title: note.title,
-                            content: note.content,
-                        };
-                    }),
+                    motivo: consult.consult_json.INF["Motivo de Consulta"],
                 };
             }),
         });

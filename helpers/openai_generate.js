@@ -61,19 +61,16 @@ function generatePrompt(transcript, background, note) {
     - Proporcione la información de manera estructurada y clara en el formato JSON compatible con RFC8259.
     - Una vez que haya completado el formato JSON, revíselo para asegurarse de que sea 100% preciso y que haya incluido toda la información relevante del diálogo.
     - Evite repetir información, ser redundante o incluir detalles no mencionados en el diálogo.
+    - El motivo de consulta debe estar presente siempre y debe ser un formato corto (10 palabras aprox).
     - NO OMITA NINGÚN DATO, incluso si parece redundante o poco relevante.
 
-    Datos del Paciente:
-    Nombre: [Nombre del paciente - Ejemplo: "Juan Pérez"]
-    Edad: [Escriba la edad en números, seguida de la palabra 'años'. Ejemplo: "40 años". Si la edad no se menciona, déjelo en blanco.]
-    Género: [Masculino/Femenino/Otro - basado en el diálogo]
-    "Estado Civil": "",
-    "Ocupación": "",
-    "Escolaridad": "",
-    "Religión": "",
-    "Lugar de Origen": ""
-
-    Motivo de consulta: [Razón principal por la que el paciente busca atención médica]
+    INF:
+    Motivo de consulta: Razón principal por la que el paciente busca atención médica (obligatorio)
+    Estado Civil.
+    Ocupación.
+    Escolaridad.
+    Religión.
+    Lugar de Origen.
 
     Diálogo Médico-Paciente:
     ["${transcript}"]
@@ -83,7 +80,7 @@ function generatePrompt(transcript, background, note) {
     Datos del paciente
     Antecedentes Familiares (AHF): Mencione enfermedades o condiciones relevantes de familiares directos, como padre, madre, hermanos o abuelos.
     Antecedentes Patológicos Personales (APP): Incluye patologías, alergias, cirugías y hospitalizaciones e inmunizaciones.
-    Antecedentes No Patológicos (ANP): Incluya hábitos, medicación actual y otras características relevantes mencionadas.
+    Antecedentes Personales No Patológicos (APNP): En caso de estar presente, incluir hábitos, medicación actual y otras características relevantes mencionadas.
     S.O.A.P (Subjetivo, Objetivo, Análisis, Plan)
 
     Formato JSON:
