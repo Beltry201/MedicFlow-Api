@@ -210,28 +210,28 @@ export const storeJsonData = async (req, res) => {
         }
 
         // SPREADSHEET
-        const spreadsheet = await manager.createSpreadsheet(
-            consultFileName,
-            folderId,
-            email
-        );
+        // const spreadsheet = await manager.createSpreadsheet(
+        //     consultFileName,
+        //     folderId,
+        //     email
+        // );
 
-        await manager.create_inf_sheet(spreadsheet, patient);
+        // await manager.create_inf_sheet(spreadsheet, patient);
 
-        await manager.create_category_sheets(spreadsheet, backgrounds_list);
+        // await manager.create_category_sheets(spreadsheet, backgrounds_list);
 
-        await manager.create_soap_sheet(spreadsheet, consult_json.SOAP);
+        // await manager.create_soap_sheet(spreadsheet, consult_json.SOAP);
 
-        await manager.create_complete_consult_sheet(spreadsheet, consult_json);
+        // await manager.create_complete_consult_sheet(spreadsheet, consult_json);
 
-        const newConsult = await Consult.findOne({
-            where: { _id_consult: consult._id_consult },
-            include: [
-                { model: Patient },
-                { model: Background },
-                { model: Note },
-            ],
-        });
+        // const newConsult = await Consult.findOne({
+        //     where: { _id_consult: consult._id_consult },
+        //     include: [
+        //         { model: Patient },
+        //         { model: Background },
+        //         { model: Note },
+        //     ],
+        // });
 
         // RATING
         if (rating !== undefined && attributes !== undefined) {
@@ -354,12 +354,12 @@ export const getUserConsults = async (req, res) => {
             include: [
                 {
                     model: Note,
-                    as: "Notes", // Make sure this matches the name in the association
+                    as: "Notes",
                     attributes: ["title", "content"],
                 },
                 {
-                    model: Patient, // Assuming you have a Patient model
-                    as: "Patient", // Make sure this matches the name in the association
+                    model: Patient,
+                    as: "Patient",
                     attributes: ["name", "birth_date", "gender"],
                 },
             ],

@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../../config/db.js";
 
 export const PaymentMethod = sequelize.define(
     "PaymentMethod",
@@ -11,23 +11,27 @@ export const PaymentMethod = sequelize.define(
         },
         card_number: {
             type: DataTypes.STRING(16),
+            allowNull: false,
         },
         card_holder: {
             type: DataTypes.STRING(255),
+            allowNull: false,
         },
         expiration_date: {
             type: DataTypes.DATE,
+            allowNull: false,
         },
         cvv: {
             type: DataTypes.STRING(4),
+            allowNull: false,
         },
         _id_doctor: {
             type: DataTypes.UUID,
-            // You can add a foreign key constraint here if necessary
+            allowNull: false,
         },
     },
     {
         tableName: "payment_methods",
-        timestamps: true, // Set this to true if you want Sequelize to handle timestamps automatically
+        timestamps: true,
     }
 );

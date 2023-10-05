@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
-import { PaymentMethod } from "./payment_methods.js";
+import { PaymentMethod } from "./suscriptions/payment_methods.js";
 import { Patient } from "./patients.js";
 import { TreatmentCatalog } from "./treatments_catalogs.js";
 import { Consult } from "./consults.js";
@@ -110,16 +110,16 @@ Patient.belongsTo(User, {
 User.hasMany(TreatmentCatalog, {
     foreignKey: "_id_doctor",
     targetId: "_id_user",
-    onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
-    onUpdate: "CASCADE", // Update related doctor_id in patients if the doctor's id is updated
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
     allowNull: false,
 });
 
 TreatmentCatalog.belongsTo(User, {
     foreignKey: "_id_doctor",
     targetId: "_id_user",
-    onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
-    onUpdate: "CASCADE", // Update related doctor_id in patients if the doctor's id is updated
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
     allowNull: false,
 });
 
@@ -127,16 +127,16 @@ TreatmentCatalog.belongsTo(User, {
 User.hasMany(Consult, {
     foreignKey: "_id_doctor",
     targetId: "_id_user",
-    onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
-    onUpdate: "CASCADE", // Update related doctor_id in patients if the doctor's id is updated
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
     allowNull: false,
 });
 
 Consult.belongsTo(User, {
     foreignKey: "_id_doctor",
     targetId: "_id_user",
-    onDelete: "CASCADE", // Automatically delete related patients when the doctor is deleted
-    onUpdate: "CASCADE", // Update related doctor_id in patients if the doctor's id is updated
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
     allowNull: false,
 });
 
