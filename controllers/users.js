@@ -42,66 +42,66 @@ export const createUser = async (req, res) => {
 
         await createDefaultParameters(newUser);
 
-        const sheetsManager = new GoogleSheetsManager();
+        // const sheetsManager = new GoogleSheetsManager();
 
         // Step 2: Authorize Google Sheets Manager
-        try {
-            await sheetsManager.authorize();
-        } catch (error) {
-            console.error(
-                `Error authorizing Google Sheets Manager: ${error.message}`
-            );
-            return res.status(500).json({
-                success: false,
-                message: "Failed to authorize Google Sheets Manager",
-                error: error.message,
-            });
-        }
+        // try {
+        //     await sheetsManager.authorize();
+        // } catch (error) {
+        //     console.error(
+        //         `Error authorizing Google Sheets Manager: ${error.message}`
+        //     );
+        //     return res.status(500).json({
+        //         success: false,
+        //         message: "Failed to authorize Google Sheets Manager",
+        //         error: error.message,
+        //     });
+        // }
 
-        // Step 3: Create Folder
-        let folderId;
-        try {
-            const folderName = `Dr. ${name} ${last_name}`;
-            folderId = await sheetsManager.createFolder(folderName);
-        } catch (error) {
-            console.error(`Error creating folder: ${error.message}`);
-            return res.status(500).json({
-                success: false,
-                message: "Failed to create folder",
-                error: error.message,
-            });
-        }
+        // // Step 3: Create Folder
+        // let folderId;
+        // try {
+        //     const folderName = `Dr. ${name} ${last_name}`;
+        //     folderId = await sheetsManager.createFolder(folderName);
+        // } catch (error) {
+        //     console.error(`Error creating folder: ${error.message}`);
+        //     return res.status(500).json({
+        //         success: false,
+        //         message: "Failed to create folder",
+        //         error: error.message,
+        //     });
+        // }
 
-        try {
-            const permission = await sheetsManager.sharePermission(
-                folderId,
-                "user",
-                "reader",
-                email
-            );
+        // try {
+        //     const permission = await sheetsManager.sharePermission(
+        //         folderId,
+        //         "user",
+        //         "reader",
+        //         email
+        //     );
 
-            console.log("\n-- PERMISSION: ", permission);
-        } catch (error) {
-            console.error(`Error granting permission: ${error.message}`);
-            return res.status(500).json({
-                success: false,
-                message: "Failed to grant permission",
-                error: error.message,
-            });
-        }
+        //     console.log("\n-- PERMISSION: ", permission);
+        // } catch (error) {
+        //     console.error(`Error granting permission: ${error.message}`);
+        //     return res.status(500).json({
+        //         success: false,
+        //         message: "Failed to grant permission",
+        //         error: error.message,
+        //     });
+        // }
 
-        // Step 4: Update User Database
-        try {
-            newUser._id_folder = folderId;
-            await newUser.save();
-        } catch (error) {
-            console.error(`Error updating user: ${error.message}`);
-            return res.status(500).json({
-                success: false,
-                message: "Failed to update user",
-                error: error.message,
-            });
-        }
+        // // Step 4: Update User Database
+        // try {
+        //     newUser._id_folder = folderId;
+        //     await newUser.save();
+        // } catch (error) {
+        //     console.error(`Error updating user: ${error.message}`);
+        //     return res.status(500).json({
+        //         success: false,
+        //         message: "Failed to update user",
+        //         error: error.message,
+        //     });
+        // }
 
         const token = jwt.sign(
             { id: newUser.id, email: newUser.email },
