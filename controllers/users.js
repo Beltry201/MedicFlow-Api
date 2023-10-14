@@ -3,7 +3,7 @@ import { generateAccessCode } from "../helpers/access_code_generator.js";
 import { createDefaultParameters } from "../helpers/default_parameters.js";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 import GoogleSheetsManager from "../helpers/sheets.js";
 
 dotenv.config();
@@ -151,7 +151,6 @@ export const loginUser = async (req, res) => {
         }
 
         // Generate JWT token
-        console.log("\n-- ID: ", user._id_user);
         const token = jwt.sign(
             { id: user._id_user, email: user.email },
             process.env.TOKEN_SECRET,
@@ -162,14 +161,12 @@ export const loginUser = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Login successful",
-            // user: { id: user.id, email: user.email},
             token: token,
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({
-            success: false,
-            message: "Failed to login",
+            message: "Internal server error",
             error: error.message,
         });
     }
@@ -300,6 +297,41 @@ export const deactivateUser = async (req, res) => {
             success: false,
             message: "Failed to deactivate user",
             error: error.message,
+        });
+    }
+};
+
+export const verifyToken = async (req, res) => {
+    console.log("Entre a validate");
+    try {
+        const token = req.headers.authorization;
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: "Token not provided gei",
+            });
+        }
+
+        // Verify and decode the token
+        const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET);
+
+        // Token is valid, user can access
+        if (decodedToken) {
+            res.status(200).json({
+                success: true,
+                message: "Token is valid",
+            });
+        }
+    } catch (error) {
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({
+                success: false,
+                message: "Token has expired",
+            });
+        }
+        return res.status(401).json({
+            success: false,
+            message: "Invalid gei",
         });
     }
 };
