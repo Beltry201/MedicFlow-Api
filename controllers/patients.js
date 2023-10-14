@@ -54,7 +54,7 @@ export const listPatients = async (req, res) => {
 // Get the details of a specific patient by ID
 export const getPatientDetails = async (req, res) => {
     try {
-        const patientId = req.params.id;
+        const patientId = req.query._id_pacient;
 
         // Find the patient by ID
         const patient = await Patient.findByPk(patientId);
@@ -85,7 +85,7 @@ export const getPatientDetails = async (req, res) => {
 // Update a patient by ID
 export const updatePatient = async (req, res) => {
     try {
-        const patientId = req.params.id;
+        const patientId = req.query.id;
         const {
             name,
             gender,
@@ -144,7 +144,7 @@ export const updatePatient = async (req, res) => {
 // Delete a patient by ID
 export const deletePatient = async (req, res) => {
     try {
-        const patientId = req.params.id;
+        const patientId = req.query._id_pacient;
 
         // Find the patient by ID
         const patient = await Patient.findByPk(patientId);
@@ -182,7 +182,7 @@ export const deletePatient = async (req, res) => {
 
 export const getDoctorPatients = async (req, res) => {
     try {
-        const doctorId = req.params.doctorId; // Assuming you are passing the doctor's ID as a URL parameter (e.g., /patients/doctor/:doctorId)
+        const doctorId = req.query._id_doctor; // Assuming you are passing the doctor's ID as a URL parameter (e.g., /patients/doctor/:doctorId)
 
         // Find all patients for the given doctor ID
         const patients = await Patient.findAll({
@@ -193,13 +193,11 @@ export const getDoctorPatients = async (req, res) => {
         });
 
         if (patients.length === 0) {
-            return res
-                .status(200)
-                .json({
-                    success: false,
-                    message: "No patients found!",
-                    patients: patients,
-                });
+            return res.status(200).json({
+                success: false,
+                message: "No patients found!",
+                patients: patients,
+            });
         }
 
         res.status(200).json({ success: true, patients: patients });

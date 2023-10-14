@@ -173,7 +173,7 @@ export const loginUser = async (req, res) => {
 };
 
 export const access_code = async (req, res) => {
-    const { code } = req.params;
+    const code = req.query.code;
     try {
         // Check if the code exists in the database
         const user = await User.findOne({
@@ -245,7 +245,7 @@ export const resetPassword = async (req, res) => {
 
 export const getUser = async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = req.query._id_user;
 
         // Find the user by ID
         const user = await User.findByPk(userId);
@@ -271,7 +271,7 @@ export const getUser = async (req, res) => {
 
 export const deactivateUser = async (req, res) => {
     try {
-        const userId = req.params._id_user;
+        const userId = req.query._id_user;
 
         // Find the user by ID
         const user = await User.findByPk(userId);

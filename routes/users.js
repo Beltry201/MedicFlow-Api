@@ -15,12 +15,12 @@ const router = Router();
 
 // Routes
 router.get("/", validateToken, getUser);
-router.post("/login", loginUser);
-router.get("/access_code/:code", access_code);
-router.post("/", createUser);
-router.put("/resetPass", validateToken, resetPassword);
-router.delete("/deactivate/:_id_user", validateToken, deactivateUser);
+router.get("/access_code", access_code);
 router.get("/token", validateToken, verifyToken);
+router.post("/login", loginUser);
+router.post("/", createUser);
+router.put("/reset_password", validateToken, resetPassword);
+router.delete("/deactivate", validateToken, deactivateUser);
 
 // router.put("/:id", validateToken, updateUser);
 // router.get("/gtokens", gtokens);

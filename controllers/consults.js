@@ -278,7 +278,7 @@ export const storeJsonData = async (req, res) => {
 
 export const getConsultDetails = async (req, res) => {
     try {
-        const { _id_consult } = req.query;
+        const _id_consult = req.query._id_consult;
 
         // Find the consult by ID
         const consult = await Consult.findOne({
@@ -344,7 +344,7 @@ export const getConsultDetails = async (req, res) => {
 
 export const getUserConsults = async (req, res) => {
     try {
-        const { _id_doctor } = req.query;
+        const _id_doctor = req.query._id_doctor;
 
         // Retrieve all consults for the given doctor
         const consults = await Consult.findAll({
