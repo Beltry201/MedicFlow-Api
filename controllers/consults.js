@@ -86,9 +86,8 @@ export const storeJsonData = async (req, res) => {
             rating,
             attributes,
             consult_json,
+            _id_treatment_catalog,
         } = req.body;
-
-        console.log(consult_json.ANP);
 
         const decodedAudioTranscript = Buffer.from(
             audio_transcript,
@@ -97,6 +96,8 @@ export const storeJsonData = async (req, res) => {
 
         let date = new Date();
 
+        const treatmentCatalogId = _id_treatment_catalog || null;
+
         const consult = await Consult.create({
             audio_transcript: decodedAudioTranscript,
             consult_json: consult_json,
@@ -104,7 +105,7 @@ export const storeJsonData = async (req, res) => {
             is_valid: true,
             _id_doctor,
             _id_patient,
-            _id_treatment_catalog: "209ecf44-0b07-49e1-820c-107bcbdf76fb",
+            _id_treatment_catalog: treatmentCatalogId,
         });
 
         // USER

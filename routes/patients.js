@@ -13,7 +13,7 @@ const router = Router();
 
 // Routes
 router.post("/", validateToken, createPatient);
-router.get("/", validateToken, listPatients);
+router.get("/list", validateToken, listPatients);
 router.get("/doctor", validateToken, getDoctorPatients);
 router.get("/", validateToken, getPatientDetails);
 router.put("/", validateToken, updatePatient);
