@@ -1,4 +1,5 @@
 import { CalendarEvent } from "../models/users/calendar_events.js";
+import { Op } from "sequelize";
 
 export const createCalendarEvent = async (req, res) => {
     try {
@@ -47,22 +48,24 @@ export const createCalendarEvent = async (req, res) => {
 
 export const getCalendarEvents = async (req, res) => {
     try {
-        const { startDate, endDate, doctorId, patientId } = req.query;
+        const { patientId } = req.query;
+
+        // Get the current date to determine the start and end of the month
+        const today = new Date();
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const endOfMonth = new Date(
+            today.getFullYear(),
+            today.getMonth() + 1,
+            0
+        );
 
         // Define filters based on query parameters
-        const filters = {};
-
-        if (startDate) {
-            filters.start_date = { [Op.gte]: new Date(startDate) };
-        }
-
-        if (endDate) {
-            filters.end_date = { [Op.lte]: new Date(endDate) };
-        }
-
-        if (doctorId) {
-            filters._id_doctor = doctorId;
-        }
+        const filters = {
+            start_date: {
+                [Op.gte]: startOfMonth,
+                [Op.lte]: endOfMonth,
+            },
+        };
 
         if (patientId) {
             filters._id_patient = patientId;
@@ -152,6 +155,48 @@ export const deleteCalendarEvent = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Failed to delete calendar event",
+            error: error.message,
+        });
+    }
+};
+
+export const getClosestEventByDate = async (req, res) => {
+    try {
+        const { _id_doctor } = req.query;
+
+        // Validate if _id_doctor is provided
+        if (!_id_doctor) {
+            return res.status(400).json({
+                success: false,
+                message: "_id_doctor parameter is required",
+            });
+        }
+
+        const closestEvent = await CalendarEvent.findOne({
+            where: {
+                _id_doctor,
+                start_date: {
+                    [Op.gte]: new Date(),
+                },
+            },
+            order: [
+                ["start_date", "ASC"], // Sort by start date in ascending order
+            ],
+        });
+
+        if (!closestEvent) {
+            return res.status(404).json({
+                success: false,
+                message: "No events found for the specified doctor",
+            });
+        }
+
+        return res.status(200).json({ success: true, closestEvent });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get closest event",
             error: error.message,
         });
     }

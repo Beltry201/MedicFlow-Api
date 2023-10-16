@@ -5,14 +5,16 @@ import {
     getCalendarEvents,
     updateCalendarEvent,
     deleteCalendarEvent,
+    getClosestEventByDate,
 } from "../controllers/calendar_events.js";
 
 const router = Router();
 
 // Routes
 router.post("/", validateToken, createCalendarEvent);
-router.get("/", validateToken, getCalendarEvents);
-router.put("/:id", validateToken, updateCalendarEvent);
-router.delete("/:id", validateToken, deleteCalendarEvent);
+router.get("/list", validateToken, getCalendarEvents);
+router.put("/", validateToken, updateCalendarEvent);
+router.delete("/", validateToken, deleteCalendarEvent);
+router.get("/next", validateToken, getClosestEventByDate);
 
 export default router;
