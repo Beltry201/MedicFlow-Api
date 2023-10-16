@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../../config/db.js";
 import { Background } from "./backgrounds.js";
 import { ConsultRating } from "./consult_rating.js";
-import { Note } from "./notes.js";
+import { Note } from "../users/notes.js";
 
 export const Consult = sequelize.define(
     "Consult",

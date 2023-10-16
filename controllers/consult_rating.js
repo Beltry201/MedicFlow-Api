@@ -1,4 +1,4 @@
-import { ConsultRating } from "../models/consult_rating.js";
+import { ConsultRating } from "../models/consults/consult_rating.js";
 
 export const createConsultRating = async (req, res) => {
     try {

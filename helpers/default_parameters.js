@@ -1,7 +1,8 @@
-import { ParameterType } from "../models/parameter_types.js";
+import { ParameterType } from "../models/consults/parameter_types.js";
 
-export const createDefaultParameters = async function createDefaultParameters(user) {
-
+export const createDefaultParameters = async function createDefaultParameters(
+    user
+) {
     const defaultSoapCategories = {
         SOAP: ["Subjetivo", "Análisis", "Plan", "Objetivo"],
     };
@@ -23,4 +24,4 @@ export const createDefaultParameters = async function createDefaultParameters(us
 
     // Wait for all promises to complete
     await Promise.all([...soapPromises]);
-}
+};

@@ -1,12 +1,12 @@
-import { Consult } from "../models/consults.js";
-import { Background } from "../models/backgrounds.js";
-import { Note } from "../models/notes.js";
+import { Consult } from "../models/consults/consults.js";
+import { Background } from "../models/consults/backgrounds.js";
+import { Note } from "../models/users/notes.js";
 import { generateText } from "../helpers/openai_generate.js";
-import { ParameterType } from "../models/parameter_types.js";
-import { Patient } from "../models/patients.js";
+import { ParameterType } from "../models/consults/parameter_types.js";
+import { Patient } from "../models/users/patients.js";
 import { Buffer } from "buffer";
-import { User } from "../models/users.js";
-import { ConsultRating } from "../models/consult_rating.js";
+import { User } from "../models/users/users.js";
+import { ConsultRating } from "../models/consults/consult_rating.js";
 
 import GoogleSheetsManager from "../helpers/sheets.js";
 

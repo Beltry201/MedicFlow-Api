@@ -1,4 +1,4 @@
-import { User } from "../models/users.js";
+import { User } from "../models/users/users.js";
 import { generateAccessCode } from "../helpers/access_code_generator.js";
 import { createDefaultParameters } from "../helpers/default_parameters.js";
 import dotenv from "dotenv";

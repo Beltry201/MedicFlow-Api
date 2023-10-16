@@ -1,4 +1,4 @@
-import { ParameterType } from "../models/parameter_types.js"; // Import the model
+import { ParameterType } from "../models/consults/parameter_types.js"; // Import the model
 
 export const createParameterType = async (req, res) => {
     try {

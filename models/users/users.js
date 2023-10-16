@@ -1,11 +1,12 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../config/db.js";
-import { PaymentMethod } from "./suscriptions/payment_methods.js";
+import { sequelize } from "../../config/db.js";
+import { PaymentMethod } from "../suscriptions/payment_methods.js";
 import { Patient } from "./patients.js";
 import { TreatmentCatalog } from "./treatments_catalogs.js";
-import { Consult } from "./consults.js";
-import { ParameterType } from "./parameter_types.js";
-import { ConsultRating } from "./consult_rating.js";
+import { Consult } from "../consults/consults.js";
+import { ParameterType } from "../consults/parameter_types.js";
+import { ConsultRating } from "../consults/consult_rating.js";
+import { CalendarEvent } from "../users/calendar_events.js";
 
 export const User = sequelize.define(
     "User",
@@ -167,6 +168,23 @@ User.hasMany(ConsultRating, {
 });
 
 ConsultRating.belongsTo(User, {
+    foreignKey: "_id_doctor",
+    targetId: "_id_user",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    allowNull: false,
+});
+
+// ------------- CALENDAR EVENT -------------
+User.hasMany(CalendarEvent, {
+    foreignKey: "_id_doctor",
+    targetId: "_id_user",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    allowNull: false,
+});
+
+CalendarEvent.belongsTo(User, {
     foreignKey: "_id_doctor",
     targetId: "_id_user",
     onDelete: "CASCADE",

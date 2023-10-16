@@ -1,11 +1,12 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../../config/db.js";
+import { Consult } from "./consults.js";
 import { ParameterType } from "./parameter_types.js";
 
-export const Note = sequelize.define(
-    "Note",
+export const Background = sequelize.define(
+    "Background",
     {
-        _id_note: {
+        _id_background: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
@@ -22,26 +23,22 @@ export const Note = sequelize.define(
             type: DataTypes.UUID,
             allowNull: false,
         },
-        _id_media: {
-            type: DataTypes.UUID,
-            allowNull: true
-        },
         _id_parameter: {
             type: DataTypes.UUID,
             allowNull: false,
         },
     },
     {
-        tableName: "notes",
+        tableName: "backgrounds",
         timestamps: true,
     }
 );
 
 // ------------- PARAMETER_TYPES -------------
-Note.belongsTo(ParameterType, {
+Background.belongsTo(ParameterType, {
     foreignKey: "_id_parameter",
 });
 
-ParameterType.hasMany(Note, {
+ParameterType.hasMany(Background, {
     foreignKey: "_id_parameter",
 });

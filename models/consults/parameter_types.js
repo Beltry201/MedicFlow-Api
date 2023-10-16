@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../../config/db.js";
 
 export const ParameterType = sequelize.define(
     "ParameterType",
@@ -23,13 +23,11 @@ export const ParameterType = sequelize.define(
         },
         _id_doctor: {
             type: DataTypes.UUID,
-            allowNull: false
-        }
-
+            allowNull: false,
+        },
     },
     {
         tableName: "parameters_types",
         timestamps: true, // Set this to true if you want Sequelize to handle timestamps automatically
     }
 );
-
