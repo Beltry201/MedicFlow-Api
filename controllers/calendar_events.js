@@ -164,21 +164,16 @@ export const deleteCalendarEvent = async (req, res) => {
     }
 };
 
-import { CalendarEvent } from "../models/calendar_events.js";
-import { Op } from "sequelize";
-
 export const getClosestEventByDate = async (req, res) => {
     try {
         const { _id_doctor } = req.query;
 
         // Validate if _id_doctor is provided
         if (!_id_doctor) {
-            return res
-                .status(400)
-                .json({
-                    success: false,
-                    message: "_id_doctor parameter is required",
-                });
+            return res.status(400).json({
+                success: false,
+                message: "_id_doctor parameter is required",
+            });
         }
 
         const closestEvent = await CalendarEvent.findOne({
@@ -194,23 +189,19 @@ export const getClosestEventByDate = async (req, res) => {
         });
 
         if (!closestEvent) {
-            return res
-                .status(404)
-                .json({
-                    success: false,
-                    message: "No events found for the specified doctor",
-                });
+            return res.status(404).json({
+                success: false,
+                message: "No events found for the specified doctor",
+            });
         }
 
         return res.status(200).json({ success: true, closestEvent });
     } catch (error) {
         console.error(error);
-        return res
-            .status(500)
-            .json({
-                success: false,
-                message: "Failed to get closest event",
-                error: error.message,
-            });
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get closest event",
+            error: error.message,
+        });
     }
 };
