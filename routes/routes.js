@@ -11,7 +11,7 @@ const router = Router();
 // Main Routes
 router.use("/users", userRoutes);
 router.use("/patients", patientRoutes);
-router.use("/treatments_catalogs", treatmentRoutes);
+router.use("/treatments_catalog", treatmentRoutes);
 router.use("/consults", consultRoutes);
 router.use("/parameters", parameterTypesRoutes);
 router.use("/ratings", consultRatingRoutes);

@@ -14,9 +14,9 @@ const router = Router();
 // Routes
 router.post("/", validateToken, createTreatmentCatalog);
 router.put("/", validateToken, updateTreatmentCatalog);
-router.get("/", validateToken, getTreatmentCatalogDetails);
-router.get("/", validateToken, listTreatmentCatalogs);
+router.get("/details", validateToken, getTreatmentCatalogDetails);
 router.delete("/", validateToken, deleteTreatmentCatalog);
-router.get("/", getDoctorTreatmentCatalogs);
+router.get("/list", getDoctorTreatmentCatalogs);
 
+// router.get("/", validateToken, listTreatmentCatalogs);
 export default router;
