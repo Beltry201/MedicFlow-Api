@@ -54,7 +54,7 @@ export const listPatients = async (req, res) => {
 // Get the details of a specific patient by ID
 export const getPatientDetails = async (req, res) => {
     try {
-        const patientId = req.query._id_pacient;
+        const patientId = req.query._id_patient;
 
         // Find the patient by ID
         const patient = await Patient.findByPk(patientId);
