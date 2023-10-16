@@ -5,6 +5,7 @@ import treatmentRoutes from "./treatments_catalogs.js";
 import consultRoutes from "./consults.js";
 import parameterTypesRoutes from "./parameter_types.js";
 import consultRatingRoutes from "./consult_rating.js";
+import calendarEventRoutes from "./calendar_event.js";
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.use("/treatments_catalog", treatmentRoutes);
 router.use("/consults", consultRoutes);
 router.use("/parameters", parameterTypesRoutes);
 router.use("/ratings", consultRatingRoutes);
+router.use("/calendar_events", calendarEventRoutes);
 
 export default router;
