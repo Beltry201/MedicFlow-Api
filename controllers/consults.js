@@ -363,6 +363,11 @@ export const getUserConsults = async (req, res) => {
                     as: "Patient",
                     attributes: ["name", "birth_date", "gender"],
                 },
+                {
+                    model: TreatmentCatalog, // Add this include for TreatmentCatalog
+                    attributes: ["name"], // Include only the 'name' attribute from TreatmentCatalog
+                    as: "TreatmentCatalog", // Set an alias for the included TreatmentCatalog
+                },
             ],
         });
 
@@ -390,6 +395,7 @@ export const getUserConsults = async (req, res) => {
                         gender: consult.Patient.gender,
                     },
                     motivo: consult.consult_json.INF["Motivo"],
+                    treatment: consult.TreatmentCatalog.name, // Access the name from the included TreatmentCatalog
                 };
             }),
         });
