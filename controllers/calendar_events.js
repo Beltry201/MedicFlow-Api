@@ -1,4 +1,4 @@
-import { CalendarEvent } from "../models/calendar_event";
+import { CalendarEvent } from "../models/users/calendar_events.js";
 
 export const createCalendarEvent = async (req, res) => {
     try {
