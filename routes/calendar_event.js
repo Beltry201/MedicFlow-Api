@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { validateToken } from "../helpers/jwt.js";
 import {
     createCalendarEvent,
     getCalendarEvents,
@@ -9,9 +10,9 @@ import {
 const router = Router();
 
 // Routes
-router.post("/", createCalendarEvent);
-router.get("/", getCalendarEvents);
-router.put("/:id", updateCalendarEvent);
-router.delete("/:id", deleteCalendarEvent);
+router.post("/", validateToken, createCalendarEvent);
+router.get("/", validateToken, getCalendarEvents);
+router.put("/:id", validateToken, updateCalendarEvent);
+router.delete("/:id", validateToken, deleteCalendarEvent);
 
 export default router;
