@@ -28,6 +28,6 @@ export const ParameterType = sequelize.define(
     },
     {
         tableName: "parameters_types",
-        timestamps: true, // Set this to true if you want Sequelize to handle timestamps automatically
+        timestamps: true,
     }
 );

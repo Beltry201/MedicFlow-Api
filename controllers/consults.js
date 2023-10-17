@@ -7,6 +7,8 @@ import { Patient } from "../models/users/patients.js";
 import { Buffer } from "buffer";
 import { User } from "../models/users/users.js";
 import { ConsultRating } from "../models/consults/consult_rating.js";
+import { TreatmentCatalog } from "../models/users/treatments_catalogs.js";
+import { sequelize } from "../config/db.js";
 
 import GoogleSheetsManager from "../helpers/sheets.js";
 
@@ -395,7 +397,9 @@ export const getUserConsults = async (req, res) => {
                         gender: consult.Patient.gender,
                     },
                     motivo: consult.consult_json.INF["Motivo"],
-                    treatment: consult.TreatmentCatalog.name, // Access the name from the included TreatmentCatalog
+                    treatment: consult.TreatmentCatalog
+                        ? consult.TreatmentCatalog.name
+                        : null,
                 };
             }),
         });
@@ -404,6 +408,127 @@ export const getUserConsults = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to fetch user consults",
+            error: error.message,
+        });
+    }
+};
+
+export const getPatientConsults = async (req, res) => {
+    try {
+        const _id_patient = req.query._id_patient; // Assuming you pass the patient ID as a query parameter
+
+        // Retrieve all consults for the given patient
+        const consults = await Consult.findAll({
+            where: {
+                _id_patient: _id_patient,
+            },
+            include: [
+                {
+                    model: Patient,
+                    as: "Patient",
+                    attributes: ["name", "birth_date", "gender"],
+                },
+                {
+                    model: TreatmentCatalog,
+                    attributes: ["name"],
+                    as: "TreatmentCatalog",
+                },
+            ],
+        });
+
+        if (consults.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No consults found for the given patient",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            consults: consults.map((consult) => {
+                return {
+                    _id_consult: consult._id_consult,
+                    date: consult.date,
+                    patient: {
+                        name: consult.Patient.name,
+                        birth_date: consult.Patient.birth_date,
+                        gender: consult.Patient.gender,
+                    },
+                    consult_json: consult.consult_json,
+                    treatment: consult.TreatmentCatalog
+                        ? consult.TreatmentCatalog.name
+                        : null,
+                };
+            }),
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch patient consults",
+            error: error.message,
+        });
+    }
+};
+
+export const getPatientBackgrounds = async (req, res) => {
+    const { _id_patient } = req.query;
+    try {
+        const patientConsults = await Consult.findAll({
+            where: {
+                _id_patient,
+            },
+            include: [
+                {
+                    model: Background,
+                    include: [
+                        {
+                            model: ParameterType,
+                            attributes: ["parameter_type_name"],
+                            where: {
+                                _id_parameter_type: sequelize.col(
+                                    "Background._id_parameter"
+                                ),
+                            },
+                        },
+                    ],
+                },
+            ],
+        });
+
+        const patientBackgrounds = patientConsults
+            .map((consult) => {
+                return consult.Backgrounds.map((background) => {
+                    return {
+                        title: background.title,
+                        content: background.content,
+                        parameter_type_name:
+                            background.ParameterType.parameter_type_name,
+                    };
+                });
+            })
+            .flat();
+
+        const categorizedBackgrounds = {
+            AHF: patientBackgrounds.filter(
+                (background) => background.parameter_type_name === "AHF"
+            ),
+            APP: patientBackgrounds.filter(
+                (background) => background.parameter_type_name === "APP"
+            ),
+            APNP: patientBackgrounds.filter(
+                (background) => background.parameter_type_name === "APNP"
+            ),
+        };
+
+        return res.json({
+            success: true,
+            patientBackgrounds: categorizedBackgrounds,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch patient backgrounds",
             error: error.message,
         });
     }

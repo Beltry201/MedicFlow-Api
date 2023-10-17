@@ -3,6 +3,7 @@ import { sequelize } from "../../config/db.js";
 import { Background } from "./backgrounds.js";
 import { ConsultRating } from "./consult_rating.js";
 import { Note } from "../users/notes.js";
+import { TreatmentCatalog } from "../users/treatments_catalogs.js";
 
 export const Consult = sequelize.define(
     "Consult",
@@ -73,4 +74,14 @@ ConsultRating.belongsTo(Consult, {
 Consult.hasMany(ConsultRating, {
     foreignKey: "_id_consult",
     targetId: "_id_consult",
+});
+
+// ------------- TREATMENT CATALOG -------------
+Consult.belongsTo(TreatmentCatalog, {
+    foreignKey: "_id_treatment_catalog",
+    targetKey: "_id_treatment_catalog",
+});
+TreatmentCatalog.hasMany(Consult, {
+    foreignKey: "_id_treatment_catalog",
+    sourceKey: "_id_treatment_catalog",
 });
