@@ -8,7 +8,7 @@
     "dev": "nodemon api.js"
   },
   "author": "",
-  "type": "module",
+  "type": "commonjs",
   "license": "MIT",
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",

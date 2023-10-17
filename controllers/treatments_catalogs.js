@@ -100,7 +100,11 @@ export const getTreatmentCatalogDetails = async (req, res) => {
         const treatmentId = req.query._id_treatment_catalog;
 
         // Find the treatment_catalog by ID
-        const treatment_catalog = await TreatmentCatalog.findByPk(treatmentId);
+        const treatment_catalog = await TreatmentCatalog.findByPk(treatmentId, {
+            attributes: {
+                exclude: ["duration_weeks"],
+            },
+        });
 
         if (!treatment_catalog) {
             return res.status(404).json({
@@ -123,7 +127,11 @@ export const getTreatmentCatalogDetails = async (req, res) => {
 export const listTreatmentCatalogs = async (req, res) => {
     try {
         // Retrieve all treatments from the database
-        const treatments_catalog = await TreatmentCatalog.findAll();
+        const treatments_catalog = await TreatmentCatalog.findAll({
+            attributes: {
+                exclude: ["duration_weeks"],
+            },
+        });
 
         res.status(200).json({ success: true, treatments_catalog });
     } catch (error) {
@@ -144,6 +152,9 @@ export const getDoctorTreatmentCatalogs = async (req, res) => {
         const treatments_catalog = await TreatmentCatalog.findAll({
             where: {
                 _id_doctor: doctorId,
+            },
+            attributes: {
+                exclude: ["duration_weeks"],
             },
         });
 
