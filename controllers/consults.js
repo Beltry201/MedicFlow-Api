@@ -473,62 +473,64 @@ export const getPatientConsults = async (req, res) => {
 
 export const getPatientBackgrounds = async (req, res) => {
     const { _id_patient } = req.query;
+
     try {
+        // Check if _id_patient is provided
+        if (!_id_patient) {
+            return res.status(400).json({
+                success: false,
+                message: "_id_patient is required",
+            });
+        }
+
         const patientConsults = await Consult.findAll({
             where: {
                 _id_patient,
             },
-            include: [
-                {
-                    model: Background,
-                    include: [
-                        {
-                            model: ParameterType,
-                            attributes: ["parameter_type_name"],
-                            where: {
-                                _id_parameter_type: sequelize.col(
-                                    "Background._id_parameter"
-                                ),
-                            },
-                        },
-                    ],
-                },
-            ],
         });
 
-        const patientBackgrounds = patientConsults
-            .map((consult) => {
-                return consult.Backgrounds.map((background) => {
-                    return {
-                        title: background.title,
-                        content: background.content,
-                        parameter_type_name:
-                            background.ParameterType.parameter_type_name,
-                    };
-                });
-            })
-            .flat();
+        // Check if there are no consults for the given _id_patient
+        if (!patientConsults || patientConsults.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No consults found for the provided _id_patient",
+            });
+        }
 
-        const categorizedBackgrounds = {
-            AHF: patientBackgrounds.filter(
-                (background) => background.parameter_type_name === "AHF"
-            ),
-            APP: patientBackgrounds.filter(
-                (background) => background.parameter_type_name === "APP"
-            ),
-            APNP: patientBackgrounds.filter(
-                (background) => background.parameter_type_name === "APNP"
-            ),
+        let backgrounds = {
+            AHF: [],
+            APP: [],
+            APNP: [],
         };
+
+        // Iterate through patientConsults
+        patientConsults.forEach((consult) => {
+            // Iterate through consult_json.AHF, consult_json.APP, and consult_json.APNP
+            ["AHF", "APP", "APNP"].forEach((category) => {
+                if (consult.consult_json && consult.consult_json[category]) {
+                    // Filter out empty values and store all values in an array
+                    Object.entries(consult.consult_json[category]).forEach(
+                        ([key, value]) => {
+                            if (value) {
+                                backgrounds[category].push({
+                                    title: key,
+                                    content: value,
+                                });
+                            }
+                        }
+                    );
+                }
+            });
+        });
 
         return res.json({
             success: true,
-            patientBackgrounds: categorizedBackgrounds,
+            patientBackgrounds: backgrounds,
         });
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: "Failed to fetch patient backgrounds",
+            message: "An unexpected error occurred",
             error: error.message,
         });
     }
