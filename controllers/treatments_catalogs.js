@@ -33,25 +33,25 @@ export const deleteTreatmentCatalog = async (req, res) => {
         // Find the treatment_catalog by ID
         const treatment_catalog = await TreatmentCatalog.findByPk(treatmentId);
 
-        if (!treatmentreatment_catalogt) {
+        if (!treatment_catalog) {
             return res.status(404).json({
                 success: false,
                 message: "Treatment catalog not found",
             });
         }
 
-        // Delete the treatment_catalog from the database
-        await treatment_catalog.destroy();
+        // Set is_valid to false
+        await treatment_catalog.update({ is_valid: false });
 
         res.status(200).json({
             success: true,
-            message: "Treatment catalog deleted successfully",
+            message: "Treatment catalog marked as invalid successfully",
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({
             success: false,
-            message: "Failed to delete treatment catalog",
+            message: "Failed to mark treatment catalog as invalid",
             error: error.message,
         });
     }
@@ -152,6 +152,7 @@ export const getDoctorTreatmentCatalogs = async (req, res) => {
         const treatments_catalog = await TreatmentCatalog.findAll({
             where: {
                 _id_doctor: doctorId,
+                is_valid: true,
             },
             attributes: {
                 exclude: ["duration_weeks"],
