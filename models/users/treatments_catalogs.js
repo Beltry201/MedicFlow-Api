@@ -19,7 +19,8 @@ export const TreatmentCatalog = sequelize.define(
         },
         duration_weeks: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
+            defaultValue: null,
         },
         description: {
             type: DataTypes.TEXT,
