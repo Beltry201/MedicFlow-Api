@@ -61,7 +61,7 @@ function generatePrompt(transcript, background, note) {
     - Proporcione la información de manera estructurada y clara en el formato JSON compatible con RFC8259.
     - Una vez que haya completado el formato JSON, revíselo para asegurarse de que sea 100% preciso y que haya incluido toda la información relevante del diálogo.
     - Evite repetir información, ser redundante o incluir detalles no mencionados en el diálogo.
-    - El motivo de consulta debe estar presente siempre y debe ser un formato corto (10 palabras aprox).
+    - El motivo debe estar presente siempre y debe ser un formato corto (10 palabras aprox).
     - NO OMITA NINGÚN DATO, incluso si parece redundante o poco relevante.
 
     INF:

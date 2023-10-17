@@ -8,7 +8,6 @@ import { Buffer } from "buffer";
 import { User } from "../models/users/users.js";
 import { ConsultRating } from "../models/consults/consult_rating.js";
 import { TreatmentCatalog } from "../models/users/treatments_catalogs.js";
-import { sequelize } from "../config/db.js";
 
 import GoogleSheetsManager from "../helpers/sheets.js";
 
@@ -466,71 +465,6 @@ export const getPatientConsults = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to fetch patient consults",
-            error: error.message,
-        });
-    }
-};
-
-export const getPatientBackgrounds = async (req, res) => {
-    const { _id_patient } = req.query;
-
-    try {
-        // Check if _id_patient is provided
-        if (!_id_patient) {
-            return res.status(400).json({
-                success: false,
-                message: "_id_patient is required",
-            });
-        }
-
-        const patientConsults = await Consult.findAll({
-            where: {
-                _id_patient,
-            },
-        });
-
-        // Check if there are no consults for the given _id_patient
-        if (!patientConsults || patientConsults.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "No consults found for the provided _id_patient",
-            });
-        }
-
-        let backgrounds = {
-            AHF: [],
-            APP: [],
-            APNP: [],
-        };
-
-        // Iterate through patientConsults
-        patientConsults.forEach((consult) => {
-            // Iterate through consult_json.AHF, consult_json.APP, and consult_json.APNP
-            ["AHF", "APP", "APNP"].forEach((category) => {
-                if (consult.consult_json && consult.consult_json[category]) {
-                    // Filter out empty values and store all values in an array
-                    Object.entries(consult.consult_json[category]).forEach(
-                        ([key, value]) => {
-                            if (value) {
-                                backgrounds[category].push({
-                                    title: key,
-                                    content: value,
-                                });
-                            }
-                        }
-                    );
-                }
-            });
-        });
-
-        return res.json({
-            success: true,
-            patientBackgrounds: backgrounds,
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "An unexpected error occurred",
             error: error.message,
         });
     }

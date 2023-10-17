@@ -2,14 +2,12 @@ import { TreatmentCatalog } from "../models/users/treatments_catalogs.js";
 
 export const createTreatmentCatalog = async (req, res) => {
     try {
-        const { name, price, duration_weeks, description, _id_doctor } =
-            req.body;
+        const { name, price, description, _id_doctor } = req.body;
 
         // Create a new treatment catalog into catalog in the database
         const newTreatmentCatalog = await TreatmentCatalog.create({
             name,
             price,
-            duration_weeks,
             description,
             _id_doctor,
         });
@@ -62,8 +60,7 @@ export const deleteTreatmentCatalog = async (req, res) => {
 export const updateTreatmentCatalog = async (req, res) => {
     try {
         const treatmentId = req.query._id_treatment_catalog;
-        const { name, price, duration_weeks, description, _id_doctor } =
-            req.body;
+        const { name, price, description, _id_doctor } = req.body;
 
         // Find the treatment_catalog by ID
         const treatment_catalog = await TreatmentCatalog.findByPk(treatmentId);
@@ -79,7 +76,6 @@ export const updateTreatmentCatalog = async (req, res) => {
         await treatment_catalog.update({
             name,
             price,
-            duration_weeks,
             description,
             _id_doctor,
         });
