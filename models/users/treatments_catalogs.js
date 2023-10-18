@@ -28,7 +28,7 @@ export const TreatmentCatalog = sequelize.define(
         _id_doctor: {
             type: DataTypes.UUID,
         },
-        is_valud: {
+        is_valid: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: true,
