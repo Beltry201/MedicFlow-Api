@@ -5,6 +5,7 @@ import {
     getConsultDetails,
     getUserConsults,
     getPatientConsults,
+    uploadPatientFile,
 } from "../controllers/consults.js";
 import { validateToken } from "../helpers/jwt.js";
 
@@ -16,5 +17,6 @@ router.get("/", validateToken, generateJsonResponse);
 router.get("/consult_details", validateToken, getConsultDetails);
 router.get("/consults_list", validateToken, getUserConsults);
 router.get("/consults_list/patient", validateToken, getPatientConsults);
+router.post("/media", validateToken, uploadPatientFile);
 
 export default router;

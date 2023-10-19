@@ -1,6 +1,4 @@
 import { S3Client } from "@aws-sdk/client-s3";
-
-// npm install dotenv
 import dotenv from "dotenv";
 dotenv.config();
 

@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
 import { Consult } from "../consults/consults.js";
+import { MediaFile } from "./media_files.js";
 
 export const Patient = sequelize.define(
     "Patient",
@@ -74,5 +75,13 @@ Consult.belongsTo(Patient, {
 });
 
 Patient.hasMany(Consult, {
+    foreignKey: "_id_patient",
+});
+
+// ------------- MEDIA FILES -------------
+MediaFile.belongsTo(Patient, {
+    foreignKey: "_id_patient",
+});
+Patient.hasMany(MediaFile, {
     foreignKey: "_id_patient",
 });

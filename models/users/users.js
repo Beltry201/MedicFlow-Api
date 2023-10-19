@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
 import { PaymentMethod } from "../suscriptions/payment_methods.js";
-import { Patient } from "./patients.js";
+import { Patient } from "../patients/patients.js";
 import { TreatmentCatalog } from "./treatments_catalogs.js";
 import { Consult } from "../consults/consults.js";
 import { ParameterType } from "../consults/parameter_types.js";

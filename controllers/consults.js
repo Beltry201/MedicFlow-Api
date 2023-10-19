@@ -3,11 +3,12 @@ import { Background } from "../models/consults/backgrounds.js";
 import { Note } from "../models/users/notes.js";
 import { generateText } from "../helpers/openai_generate.js";
 import { ParameterType } from "../models/consults/parameter_types.js";
-import { Patient } from "../models/users/patients.js";
+import { Patient } from "../models/patients/patients.js";
 import { Buffer } from "buffer";
 import { User } from "../models/users/users.js";
 import { ConsultRating } from "../models/consults/consult_rating.js";
 import { TreatmentCatalog } from "../models/users/treatments_catalogs.js";
+import { uploadFile } from "./bucket.js";
 
 import GoogleSheetsManager from "../helpers/sheets.js";
 
@@ -81,13 +82,14 @@ export const storeJsonData = async (req, res) => {
     await manager.authorize();
     try {
         const {
-            audio_transcript,
             _id_doctor,
             _id_patient,
+            _id_treatment_catalog,
             rating,
+            treatment,
             attributes,
             consult_json,
-            _id_treatment_catalog,
+            audio_transcript,
         } = req.body;
 
         const decodedAudioTranscript = Buffer.from(
@@ -103,6 +105,8 @@ export const storeJsonData = async (req, res) => {
             audio_transcript: decodedAudioTranscript,
             consult_json: consult_json,
             date,
+            treatment_name: treatment.name,
+            treatment_price: treatment.price,
             is_valid: true,
             _id_doctor,
             _id_patient,
@@ -226,14 +230,14 @@ export const storeJsonData = async (req, res) => {
 
         // await manager.create_complete_consult_sheet(spreadsheet, consult_json);
 
-        // const newConsult = await Consult.findOne({
-        //     where: { _id_consult: consult._id_consult },
-        //     include: [
-        //         { model: Patient },
-        //         { model: Background },
-        //         { model: Note },
-        //     ],
-        // });
+        const newConsult = await Consult.findOne({
+            where: { _id_consult: consult._id_consult },
+            include: [
+                { model: Patient },
+                { model: Background },
+                { model: Note },
+            ],
+        });
 
         // RATING
         if (rating !== undefined && attributes !== undefined) {
@@ -252,6 +256,10 @@ export const storeJsonData = async (req, res) => {
         const formattedConsult = {
             id_consult: newConsult._id_consult,
             date: newConsult.date,
+            treatment: {
+                name: newConsult.treatment_name,
+                price: newConsult.treatment_price,
+            },
             patient: {
                 _id_patient,
                 name: newConsult.Patient.name,
@@ -318,6 +326,10 @@ export const getConsultDetails = async (req, res) => {
         const formattedConsult = {
             id_consult: consult._id_consult,
             date: consult.date,
+            treatment: {
+                name: consult.treatment_name,
+                price: consult.treatment_price,
+            },
             patient: {
                 _id_patient: consult.Patient._id_patient,
                 name: consult.Patient.name,
@@ -448,15 +460,16 @@ export const getPatientConsults = async (req, res) => {
                 return {
                     _id_consult: consult._id_consult,
                     date: consult.date,
+                    treatment: {
+                        name: consult.treatment_name,
+                        price: consult.treatment_price,
+                    },
                     patient: {
                         name: consult.Patient.name,
                         birth_date: consult.Patient.birth_date,
                         gender: consult.Patient.gender,
                     },
                     consult_json: consult.consult_json,
-                    treatment: consult.TreatmentCatalog
-                        ? consult.TreatmentCatalog.name
-                        : null,
                 };
             }),
         });
@@ -467,5 +480,30 @@ export const getPatientConsults = async (req, res) => {
             message: "Failed to fetch patient consults",
             error: error.message,
         });
+    }
+};
+
+export const uploadPatientFile = async (req, res) => {
+    try {
+        const { _id_patient, _id_conuslt } = req.query;
+
+        const fileName = `${_id_patient}`;
+        await uploadFile(req, res, fileName, "consults");
+        if (uploadFile) {
+            const fileUrl = ("consults", fileName);
+            // Create a new MediaFile entry
+            await MediaFile.create({
+                _id_patient,
+                type: "image",
+                url: fileUrl,
+            });
+
+            return res
+                .status(200)
+                .send({ message: "File Uploaded Successfully" });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: error.message });
     }
 };

@@ -1,6 +1,9 @@
-import { Patient } from "../models/users/patients.js";
+import { Patient } from "../models/patients/patients.js";
 import { Consult } from "../models/consults/consults.js";
 import { similarityScore } from "../helpers/string_similarity.js";
+import { MediaFile } from "../models/patients/media_files.js";
+import { uploadFile } from "./bucket.js";
+import mime from "mime";
 
 // Create a new patient
 export const createPatient = async (req, res) => {
@@ -348,5 +351,30 @@ export const getPatientINF = async (req, res) => {
             message: "An unexpected error occurred",
             error: error.message,
         });
+    }
+};
+
+export const uploadPatientFile = async (req, res) => {
+    try {
+        const { _id_patient } = req.query;
+
+        const fileName = `${_id_patient}`;
+        await uploadFile(req, res, fileName, "patients");
+        if (uploadFile) {
+            const fileUrl = ("patients", fileName);
+            // Create a new MediaFile entry
+            await MediaFile.create({
+                _id_patient,
+                type: "image",
+                url: fileUrl,
+            });
+
+            return res
+                .status(200)
+                .send({ message: "File Uploaded Successfully" });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: error.message });
     }
 };

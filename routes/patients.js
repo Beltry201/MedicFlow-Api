@@ -9,8 +9,8 @@ import {
     getDoctorPatients,
     getPatientBackgrounds,
     getPatientINF,
+    uploadPatientFile,
 } from "../controllers/patients.js";
-
 const router = Router();
 
 // Routes
@@ -22,4 +22,5 @@ router.put("/", validateToken, updatePatient);
 router.delete("/", validateToken, deletePatient);
 router.get("/backgrounds_list", validateToken, getPatientBackgrounds);
 router.get("/inf", validateToken, getPatientINF);
+router.post("/media", validateToken, uploadPatientFile);
 export default router;

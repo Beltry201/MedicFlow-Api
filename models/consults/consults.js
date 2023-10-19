@@ -4,6 +4,7 @@ import { Background } from "./backgrounds.js";
 import { ConsultRating } from "./consult_rating.js";
 import { Note } from "../users/notes.js";
 import { TreatmentCatalog } from "../users/treatments_catalogs.js";
+import { MediaFile } from "../patients/media_files.js";
 
 export const Consult = sequelize.define(
     "Consult",
@@ -24,6 +25,16 @@ export const Consult = sequelize.define(
         date: {
             type: DataTypes.DATE,
             allowNull: false,
+        },
+        treatment_name: {
+            type: DataTypes.STRING(255),
+            allowNull: true, // Set to true if null is allowed
+            defaultValue: null, // Set a default value if needed
+        },
+        treatment_price: {
+            type: DataTypes.FLOAT,
+            allowNull: true, // Set to true if null is allowed
+            defaultValue: null, // Set a default value if needed
         },
         is_valid: {
             type: DataTypes.BOOLEAN,
@@ -84,4 +95,14 @@ Consult.belongsTo(TreatmentCatalog, {
 TreatmentCatalog.hasMany(Consult, {
     foreignKey: "_id_treatment_catalog",
     sourceKey: "_id_treatment_catalog",
+});
+
+// ------------- MEDIA FILES -------------
+MediaFile.belongsTo(Consult, {
+    foreignKey: "_id_consult",
+    targetKey: "_id_consult",
+});
+Consult.hasMany(MediaFile, {
+    foreignKey: "_id_consult",
+    sourceKey: "_id_consult",
 });
