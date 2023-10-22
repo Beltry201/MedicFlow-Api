@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
-import { ParameterType } from "../consults/parameter_types.js";
 
 export const Note = sequelize.define(
     "Note",
@@ -22,11 +21,7 @@ export const Note = sequelize.define(
             type: DataTypes.UUID,
             allowNull: false,
         },
-        _id_media: {
-            type: DataTypes.UUID,
-            allowNull: true,
-        },
-        _id_parameter: {
+        _id_patient: {
             type: DataTypes.UUID,
             allowNull: false,
         },
@@ -36,12 +31,3 @@ export const Note = sequelize.define(
         timestamps: true,
     }
 );
-
-// ------------- PARAMETER_TYPES -------------
-Note.belongsTo(ParameterType, {
-    foreignKey: "_id_parameter",
-});
-
-ParameterType.hasMany(Note, {
-    foreignKey: "_id_parameter",
-});

@@ -1,6 +1,6 @@
 import { Consult } from "../models/consults/consults.js";
 import { Background } from "../models/consults/backgrounds.js";
-import { Note } from "../models/users/notes.js";
+import { Note } from "../models/patients/notes.js";
 import { generateText } from "../helpers/openai_generate.js";
 import { ParameterType } from "../models/consults/parameter_types.js";
 import { Patient } from "../models/patients/patients.js";
@@ -11,6 +11,7 @@ import { TreatmentCatalog } from "../models/users/treatments_catalogs.js";
 import { uploadFile } from "./bucket.js";
 
 import GoogleSheetsManager from "../helpers/sheets.js";
+import { title } from "process";
 
 export const generateJsonResponse = async (req, res) => {
     const { audio_transcript, _id_doctor } = req.query;
@@ -100,7 +101,8 @@ export const storeJsonData = async (req, res) => {
         let date = new Date();
 
         const treatmentCatalogId = _id_treatment_catalog || null;
-
+        console.log("\n-- TREATMENT NAME: ", treatment.name);
+        console.log("\n-- TREATMENT: ", treatment);
         const consult = await Consult.create({
             audio_transcript: decodedAudioTranscript,
             consult_json: consult_json,
@@ -141,7 +143,6 @@ export const storeJsonData = async (req, res) => {
 
         for (const categoryName in consult_json) {
             const categoryData = consult_json[categoryName];
-
             const titles = Object.keys(categoryData);
             for (let i = 0; i < titles.length; i++) {
                 const title = titles[i];
@@ -152,7 +153,6 @@ export const storeJsonData = async (req, res) => {
                 }
                 if (content !== "") {
                     let parameter;
-
                     if (
                         categoryName === "AHF" ||
                         categoryName === "APNP" ||
@@ -203,6 +203,7 @@ export const storeJsonData = async (req, res) => {
                         }
 
                         if (content.trim() !== "") {
+                            console.log("\n-- INERTING CONTENT: ", content);
                             await Note.create({
                                 _id_consult: consult._id_consult,
                                 _id_parameter: parameter._id_parameter_type,
@@ -299,14 +300,6 @@ export const getConsultDetails = async (req, res) => {
                 },
                 {
                     model: Background,
-                    include: [
-                        {
-                            model: ParameterType,
-                        },
-                    ],
-                },
-                {
-                    model: Note,
                     include: [
                         {
                             model: ParameterType,

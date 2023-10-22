@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
 import { Background } from "./backgrounds.js";
 import { ConsultRating } from "./consult_rating.js";
-import { Note } from "../users/notes.js";
+import { Note } from "../patients/notes.js";
 import { TreatmentCatalog } from "../users/treatments_catalogs.js";
 import { MediaFile } from "../patients/media_files.js";
 
