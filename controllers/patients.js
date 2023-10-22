@@ -202,6 +202,35 @@ export const getDoctorPatients = async (req, res) => {
             });
         }
 
+        // Iterate through patients to find their last consult
+        for (const patient of patients) {
+            try {
+                const patientConsults = await Consult.findAll({
+                    where: {
+                        _id_patient: patient._id_patient,
+                    },
+                    order: [["date", "DESC"]],
+                    limit: 1, // Limit to one result (the most recent consult)
+                });
+
+                const lastConsult = patientConsults[0]; // Get the last consult
+                if (lastConsult) {
+                    const motivo =
+                        lastConsult.consult_json?.INF?.Motivo || null;
+                    patient.dataValues.last_consult = motivo; // Assign last_consult to dataValues
+                } else {
+                    patient.dataValues.last_consult = null; // Set to null if no consults found
+                }
+                console.log("\n-- PATIENT: ", patient);
+            } catch (error) {
+                console.error(
+                    `Error fetching consults for patient ${patient._id_patient}:`,
+                    error
+                );
+                patient.last_consult = null; // Set to null in case of error
+            }
+        }
+
         res.status(200).json({ success: true, patients: patients });
     } catch (error) {
         console.error(error);
