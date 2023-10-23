@@ -360,11 +360,6 @@ export const getUserConsults = async (req, res) => {
             },
             include: [
                 {
-                    model: Note,
-                    as: "Notes",
-                    attributes: ["title", "content"],
-                },
-                {
                     model: Patient,
                     as: "Patient",
                     attributes: ["name", "birth_date", "gender"],
