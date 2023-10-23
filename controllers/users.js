@@ -19,6 +19,9 @@ export const createUser = async (req, res) => {
             password,
             specialty,
             role,
+            diploma_organization,
+            office_address,
+            profesional_id,
         } = req.body;
 
         // Hash the password
@@ -34,6 +37,9 @@ export const createUser = async (req, res) => {
             password: hashedPassword,
             specialty,
             role,
+            diploma_organization, // Add this line
+            office_address, // Add this line
+            profesional_id, // Add this line
         });
 
         const accessCode = generateAccessCode();
@@ -41,67 +47,6 @@ export const createUser = async (req, res) => {
         await newUser.save();
 
         await createDefaultParameters(newUser);
-
-        // const sheetsManager = new GoogleSheetsManager();
-
-        // Step 2: Authorize Google Sheets Manager
-        // try {
-        //     await sheetsManager.authorize();
-        // } catch (error) {
-        //     console.error(
-        //         `Error authorizing Google Sheets Manager: ${error.message}`
-        //     );
-        //     return res.status(500).json({
-        //         success: false,
-        //         message: "Failed to authorize Google Sheets Manager",
-        //         error: error.message,
-        //     });
-        // }
-
-        // // Step 3: Create Folder
-        // let folderId;
-        // try {
-        //     const folderName = `Dr. ${name} ${last_name}`;
-        //     folderId = await sheetsManager.createFolder(folderName);
-        // } catch (error) {
-        //     console.error(`Error creating folder: ${error.message}`);
-        //     return res.status(500).json({
-        //         success: false,
-        //         message: "Failed to create folder",
-        //         error: error.message,
-        //     });
-        // }
-
-        // try {
-        //     const permission = await sheetsManager.sharePermission(
-        //         folderId,
-        //         "user",
-        //         "reader",
-        //         email
-        //     );
-
-        //     console.log("\n-- PERMISSION: ", permission);
-        // } catch (error) {
-        //     console.error(`Error granting permission: ${error.message}`);
-        //     return res.status(500).json({
-        //         success: false,
-        //         message: "Failed to grant permission",
-        //         error: error.message,
-        //     });
-        // }
-
-        // // Step 4: Update User Database
-        // try {
-        //     newUser._id_folder = folderId;
-        //     await newUser.save();
-        // } catch (error) {
-        //     console.error(`Error updating user: ${error.message}`);
-        //     return res.status(500).json({
-        //         success: false,
-        //         message: "Failed to update user",
-        //         error: error.message,
-        //     });
-        // }
 
         const token = jwt.sign(
             { id: newUser.id, email: newUser.email },
@@ -120,6 +65,42 @@ export const createUser = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to create user",
+            error: error.message,
+        });
+    }
+};
+
+export const updateUser = async (req, res) => {
+    try {
+        const { phone, email, specialty, office_address } = req.body;
+
+        const { _id_user } = req.query;
+
+        const user = await User.findByPk(_id_user);
+
+        if (!user) {
+            return res
+                .status(404)
+                .json({ success: false, message: "User not found" });
+        }
+
+        if (phone) user.phone = phone;
+        if (email) user.email = email;
+        if (specialty) user.specialty = specialty;
+        if (office_address) user.office_address = office_address;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "User updated successfully",
+            user,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update user",
             error: error.message,
         });
     }

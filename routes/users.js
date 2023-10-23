@@ -8,6 +8,7 @@ import {
     resetPassword,
     deactivateUser,
     verifyToken,
+    updateUser,
     // gtokens,
 } from "../controllers/users.js";
 
@@ -19,6 +20,7 @@ router.get("/access_code", access_code);
 router.get("/token", validateToken, verifyToken);
 router.post("/login", loginUser);
 router.post("/", createUser);
+router.put("/", validateToken, updateUser);
 router.put("/reset_password", validateToken, resetPassword);
 router.delete("/deactivate", validateToken, deactivateUser);
 

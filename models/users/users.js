@@ -39,6 +39,19 @@ export const User = sequelize.define(
             allowNull: false,
             unique: true,
         },
+        diploma_organization: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
+        office_address: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+            defaultValue: null,
+        },
+        profesional_id: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
         profile_picture: {
             type: DataTypes.STRING(255),
         },
