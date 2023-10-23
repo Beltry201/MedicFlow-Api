@@ -1,37 +1,55 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { bucketName, s3 } from "../helpers/s3.js";
+import { bucketName, bucketRegion, s3 } from "../helpers/s3.js";
 import { upload } from "../helpers/multer.js";
 
-export const uploadFile = async (req, res, fileName, fileType) => {
-    try {
+export const uploadFile = async (req, res, fileName, contentType) => {
+    return new Promise((resolve, reject) => {
         upload.single("fileN")(req, res, async (err) => {
             if (err) {
                 console.error(err);
-                return res.status(404).send({ message: "Internal Error" });
+                return reject({ message: "Internal Error" });
             } else {
-                //Get file and check its type.
-                const contentType = req.file.mimetype;
-                console.log("Uploaded file type:", contentType);
+                try {
+                    // Get file and check its type.
+                    const fileType = req.file.mimetype;
 
-                // Prepare file for bucket and send file.
-                const file = req.file.buffer;
-                const params = {
-                    Bucket: bucketName,
-                    Key: `${fileType}/${fileName}`,
-                    Body: file,
-                    ContentType: contentType,
-                };
-                const command = new PutObjectCommand(params);
+                    // Check if the file extension is valid
+                    const allowedExtensions = ["png", "jpg", "jpeg", "pdf"];
+                    const fileExtension = fileType.split("/")[1].toLowerCase();
 
-                await s3.send(command);
+                    if (!allowedExtensions.includes(fileExtension)) {
+                        return reject({ message: "Invalid file extension" });
+                    }
 
-                console.log(`File uploaded for ${fileType}: ${fileName}`);
+                    console.log("File type: ", fileType);
 
-                return;
+                    // Concatenate the extension to the fileName
+                    const fullFileName = `${contentType}/${fileName}.${fileExtension}`;
+                    console.log("\n-- FULL NAME: ", fullFileName);
+
+                    // Prepare file for bucket and send file.
+                    const fileData = req.file.buffer;
+                    const params = {
+                        Bucket: bucketName,
+                        Key: fullFileName,
+                        Body: fileData,
+                        ContentType: contentType,
+                    };
+                    const command = new PutObjectCommand(params);
+
+                    await s3.send(command);
+
+                    console.log(
+                        `File uploaded for ${contentType}: ${fullFileName}`
+                    );
+
+                    const fileUrl = `https://${bucketName}.s3.${bucketRegion}.amazonaws.com/${fullFileName}`;
+                    resolve(fileUrl);
+                } catch (error) {
+                    console.error(error);
+                    reject({ message: error.message });
+                }
             }
         });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send({ error: error.message });
-    }
+    });
 };

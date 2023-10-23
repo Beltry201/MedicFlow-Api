@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const bucketName = process.env.BUCKET_NAME;
-const bucketRegion = process.env.BUCKET_REGION;
+export const bucketRegion = process.env.BUCKET_REGION;
 const accessKey = process.env.ACCESSS_KEY;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 

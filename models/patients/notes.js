@@ -9,17 +9,9 @@ export const Note = sequelize.define(
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
-        title: {
-            type: DataTypes.STRING,
-            allowNull: true,
-        },
         content: {
             type: DataTypes.TEXT,
             allowNull: true,
-        },
-        _id_consult: {
-            type: DataTypes.UUID,
-            allowNull: false,
         },
         _id_patient: {
             type: DataTypes.UUID,

@@ -2,15 +2,11 @@ import { Note } from "../models/patients/notes.js";
 
 export const createNote = async (req, res) => {
     try {
-        const { title, content, _id_consult, _id_media, _id_parameter } =
-            req.body;
+        const { content, _id_patient } = req.body;
 
         const newNote = await Note.create({
-            title,
             content,
-            _id_consult,
-            _id_media,
-            _id_parameter,
+            _id_patient,
         });
 
         res.status(201).json({
@@ -90,15 +86,10 @@ export const updateNote = async (req, res) => {
                 .json({ success: false, message: "Note not found" });
         }
 
-        const { title, content, _id_consult, _id_media, _id_parameter } =
-            req.body;
+        const { content } = req.body;
 
         await note.update({
-            title,
             content,
-            _id_consult,
-            _id_media,
-            _id_parameter,
         });
 
         res.status(200).json({ success: true, note });

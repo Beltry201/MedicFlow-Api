@@ -386,20 +386,30 @@ export const uploadPatientFile = async (req, res) => {
     try {
         const { _id_patient } = req.query;
 
-        const fileName = `${_id_patient}`;
-        await uploadFile(req, res, fileName, "patients");
-        if (uploadFile) {
-            const fileUrl = ("patients", fileName);
-            // Create a new MediaFile entry
-            await MediaFile.create({
-                _id_patient,
-                type: "image",
+        const file = await MediaFile.create({
+            _id_patient,
+            type: "image",
+            url: "",
+        });
+
+        const fileUrl = await uploadFile(
+            req,
+            res,
+            file._id_media_file,
+            "patients"
+        );
+
+        if (fileUrl) {
+            await file.update({
                 url: fileUrl,
             });
-
             return res
                 .status(200)
-                .send({ message: "File Uploaded Successfully" });
+                .send({ message: "File Uploaded Successfully", url: fileUrl });
+        } else {
+            return res.status(400).send({
+                message: "Unable to upload file",
+            });
         }
     } catch (error) {
         console.error(error);

@@ -4,7 +4,7 @@ import { sequelize } from "../../config/db.js";
 export const MediaFile = sequelize.define(
     "MediaFile",
     {
-        id: {
+        _id_media_file: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
