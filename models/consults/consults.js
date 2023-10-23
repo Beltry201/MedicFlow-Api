@@ -71,11 +71,11 @@ Background.belongsTo(Consult, {
 });
 Consult.hasMany(Background, { foreignKey: "_id_consult" });
 
-// ------------- TREATMENT -------------
-Note.belongsTo(Consult, {
-    foreignKey: "_id_consult",
-});
-Consult.hasMany(Note, { foreignKey: "_id_consult" });
+// // ------------- TREATMENT -------------
+// Note.belongsTo(Consult, {
+//     foreignKey: "_id_consult",
+// });
+// Consult.hasMany(Note, { foreignKey: "_id_consult" });
 
 // ------------- CONSULT RATING -------------
 ConsultRating.belongsTo(Consult, {

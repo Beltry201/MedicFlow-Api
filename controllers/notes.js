@@ -23,42 +23,14 @@ export const createNote = async (req, res) => {
     }
 };
 
-export const getNote = async (req, res) => {
+export const getNotesForPatient = async (req, res) => {
     try {
-        const note = await Note.findByPk(req.params.id, {
-            include: [
-                { model: ParameterType, attributes: ["parameter_type_name"] },
-            ],
-        });
-
-        if (!note) {
-            return res
-                .status(404)
-                .json({ success: false, message: "Note not found" });
-        }
-
-        res.status(200).json({ success: true, note });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to retrieve note",
-            error: error.message,
-        });
-    }
-};
-
-export const listNotesForPatient = async (req, res) => {
-    try {
-        const _id_patient = req.query._id_patient;
+        const { _id_patient } = req.query;
 
         const notes = await Note.findAll({
             where: {
-                _id_patient: _id_patient,
+                _id_patient,
             },
-            include: [
-                { model: ParameterType, attributes: ["parameter_type_name"] },
-            ],
         });
 
         res.status(200).json({
@@ -77,22 +49,29 @@ export const listNotesForPatient = async (req, res) => {
 
 export const updateNote = async (req, res) => {
     try {
-        const noteId = req.params.id;
-        const note = await Note.findByPk(noteId);
-
-        if (!note) {
-            return res
-                .status(404)
-                .json({ success: false, message: "Note not found" });
-        }
-
+        const { _id_note } = req.query;
         const { content } = req.body;
 
-        await note.update({
-            content,
-        });
+        const [updatedRows] = await Note.update(
+            { content },
+            {
+                where: {
+                    _id_note,
+                },
+            }
+        );
 
-        res.status(200).json({ success: true, note });
+        if (updatedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Note not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Note updated successfully",
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -105,23 +84,24 @@ export const updateNote = async (req, res) => {
 
 export const deleteNote = async (req, res) => {
     try {
-        const noteId = req.params.id;
-        const note = await Note.findByPk(noteId);
+        const { _id_note } = req.query;
 
-        if (!note) {
-            return res
-                .status(404)
-                .json({ success: false, message: "Note not found" });
-        }
-
-        // Instead of physically deleting, we're marking as invalid
-        await note.update({
-            is_valid: false,
+        const deletedRows = await Note.destroy({
+            where: {
+                _id_note,
+            },
         });
+
+        if (deletedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Note not found",
+            });
+        }
 
         res.status(200).json({
             success: true,
-            message: "Note marked as invalid",
+            message: "Note deleted successfully",
         });
     } catch (error) {
         console.error(error);

@@ -365,9 +365,9 @@ export const getUserConsults = async (req, res) => {
                     attributes: ["name", "birth_date", "gender"],
                 },
                 {
-                    model: TreatmentCatalog, // Add this include for TreatmentCatalog
-                    attributes: ["name"], // Include only the 'name' attribute from TreatmentCatalog
-                    as: "TreatmentCatalog", // Set an alias for the included TreatmentCatalog
+                    model: TreatmentCatalog,
+                    attributes: ["name"],
+                    as: "TreatmentCatalog",
                 },
             ],
         });

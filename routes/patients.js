@@ -13,7 +13,7 @@ import {
 } from "../controllers/patients.js";
 import {
     createNote,
-    getNote,
+    getNotesForPatient,
     updateNote,
     deleteNote,
 } from "../controllers/notes.js";
@@ -29,5 +29,10 @@ router.delete("/", validateToken, deletePatient);
 router.get("/backgrounds_list", validateToken, getPatientBackgrounds);
 router.get("/inf", validateToken, getPatientINF);
 router.post("/media", validateToken, uploadPatientFile);
+
+router.get("/note", validateToken, getNotesForPatient);
 router.post("/note", validateToken, createNote);
+router.put("/note", validateToken, updateNote);
+router.delete("/note", validateToken, deleteNote);
+
 export default router;
