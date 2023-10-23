@@ -10,6 +10,7 @@ import {
     getPatientBackgrounds,
     getPatientINF,
     uploadPatientFile,
+    getPatientFiles,
 } from "../controllers/patients.js";
 import {
     createNote,
@@ -29,6 +30,7 @@ router.delete("/", validateToken, deletePatient);
 router.get("/backgrounds_list", validateToken, getPatientBackgrounds);
 router.get("/inf", validateToken, getPatientINF);
 router.post("/media", validateToken, uploadPatientFile);
+router.get("/media/list", validateToken, getPatientFiles);
 
 router.get("/note", validateToken, getNotesForPatient);
 router.post("/note", validateToken, createNote);

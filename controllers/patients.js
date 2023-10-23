@@ -1,3 +1,4 @@
+import { sequelize } from "../config/db.js";
 import { Patient } from "../models/patients/patients.js";
 import { Consult } from "../models/consults/consults.js";
 import { similarityScore } from "../helpers/string_similarity.js";
@@ -414,5 +415,41 @@ export const uploadPatientFile = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).send({ error: error.message });
+    }
+};
+
+export const getPatientFiles = async (req, res) => {
+    try {
+        const { _id_patient } = req.query;
+
+        const mediaFiles = await MediaFile.findAll({
+            where: {
+                _id_patient,
+                type: "image",
+            },
+            attributes: ["url", "createdAt"],
+            order: [["createdAt", "DESC"]],
+        });
+
+        const validMediaFiles = mediaFiles.filter((file) => file.url);
+
+        if (validMediaFiles.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No valid media files found for the patient",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            mediaFiles: validMediaFiles,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to retrieve media files",
+            error: error.message,
+        });
     }
 };
