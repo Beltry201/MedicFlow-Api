@@ -12,7 +12,7 @@ export const uploadFile = async (req, res, fileName, contentType) => {
                 try {
                     // Get file and check its type.
                     const fileType = req.file.mimetype;
-
+                    
                     // Check if the file extension is valid
                     const allowedExtensions = [
                         "png",

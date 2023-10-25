@@ -202,15 +202,16 @@ export const storeJsonData = async (req, res) => {
                             });
                         }
 
-                        if (content.trim() !== "") {
-                            console.log("\n-- INERTING CONTENT: ", content);
-                            await Note.create({
-                                _id_consult: consult._id_consult,
-                                _id_parameter: parameter._id_parameter_type,
-                                title,
-                                content,
-                            });
-                        }
+                        // if (content.trim() !== "") {
+                        //     console.log("\n-- INERTING CONTENT: ", content);
+                        //     await Note.create({
+                        //         _id_consult: consult._id_consult,
+
+                        //         _id_parameter: parameter._id_parameter_type,
+                        //         title,
+                        //         content,
+                        //     });
+                        // }
                     }
                 }
             }
@@ -236,7 +237,7 @@ export const storeJsonData = async (req, res) => {
             include: [
                 { model: Patient },
                 { model: Background },
-                { model: Note },
+                // { model: Note },
             ],
         });
 
