@@ -15,7 +15,7 @@ export const getPatientFiles = async (req, res) => {
             where: {
                 _id_patient,
             },
-            attributes: ["url"],
+            attributes: ["_id_media_file", "url", "createdAt", "updatedAt"],
             order: [["createdAt", "DESC"]],
         });
 
