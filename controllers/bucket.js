@@ -15,6 +15,7 @@ export const getPatientFiles = async (req, res) => {
             where: {
                 _id_patient,
             },
+            attributes: ["url"],
             order: [["createdAt", "DESC"]],
         });
 
@@ -28,19 +29,20 @@ export const getPatientFiles = async (req, res) => {
         }
 
         // Get file information for each valid media file
-        const mediaFilesWithInfo = await Promise.all(
-            validMediaFiles.map(async (file) => {
-                const fileInfo = await getFileInfo(
-                    file._id_media_file,
-                    "patients"
-                );
-                return { ...file, fileInfo };
-            })
-        );
+        // const mediaFilesWithInfo = await Promise.all(
+        //     validMediaFiles.map(async (file) => {
+        //         const fileInfo = await getFileInfo(
+        //             file._id_media_file,
+        //             "patients"
+        //         );
+        //         return { ...file, fileInfo };
+        //     })
+        // );
 
         res.status(200).json({
             success: true,
-            mediaFiles: mediaFilesWithInfo,
+            mediaFiles,
+            // mediaFiles: mediaFilesWithInfo,
         });
     } catch (error) {
         console.error(error);
