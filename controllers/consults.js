@@ -363,7 +363,7 @@ export const getUserConsults = async (req, res) => {
                 {
                     model: Patient,
                     as: "Patient",
-                    attributes: ["name", "birth_date", "gender"],
+                    attributes: ["name", "last_name", "birth_date", "gender"],
                 },
                 {
                     model: TreatmentCatalog,
@@ -426,7 +426,7 @@ export const getPatientConsults = async (req, res) => {
                 {
                     model: Patient,
                     as: "Patient",
-                    attributes: ["name", "birth_date", "gender"],
+                    attributes: ["name", "last_name", "birth_date", "gender"],
                 },
                 {
                     model: TreatmentCatalog,
@@ -455,6 +455,7 @@ export const getPatientConsults = async (req, res) => {
                     },
                     patient: {
                         name: consult.Patient.name,
+                        last_name: consult.Patient.last_name,
                         birth_date: consult.Patient.birth_date,
                         gender: consult.Patient.gender,
                     },
