@@ -1,4 +1,4 @@
-import { TreatmentCatalog } from "../models/users/treatments_catalogs.js";
+import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
 
 export const createTreatmentCatalog = async (req, res) => {
     try {

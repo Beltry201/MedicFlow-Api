@@ -6,7 +6,7 @@ import {
     getUserConsults,
     getPatientConsults,
     uploadPatientFile,
-} from "../controllers/consults.js";
+} from "../controllers/consult/consults.js";
 import { validateToken } from "../helpers/jwt.js";
 
 const router = Router();

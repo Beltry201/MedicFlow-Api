@@ -17,13 +17,17 @@ export const MembershipPlan = sequelize.define(
             type: DataTypes.ENUM("monthly", "yearly"),
             allowNull: false,
         },
-        tokens_limit: {
+        consults_limit: {
             type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        min_per_consult: {
+            type: DataTypes.FLOAT,
             allowNull: false,
         },
     },
     {
         tableName: "membership_plans",
-        timestamps: false, // Assuming membership plans don't need timestamps
+        timestamps: true,
     }
 );

@@ -7,7 +7,7 @@ import {
     getTreatmentCatalogDetails,
     listTreatmentCatalogs,
     getDoctorTreatmentCatalogs,
-} from "../controllers/treatments_catalogs.js";
+} from "../controllers/user/treatments_catalogs.js";
 
 const router = Router();
 

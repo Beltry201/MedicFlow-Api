@@ -23,7 +23,7 @@ export const PaymentRecord = sequelize.define(
         },
     },
     {
-        tableName: "payment_histories",
+        tableName: "payment_records",
         timestamps: true,
     }
 );

@@ -11,13 +11,13 @@ import {
     getPatientINF,
     uploadPatientFile,
     uploadBase64File,
-} from "../controllers/patients.js";
+} from "../controllers/patient/patients.js";
 import {
     createNote,
     getNotesForPatient,
     updateNote,
     deleteNote,
-} from "../controllers/notes.js";
+} from "../controllers/patient/notes.js";
 import { getPatientFiles } from "../controllers/bucket.js";
 const router = Router();
 

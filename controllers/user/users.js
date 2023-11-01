@@ -1,10 +1,10 @@
-import { User } from "../models/users/users.js";
-import { generateAccessCode } from "../helpers/access_code_generator.js";
-import { createDefaultParameters } from "../helpers/default_parameters.js";
+import { User } from "../../models/users/users.js";
+import { generateAccessCode } from "../../helpers/access_code_generator.js";
+import { createDefaultParameters } from "../../helpers/default_parameters.js";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt, { decode } from "jsonwebtoken";
-import GoogleSheetsManager from "../helpers/sheets.js";
+import GoogleSheetsManager from "../../helpers/sheets.js";
 
 dotenv.config();
 

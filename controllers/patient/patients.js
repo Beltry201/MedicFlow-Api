@@ -1,9 +1,9 @@
-import { sequelize } from "../config/db.js";
-import { Patient } from "../models/patients/patients.js";
-import { Consult } from "../models/consults/consults.js";
-import { similarityScore } from "../helpers/string_similarity.js";
-import { MediaFile } from "../models/patients/media_files.js";
-import { uploadFile, getFileInfo } from "./bucket.js";
+import { sequelize } from "../../config/db.js";
+import { Patient } from "../../models/patients/patients.js";
+import { Consult } from "../../models/consults/consults.js";
+import { similarityScore } from "../../helpers/string_similarity.js";
+import { MediaFile } from "../../models/patients/media_files.js";
+import { uploadFile, getFileInfo } from "../bucket.js";
 
 // Create a new patient
 export const createPatient = async (req, res) => {

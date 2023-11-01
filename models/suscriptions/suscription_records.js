@@ -17,13 +17,27 @@ export const SubscriptionRecord = sequelize.define(
             type: DataTypes.DATE,
             allowNull: false,
         },
+        state: {
+            type: Sequelize.ENUM(
+                "Active",
+                "Pending",
+                "Trial",
+                "Cancelled",
+                "Suspended",
+                "Expired",
+                "Grace Period",
+                "Pending Cancellation",
+                "Free Tier"
+            ),
+            allowNull: false,
+        },
         is_active: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
         },
     },
     {
-        tableName: "subscription_histories",
+        tableName: "subscription_records",
         timestamps: true,
     }
 );

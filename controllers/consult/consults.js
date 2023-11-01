@@ -1,16 +1,16 @@
-import { Consult } from "../models/consults/consults.js";
-import { Background } from "../models/consults/backgrounds.js";
-import { Note } from "../models/patients/notes.js";
-import { generateText } from "../helpers/openai_generate.js";
-import { ParameterType } from "../models/consults/parameter_types.js";
-import { Patient } from "../models/patients/patients.js";
+import { Consult } from "../../models/consults/consults.js";
+import { Background } from "../../models/consults/backgrounds.js";
+import { Note } from "../../models/patients/notes.js";
+import { generateText } from "../../helpers/openai_generate.js";
+import { ParameterType } from "../../models/consults/parameter_types.js";
+import { Patient } from "../../models/patients/patients.js";
 import { Buffer } from "buffer";
-import { User } from "../models/users/users.js";
-import { ConsultRating } from "../models/consults/consult_rating.js";
-import { TreatmentCatalog } from "../models/users/treatments_catalogs.js";
-import { uploadFile } from "./bucket.js";
+import { User } from "../../models/users/users.js";
+import { ConsultRating } from "../../models/consults/consult_rating.js";
+import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
+import { uploadFile } from "../bucket.js";
 
-import GoogleSheetsManager from "../helpers/sheets.js";
+import GoogleSheetsManager from "../../helpers/sheets.js";
 import { title } from "process";
 
 export const generateJsonResponse = async (req, res) => {

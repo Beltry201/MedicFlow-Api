@@ -1,4 +1,4 @@
-import { CalendarEvent } from "../models/users/calendar_events.js";
+import { CalendarEvent } from "../../models/users/calendar_events.js";
 import { Op } from "sequelize";
 
 export const createCalendarEvent = async (req, res) => {
