@@ -27,7 +27,6 @@ export const createUser = async (req, res) => {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Step 1: Create User
         const newUser = await User.create({
             name,
             last_name,
@@ -37,19 +36,18 @@ export const createUser = async (req, res) => {
             password: hashedPassword,
             specialty,
             role,
-            diploma_organization, // Add this line
-            office_address, // Add this line
-            profesional_id, // Add this line
+            diploma_organization,
+            office_address,
+            profesional_id,
         });
 
         const accessCode = generateAccessCode();
         newUser.access_code = accessCode;
         await newUser.save();
-
         await createDefaultParameters(newUser);
 
         const token = jwt.sign(
-            { id: newUser.id, email: newUser.email },
+            { id: newUser._id_user, email: newUser.email },
             process.env.TOKEN_SECRET,
             { expiresIn: "1w" }
         );
@@ -57,7 +55,18 @@ export const createUser = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "User created successfully",
-            user: newUser,
+            user: {
+                name: newUser.name,
+                last_name: newUser.last_name,
+                phone: newUser.phone,
+                email: newUser.email,
+                profile_picture: newUser.profile_picture,
+                specialty: newUser.specialty,
+                role: newUser.role,
+                diploma_organization: newUser.diploma_organization,
+                office_address: newUser.office_address,
+                profesional_id: newUser.profesional_id,
+            },
             token: token,
         });
     } catch (error) {

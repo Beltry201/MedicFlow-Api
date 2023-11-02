@@ -56,7 +56,6 @@ export const listPatients = async (req, res) => {
     }
 };
 
-// Get the details of a specific patient by ID
 export const getPatientDetails = async (req, res) => {
     try {
         const patientId = req.query._id_patient;
@@ -81,7 +80,13 @@ export const getPatientDetails = async (req, res) => {
                 _id_patient: patientId,
             },
         });
-        res.status(200).json({ success: true, patient, consultCount });
+
+        const patientDetails = {
+            ...patient.toJSON(),
+            consultCount,
+        };
+
+        res.status(200).json({ success: true, patient: patientDetails });
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -208,10 +213,18 @@ export const getDoctorPatients = async (req, res) => {
             });
         }
 
-        // Iterate through patients to find their last consult
+        // Iterate through patients to find their last consult and count consults
         for (const patient of patients) {
             try {
                 const patientConsults = await Consult.findAll({
+                    where: {
+                        _id_patient: patient._id_patient,
+                    },
+                });
+
+                const consultCount = patientConsults.length; // Count consults
+
+                const patientConsultsOrdered = await Consult.findAll({
                     where: {
                         _id_patient: patient._id_patient,
                     },
@@ -219,7 +232,7 @@ export const getDoctorPatients = async (req, res) => {
                     limit: 1, // Limit to one result (the most recent consult)
                 });
 
-                const lastConsult = patientConsults[0]; // Get the last consult
+                const lastConsult = patientConsultsOrdered[0]; // Get the last consult
                 if (lastConsult) {
                     const motivo =
                         lastConsult.consult_json?.INF?.Motivo || null;
@@ -227,7 +240,9 @@ export const getDoctorPatients = async (req, res) => {
                 } else {
                     patient.dataValues.last_consult = null; // Set to null if no consults found
                 }
-                console.log("\n-- PATIENT: ", patient);
+
+                // Add consultCount to patient object
+                patient.dataValues.consultCount = consultCount;
             } catch (error) {
                 console.error(
                     `Error fetching consults for patient ${patient._id_patient}:`,
