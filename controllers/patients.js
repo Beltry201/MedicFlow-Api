@@ -76,7 +76,12 @@ export const getPatientDetails = async (req, res) => {
                 .json({ success: false, message: "Invalid patient" });
         }
 
-        res.status(200).json({ success: true, patient });
+        const consultCount = await Consult.count({
+            where: {
+                _id_patient: patientId,
+            },
+        });
+        res.status(200).json({ success: true, patient, consultCount });
     } catch (error) {
         console.error(error);
         res.status(500).json({
