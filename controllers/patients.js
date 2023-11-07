@@ -417,7 +417,7 @@ export const uploadPatientFile = async (req, res) => {
             req,
             res,
             file._id_media_file,
-            "patients"
+            `patients/${_id_patient}`
         );
 
         if (fileUrl) {
@@ -458,9 +458,6 @@ export const uploadBase64File = async (req, res) => {
             type: "image",
             url: "",
         });
-
-        // Convert base64 data to buffer
-        // const fileBuffer = Buffer.from(base64String, "base64");
 
         // Upload file to S3
         const fullFileName = `${_id_patient}_${file._id_media_file}.${fileExtension}`;

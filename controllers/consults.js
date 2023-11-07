@@ -1,17 +1,17 @@
 import { Consult } from "../models/consults/consults.js";
 import { Background } from "../models/consults/backgrounds.js";
-import { Note } from "../models/patients/notes.js";
 import { generateText } from "../helpers/openai_generate.js";
 import { ParameterType } from "../models/consults/parameter_types.js";
 import { Patient } from "../models/patients/patients.js";
 import { Buffer } from "buffer";
 import { User } from "../models/users/users.js";
+import { MediaFile } from "../models/patients/media_files.js";
 import { ConsultRating } from "../models/consults/consult_rating.js";
 import { TreatmentCatalog } from "../models/users/treatments_catalogs.js";
 import { uploadFile } from "./bucket.js";
+import multer from "multer";
 
 import GoogleSheetsManager from "../helpers/sheets.js";
-import { title } from "process";
 
 export const generateJsonResponse = async (req, res) => {
     const { audio_transcript, _id_doctor } = req.query;
@@ -79,30 +79,29 @@ export const generateJsonResponse = async (req, res) => {
 };
 
 export const storeJsonData = async (req, res) => {
-    const manager = new GoogleSheetsManager();
-    await manager.authorize();
     try {
         const {
+            audio_transcript,
             _id_doctor,
             _id_patient,
-            _id_treatment_catalog,
             rating,
             treatment,
             attributes,
             consult_json,
-            audio_transcript,
+            _id_treatment_catalog,
         } = req.body;
 
+        // Check if audio_transcript is defined
         const decodedAudioTranscript = Buffer.from(
             audio_transcript,
             "base64"
         ).toString("utf-8");
 
+        console.log("\n-- AUDIO TRANSCRIPT: ", decodedAudioTranscript);
         let date = new Date();
 
+        // Create Consult
         const treatmentCatalogId = _id_treatment_catalog || null;
-        console.log("\n-- TREATMENT NAME: ", treatment.name);
-        console.log("\n-- TREATMENT: ", treatment);
         const consult = await Consult.create({
             audio_transcript: decodedAudioTranscript,
             consult_json: consult_json,
@@ -115,32 +114,7 @@ export const storeJsonData = async (req, res) => {
             _id_treatment_catalog: treatmentCatalogId,
         });
 
-        // USER
-        const consultDoctor = await User.findOne({
-            where: { _id_user: consult._id_doctor },
-        });
-        const folderId = consultDoctor._id_folder;
-        const email = consultDoctor.email;
-
-        // PATIENT
-        const consultPatient = await Patient.findOne({
-            where: { _id_patient: consult._id_patient },
-        });
-        const consultFileName = consultPatient.name + "_" + date;
-        const patient = {
-            name: consultPatient.name,
-            birth_date: consultPatient.birth_date,
-            sex: consultPatient.gender,
-            civil_state: consult_json.INF.civil_state,
-            occupation: consult_json.INF.Ocupación,
-            scholarship: consult_json.INF.Escolaridad,
-            religion: consult_json.INF.Religión,
-            origin: consult_json.INF["Lugar de Origen"],
-        };
-
-        const { AHF, APNP, APP } = consult_json;
-        const backgrounds_list = { AHF, APNP, APP };
-
+        // Store Background
         for (const categoryName in consult_json) {
             const categoryData = consult_json[categoryName];
             const titles = Object.keys(categoryData);
@@ -201,37 +175,24 @@ export const storeJsonData = async (req, res) => {
                                 parameter_type_name: title,
                             });
                         }
-
-                        // if (content.trim() !== "") {
-                        //     console.log("\n-- INERTING CONTENT: ", content);
-                        //     await Note.create({
-                        //         _id_consult: consult._id_consult,
-
-                        //         _id_parameter: parameter._id_parameter_type,
-                        //         title,
-                        //         content,
-                        //     });
-                        // }
                     }
                 }
             }
         }
 
-        // SPREADSHEET
-        // const spreadsheet = await manager.createSpreadsheet(
-        //     consultFileName,
-        //     folderId,
-        //     email
-        // );
-
-        // await manager.create_inf_sheet(spreadsheet, patient);
-
-        // await manager.create_category_sheets(spreadsheet, backgrounds_list);
-
-        // await manager.create_soap_sheet(spreadsheet, consult_json.SOAP);
-
-        // await manager.create_complete_consult_sheet(spreadsheet, consult_json);
-
+        // Create Rating
+        if (rating !== undefined && attributes !== undefined) {
+            await ConsultRating.create({
+                rating,
+                attributes,
+                _id_doctor,
+                _id_consult: consult._id_consult,
+            });
+        } else {
+            console.log(
+                "Rating or attributes missing. Skipping consult rating creation."
+            );
+        }
         const newConsult = await Consult.findOne({
             where: { _id_consult: consult._id_consult },
             include: [
@@ -241,26 +202,12 @@ export const storeJsonData = async (req, res) => {
             ],
         });
 
-        // RATING
-        if (rating !== undefined && attributes !== undefined) {
-            await ConsultRating.create({
-                rating,
-                attributes,
-                _id_doctor,
-                _id_consult: newConsult._id_consult,
-            });
-        } else {
-            console.log(
-                "Rating or attributes missing. Skipping consult rating creation."
-            );
-        }
-
         const formattedConsult = {
-            id_consult: newConsult._id_consult,
-            date: newConsult.date,
+            id_consult: consult._id_consult,
+            date: consult.date,
             treatment: {
-                name: newConsult.treatment_name,
-                price: newConsult.treatment_price,
+                name: consult.treatment_name,
+                price: consult.treatment_price,
             },
             patient: {
                 _id_patient,
@@ -473,24 +420,35 @@ export const getPatientConsults = async (req, res) => {
     }
 };
 
-export const uploadPatientFile = async (req, res) => {
+export const uploadConsultFile = async (req, res) => {
     try {
-        const { _id_patient, _id_conuslt } = req.query;
+        const { _id_patient, _id_consult } = req.query;
 
-        const fileName = `${_id_patient}`;
-        await uploadFile(req, res, fileName, "consults");
-        if (uploadFile) {
-            const fileUrl = ("consults", fileName);
-            // Create a new MediaFile entry
-            await MediaFile.create({
-                _id_patient,
-                type: "image",
+        const file = await MediaFile.create({
+            _id_patient,
+            _id_consult,
+            type: "image",
+            url: "",
+        });
+
+        const fileUrl = await uploadFile(
+            req,
+            res,
+            file._id_media_file,
+            `consults/${_id_patient}/${_id_consult}`
+        );
+
+        if (fileUrl) {
+            await file.update({
                 url: fileUrl,
             });
-
             return res
                 .status(200)
-                .send({ message: "File Uploaded Successfully" });
+                .send({ message: "File Uploaded Successfully", url: fileUrl });
+        } else {
+            return res.status(400).send({
+                message: "Unable to upload file",
+            });
         }
     } catch (error) {
         console.error(error);

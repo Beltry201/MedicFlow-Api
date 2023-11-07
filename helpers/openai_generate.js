@@ -8,6 +8,7 @@ const openai = new OpenAIApi({
         encoding: "utf-8",
     }).trim(),
 });
+
 // Function to generate the JSON response structure
 const requestJson = (jsonStructure) => `
 
