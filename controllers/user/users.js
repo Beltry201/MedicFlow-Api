@@ -1,9 +1,11 @@
-import { User } from "../models/users/users.js";
-import { generateAccessCode } from "../helpers/access_code_generator.js";
-import { createDefaultParameters } from "../helpers/default_parameters.js";
+import { User } from "../../models/users/users.js";
+import { generateAccessCode } from "../../helpers/access_code_generator.js";
+import { createDefaultParameters } from "../../helpers/default_parameters.js";
+// import { Subscription } from "../../models/subscriptions/subscriptions.js";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt, { decode } from "jsonwebtoken";
+import Joi from "joi";
 
 dotenv.config();
 
@@ -23,9 +25,79 @@ export const createUser = async (req, res) => {
             profesional_id,
         } = req.body;
 
-        // Hash the password
+        // Validations
+        const schema = Joi.object({
+            name: Joi.string().required(),
+            last_name: Joi.string().required(),
+            phone: Joi.string().required(),
+            email: Joi.string().email().required(),
+            office_address: Joi.string().required(),
+            profile_picture: Joi.string().required(),
+            password: Joi.string().required(),
+            specialty: Joi.string().required(),
+            role: Joi.string().required(),
+            diploma_organization: Joi.string().required(),
+            profesional_id: Joi.string().required(),
+        });
+
+        const { error } = schema.validate(req.body);
+
+        const existingPhoneUser = await User.findOne({ where: { phone } });
+
+        if (existingPhoneUser) {
+            return res.status(400).json({
+                success: false,
+                message: "Validation error",
+                error: "Phone number already exists.",
+            });
+        }
+
+        const existingEmailUser = await User.findOne({ where: { email } });
+
+        if (existingEmailUser) {
+            return res.status(400).json({
+                success: false,
+                message: "Validation error",
+                error: "Email already exists.",
+            });
+        }
+
+        const existingOfficeAddressUser = await User.findOne({
+            where: { office_address },
+        });
+
+        if (existingOfficeAddressUser) {
+            return res.status(400).json({
+                success: false,
+                message: "Validation error",
+                error: "Office address already exists.",
+            });
+        }
+
+        const existingProfesionalIdUser = await User.findOne({
+            where: { profesional_id },
+        });
+
+        if (existingProfesionalIdUser) {
+            return res.status(400).json({
+                success: false,
+                message: "Validation error",
+                error: "Profesional ID already exists.",
+            });
+        }
+
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                message: "Validation error",
+                error: error.details[0].message,
+            });
+        }
+
+        // Password Handling
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Creat User
         const newUser = await User.create({
             name,
             last_name,
@@ -40,13 +112,32 @@ export const createUser = async (req, res) => {
             profesional_id,
         });
 
+        // Free Tier Subsbription
+        const oneYearLater = new Date();
+        oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+        // const newSubscriptionRecord = await Subscription.create({
+        //     _id_user: newUser._id_user,
+        //     subscription_start_date: new Date(),
+        //     subscription_end_date: oneYearLater,
+        //     state: "Free Tier",
+        //     is_active: true,
+        // });
+
+        // MVP Access Code
         const accessCode = generateAccessCode();
         newUser.access_code = accessCode;
         await newUser.save();
+
+        //TODO: Quitar esta función, sustituir por default value (?)
         await createDefaultParameters(newUser);
 
+        // Sign Token
         const token = jwt.sign(
-            { id: newUser._id_user, email: newUser.email },
+            {
+                _id_user: newUser._id_user,
+                email: newUser.email,
+                phone: newUser.phone,
+            },
             process.env.TOKEN_SECRET,
             { expiresIn: "1w" }
         );
@@ -54,18 +145,7 @@ export const createUser = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "User created successfully",
-            user: {
-                name: newUser.name,
-                last_name: newUser.last_name,
-                phone: newUser.phone,
-                email: newUser.email,
-                profile_picture: newUser.profile_picture,
-                specialty: newUser.specialty,
-                role: newUser.role,
-                diploma_organization: newUser.diploma_organization,
-                office_address: newUser.office_address,
-                profesional_id: newUser.profesional_id,
-            },
+            user: newUser,
             token: token,
         });
     } catch (error) {
@@ -82,7 +162,7 @@ export const updateUser = async (req, res) => {
     try {
         const { phone, email, specialty, office_address } = req.body;
 
-        const { _id_user } = req.query;
+        const { _id_user } = req.user;
 
         const user = await User.findByPk(_id_user);
 
@@ -234,8 +314,8 @@ export const resetPassword = async (req, res) => {
 
 export const getUser = async (req, res) => {
     try {
-        const userId = req.query._id_user;
-
+        const userId = req.user._id_user;
+        console.log("\n-- ID USER: ", req.user);
         // Find the user by ID
         const user = await User.findByPk(userId);
 

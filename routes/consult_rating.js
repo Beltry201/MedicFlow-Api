@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createConsultRating } from "../controllers/consult_rating.js";
+import { createConsultRating } from "../controllers/consult/consult_rating.js";
 import { validateToken } from "../helpers/jwt.js";
 
 const router = Router();

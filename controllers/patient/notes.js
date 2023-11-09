@@ -1,4 +1,4 @@
-import { Note } from "../models/patients/notes.js";
+import { Note } from "../../models/patients/notes.js";
 
 export const createNote = async (req, res) => {
     try {

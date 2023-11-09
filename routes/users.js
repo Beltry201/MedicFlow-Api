@@ -10,7 +10,7 @@ import {
     verifyToken,
     updateUser,
     // gtokens,
-} from "../controllers/users.js";
+} from "../controllers/user/users.js";
 
 const router = Router();
 

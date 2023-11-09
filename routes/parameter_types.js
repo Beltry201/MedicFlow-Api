@@ -5,7 +5,7 @@ import {
     getAllParameterTypesForDoctor,
     updateParameterType,
     deleteParameterType,
-} from "../controllers/parameter_types.js"; // Make sure to import the correct controller functions
+} from "../controllers/consult/parameter_types.js";
 
 const router = Router();
 

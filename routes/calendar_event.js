@@ -6,7 +6,7 @@ import {
     updateCalendarEvent,
     deleteCalendarEvent,
     getClosestEventByDate,
-} from "../controllers/calendar_events.js";
+} from "../controllers/user/calendar_events.js";
 
 const router = Router();
 

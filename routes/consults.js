@@ -5,9 +5,8 @@ import {
     getConsultDetails,
     getUserConsults,
     getPatientConsults,
-    uploadConsultFile,
-} from "../controllers/consults.js";
-
+    uploadPatientFile,
+} from "../controllers/consult/consults.js";
 import { validateToken } from "../helpers/jwt.js";
 
 const router = Router();
