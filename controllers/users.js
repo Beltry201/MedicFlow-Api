@@ -4,7 +4,6 @@ import { createDefaultParameters } from "../helpers/default_parameters.js";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt, { decode } from "jsonwebtoken";
-import GoogleSheetsManager from "../helpers/sheets.js";
 
 dotenv.config();
 
