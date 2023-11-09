@@ -1,3 +1,9 @@
+import { Consult } from "../models/consults/consults.js";
+import { MembershipPlan } from "../models/subscriptions/membership_plans.js";
+import { PaymentRecord } from "../models/subscriptions/payment_records.js";
+import { Subscription } from "../models/subscriptions/subscriptions.js";
+import { Op } from "sequelize";
+
 export async function canGenerateMoreConsults(user) {
     const currentDate = new Date();
     const firstDayOfMonth = new Date(
@@ -12,13 +18,13 @@ export async function canGenerateMoreConsults(user) {
     );
 
     // Step 1: Get the user's latest subscription record
-    const latestSubscription = await SubscriptionRecord.findOne({
+    const latestSubscription = await Subscription.findOne({
         where: { _id_user: user._id_user },
-        order: [["createdAt", "DESC"]], // Assuming createdAt indicates the order of subscriptions
+        order: [["createdAt", "DESC"]],
     });
 
     if (latestSubscription) {
-        console.log("Latest Subscription:", latestSubscription.state);
+        console.log("\n-- SUBSCRIPTION FOUND: ", latestSubscription.state);
 
         if (latestSubscription.state === "Active") {
             // Step 2: Get the latest payment record
@@ -47,7 +53,7 @@ export async function canGenerateMoreConsults(user) {
                     // Step 4: Count how many consults the user has made in the current month
                     const consultCount = await Consult.count({
                         where: {
-                            _id_user: user._id_user,
+                            _id_doctor: user._id_user,
                             createdAt: {
                                 [Op.between]: [firstDayOfMonth, lastDayOfMonth],
                             },
@@ -74,7 +80,7 @@ export async function canGenerateMoreConsults(user) {
                 // Step 6: Count how many consults the user has made in the current month
                 const consultCount = await Consult.count({
                     where: {
-                        _id_user: user._id_user,
+                        _id_doctor: user._id_user,
                         createdAt: {
                             [Op.between]: [firstDayOfMonth, lastDayOfMonth],
                         },

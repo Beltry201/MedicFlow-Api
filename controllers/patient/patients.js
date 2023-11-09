@@ -56,7 +56,6 @@ export const listPatients = async (req, res) => {
     }
 };
 
-// Get the details of a specific patient by ID
 export const getPatientDetails = async (req, res) => {
     try {
         const patientId = req.query._id_patient;
@@ -76,7 +75,18 @@ export const getPatientDetails = async (req, res) => {
                 .json({ success: false, message: "Invalid patient" });
         }
 
-        res.status(200).json({ success: true, patient });
+        const consultCount = await Consult.count({
+            where: {
+                _id_patient: patientId,
+            },
+        });
+
+        const patientDetails = {
+            ...patient.toJSON(),
+            consultCount,
+        };
+
+        res.status(200).json({ success: true, patient: patientDetails });
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -203,10 +213,18 @@ export const getDoctorPatients = async (req, res) => {
             });
         }
 
-        // Iterate through patients to find their last consult
+        // Iterate through patients to find their last consult and count consults
         for (const patient of patients) {
             try {
                 const patientConsults = await Consult.findAll({
+                    where: {
+                        _id_patient: patient._id_patient,
+                    },
+                });
+
+                const consultCount = patientConsults.length; // Count consults
+
+                const patientConsultsOrdered = await Consult.findAll({
                     where: {
                         _id_patient: patient._id_patient,
                     },
@@ -214,7 +232,7 @@ export const getDoctorPatients = async (req, res) => {
                     limit: 1, // Limit to one result (the most recent consult)
                 });
 
-                const lastConsult = patientConsults[0]; // Get the last consult
+                const lastConsult = patientConsultsOrdered[0]; // Get the last consult
                 if (lastConsult) {
                     const motivo =
                         lastConsult.consult_json?.INF?.Motivo || null;
@@ -222,7 +240,9 @@ export const getDoctorPatients = async (req, res) => {
                 } else {
                     patient.dataValues.last_consult = null; // Set to null if no consults found
                 }
-                console.log("\n-- PATIENT: ", patient);
+
+                // Add consultCount to patient object
+                patient.dataValues.consultCount = consultCount;
             } catch (error) {
                 console.error(
                     `Error fetching consults for patient ${patient._id_patient}:`,
@@ -397,7 +417,7 @@ export const uploadPatientFile = async (req, res) => {
             req,
             res,
             file._id_media_file,
-            "patients"
+            `patients/${_id_patient}`
         );
 
         if (fileUrl) {
@@ -438,9 +458,6 @@ export const uploadBase64File = async (req, res) => {
             type: "image",
             url: "",
         });
-
-        // Convert base64 data to buffer
-        // const fileBuffer = Buffer.from(base64String, "base64");
 
         // Upload file to S3
         const fullFileName = `${_id_patient}_${file._id_media_file}.${fileExtension}`;

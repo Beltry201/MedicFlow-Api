@@ -1,5 +1,9 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
+import { User } from "../users/users.js";
+import { MembershipPlan } from "./membership_plans.js";
+import { Subscription } from "./subscriptions.js";
+import { PaymentMethod } from "./payment_methods.js";
 
 export const PaymentRecord = sequelize.define(
     "PaymentRecord",
@@ -21,6 +25,10 @@ export const PaymentRecord = sequelize.define(
             type: DataTypes.STRING(255),
             allowNull: false,
         },
+        _id_membership_plan: {
+            type: DataTypes.UUID,
+            allowNull: false,
+        },
     },
     {
         tableName: "payment_records",
@@ -31,6 +39,9 @@ export const PaymentRecord = sequelize.define(
 // Define associations
 PaymentRecord.belongsTo(User, { foreignKey: "_id_user" });
 PaymentRecord.belongsTo(PaymentMethod, { foreignKey: "_id_payment_method" });
-PaymentRecord.belongsTo(SubscriptionRecord, {
+PaymentRecord.belongsTo(Subscription, {
     foreignKey: "_id_subscription_record",
+});
+Subscription.belongsTo(MembershipPlan, {
+    foreignKey: "_id_membership_plan",
 });

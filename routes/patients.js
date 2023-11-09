@@ -31,7 +31,8 @@ router.delete("/", validateToken, deletePatient);
 router.get("/backgrounds_list", validateToken, getPatientBackgrounds);
 router.get("/inf", validateToken, getPatientINF);
 router.post("/media", validateToken, uploadPatientFile);
-router.post("/media/base", validateToken, uploadBase64File);
+// DEPRECATED
+// router.post("/media/base", validateToken, uploadBase64File);
 router.get("/media/list", validateToken, getPatientFiles);
 
 router.get("/note", validateToken, getNotesForPatient);
