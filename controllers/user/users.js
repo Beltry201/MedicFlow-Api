@@ -1,7 +1,7 @@
 import { User } from "../../models/users/users.js";
 import { generateAccessCode } from "../../helpers/access_code_generator.js";
 import { createDefaultParameters } from "../../helpers/default_parameters.js";
-import { Subscription } from "../../models/subscriptions/subscriptions.js";
+// import { Subscription } from "../../models/subscriptions/subscriptions.js";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt, { decode } from "jsonwebtoken";
@@ -115,13 +115,13 @@ export const createUser = async (req, res) => {
         // Free Tier Subsbription
         const oneYearLater = new Date();
         oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
-        const newSubscriptionRecord = await Subscription.create({
-            _id_user: newUser._id_user,
-            subscription_start_date: new Date(),
-            subscription_end_date: oneYearLater,
-            state: "Free Tier",
-            is_active: true,
-        });
+        // const newSubscriptionRecord = await Subscription.create({
+        //     _id_user: newUser._id_user,
+        //     subscription_start_date: new Date(),
+        //     subscription_end_date: oneYearLater,
+        //     state: "Free Tier",
+        //     is_active: true,
+        // });
 
         // MVP Access Code
         const accessCode = generateAccessCode();

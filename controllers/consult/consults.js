@@ -10,14 +10,14 @@ import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
 import { uploadFile } from "../bucket.js";
 import { canGenerateMoreConsults } from "../../helpers/subscription_handler.js";
 import GoogleSheetsManager from "../../helpers/sheets.js";
-import { Subscription } from "../../models/subscriptions/subscriptions.js";
+// import { Subscription } from "../../models/subscriptions/subscriptions.js";
 
 export const generateJsonResponse = async (req, res) => {
     const { audio_transcript } = req.query;
     const user = req.user;
 
     try {
-        // const isEligible = await canGenerateMoreConsults(user);
+        const isEligible = await canGenerateMoreConsults(user);
         const latestSubscription = await SubscriptionRecord.findOne({
             where: { _id_user: user._id_user },
             order: [["createdAt", "DESC"]],
