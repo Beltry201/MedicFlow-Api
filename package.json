@@ -8,7 +8,7 @@
     "dev": "nodemon api.js"
   },
   "author": "",
-  "type": "module",
+  "type": "commonjs",
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.430.0",
@@ -24,6 +24,7 @@
     "googleapis": "^105.0.0",
     "infobip": "^0.1.0",
     "install": "^0.13.0",
+    "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.1",
     "mime-types": "^2.1.35",
     "morgan": "^1.10.0",

@@ -18,6 +18,7 @@ export const validateToken = (req, res, next) => {
                 .status(401)
                 .json({ success: false, message: "Invalid token" });
         }
+
         req.user = decodedToken;
         next();
     });

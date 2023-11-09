@@ -1,6 +1,5 @@
 import { Consult } from "../../models/consults/consults.js";
 import { Background } from "../../models/consults/backgrounds.js";
-import { Note } from "../../models/patients/notes.js";
 import { generateText } from "../../helpers/openai_generate.js";
 import { ParameterType } from "../../models/consults/parameter_types.js";
 import { Patient } from "../../models/patients/patients.js";
@@ -9,65 +8,83 @@ import { User } from "../../models/users/users.js";
 import { ConsultRating } from "../../models/consults/consult_rating.js";
 import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
 import { uploadFile } from "../bucket.js";
-
+import { canGenerateMoreConsults } from "../../helpers/subscription_handler.js";
 import GoogleSheetsManager from "../../helpers/sheets.js";
-import { title } from "process";
+import { Subscription } from "../../models/subscriptions/subscriptions.js";
 
 export const generateJsonResponse = async (req, res) => {
-    const { audio_transcript, _id_doctor } = req.query;
+    const { audio_transcript } = req.query;
+    const user = req.user;
 
     try {
-        const backgroundParameterDictionary = {};
-        const treatmentParameterDictionary = {};
-
-        // Fetch treatment parameters for the doctor
-        const treatmentParameters = await ParameterType.findAll({
-            where: {
-                _id_doctor,
-                parameter_belongs_to: "soap",
-            },
-            attributes: ["parameter_type_name", "category"], // Include category in the result
+        // const isEligible = await canGenerateMoreConsults(user);
+        const latestSubscription = await SubscriptionRecord.findOne({
+            where: { _id_user: user._id_user },
+            order: [["createdAt", "DESC"]],
         });
 
-        const backgroundParameters = await ParameterType.findAll({
-            where: {
-                parameter_belongs_to: "background",
-            },
-            attributes: ["parameter_type_name", "category"],
-        });
+        if (latestSubscription) {
+            console.log("\n-- SUBSCRIPTION FOUND: ", latestSubscription);
+        }
 
-        // Create dictionaries for treatment and background parameters
-        backgroundParameters.forEach((parameter) => {
-            const categoryName = parameter.category;
-            if (!backgroundParameterDictionary[categoryName]) {
-                backgroundParameterDictionary[categoryName] = {};
-            }
-            backgroundParameterDictionary[categoryName][
-                parameter.parameter_type_name
-            ] = `[${parameter.parameter_type_name} del paciente]`;
-        });
+        if (isEligible) {
+            const backgroundParameterDictionary = {};
+            const treatmentParameterDictionary = {};
 
-        treatmentParameters.forEach((parameter) => {
-            const categoryName = parameter.category;
-            if (!treatmentParameterDictionary[categoryName]) {
-                treatmentParameterDictionary[categoryName] = {};
-            }
-            treatmentParameterDictionary[categoryName][
-                parameter.parameter_type_name
-            ] = `[${parameter.parameter_type_name} del paciente]`;
-        });
+            // Fetch treatment parameters for the doctor
+            const treatmentParameters = await ParameterType.findAll({
+                where: {
+                    _id_doctor: user._id_user,
+                    parameter_belongs_to: "soap",
+                },
+                attributes: ["parameter_type_name", "category"], // Include category in the result
+            });
 
-        // Generate text using audio_transcript and the dictionaries
-        const generatedText = await generateText(
-            audio_transcript,
-            backgroundParameterDictionary,
-            treatmentParameterDictionary
-        );
+            const backgroundParameters = await ParameterType.findAll({
+                where: {
+                    parameter_belongs_to: "background",
+                },
+                attributes: ["parameter_type_name", "category"],
+            });
 
-        res.status(200).json({
-            success: true,
-            consult_json: generatedText,
-        });
+            // Create dictionaries for treatment and background parameters
+            backgroundParameters.forEach((parameter) => {
+                const categoryName = parameter.category;
+                if (!backgroundParameterDictionary[categoryName]) {
+                    backgroundParameterDictionary[categoryName] = {};
+                }
+                backgroundParameterDictionary[categoryName][
+                    parameter.parameter_type_name
+                ] = `[${parameter.parameter_type_name} del paciente]`;
+            });
+
+            treatmentParameters.forEach((parameter) => {
+                const categoryName = parameter.category;
+                if (!treatmentParameterDictionary[categoryName]) {
+                    treatmentParameterDictionary[categoryName] = {};
+                }
+                treatmentParameterDictionary[categoryName][
+                    parameter.parameter_type_name
+                ] = `[${parameter.parameter_type_name} del paciente]`;
+            });
+
+            // Generate text using audio_transcript and the dictionaries
+            const generatedText = await generateText(
+                audio_transcript,
+                backgroundParameterDictionary,
+                treatmentParameterDictionary
+            );
+
+            res.status(200).json({
+                success: true,
+                consult_json: generatedText,
+            });
+        } else {
+            res.status(403).json({
+                success: false,
+                message: "Monthly consult limit reached",
+            });
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({
