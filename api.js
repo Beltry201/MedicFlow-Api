@@ -15,8 +15,8 @@ app.use(router);
 
 async function main() {
     await sequelize.sync({ force: false });
-    app.listen(4000);
-    console.log("Server on port", 4000);
+    app.listen(4001);
+    console.log("Server on port", 4001);
 }
 
 main();
