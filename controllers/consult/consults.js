@@ -16,15 +16,16 @@ export const generateJsonResponse = async (req, res) => {
     const user = req.user;
 
     try {
-        const isEligible = await canGenerateMoreConsults(user);
-        const latestSubscription = await SubscriptionRecord.findOne({
-            where: { _id_user: user._id_user },
-            order: [["createdAt", "DESC"]],
-        });
+        // const isEligible = await canGenerateMoreConsults(user);
+        const isEligible = true;
+        // const latestSubscription = await SubscriptionRecord.findOne({
+        //     where: { _id_user: user._id_user },
+        //     order: [["createdAt", "DESC"]],
+        // });
 
-        if (latestSubscription) {
-            console.log("\n-- SUBSCRIPTION FOUND: ", latestSubscription);
-        }
+        // if (latestSubscription) {
+        //     console.log("\n-- SUBSCRIPTION FOUND: ", latestSubscription);
+        // }
 
         if (isEligible) {
             const backgroundParameterDictionary = {};
