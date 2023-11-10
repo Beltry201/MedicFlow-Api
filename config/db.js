@@ -3,19 +3,44 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Dynamically set the environment based on NODE_ENV
+const environment = process.env.NODE_ENV || "development";
+
+// Use different configurations based on the environment
+const dbConfig = {
+    development: {
+        database: process.env.DB_DEV,
+        username: process.env.DB_USER_DEV,
+        password: process.env.DB_PASSWORD_DEV,
+        host: process.env.DB_HOST_DEV,
+        port: process.env.DB_PORT_DEV,
+    },
+    testing: {
+        database: process.env.DB_TEST,
+        username: process.env.DB_USER,
+        password: process.env.DB_PASSWORD_TEST,
+        host: process.env.DB_HOST_TEST,
+        port: process.env.DB_PORT_TEST,
+    },
+    production: {
+        database: process.env.DB_PROD,
+        username: process.env.DB_USER,
+        password: process.env.DB_PASSWORD_PROD,
+        host: process.env.DB_HOST_PROD,
+        port: process.env.DB_PORT_PROD,
+    },
+};
+
+// Use the appropriate configuration based on the environment
+const selectedConfig = dbConfig[environment];
+
 export const sequelize = new Sequelize(
-    process.env.DB, // db name,
-    process.env.DB_USER, // username
-    process.env.DB_PASSWORD, // password
+    selectedConfig.database,
+    selectedConfig.username,
+    selectedConfig.password,
     {
-        host: process.env.DB_HOST,
+        host: selectedConfig.host,
         dialect: "postgres",
-        // pool: {
-        //   max: 5,
-        //   min: 0,
-        //   require: 30000,
-        //   idle: 10000,
-        // },
-        // logging: false,
+        port: selectedConfig.port,
     }
 );

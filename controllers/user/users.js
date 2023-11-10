@@ -221,7 +221,11 @@ export const loginUser = async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { id: user._id_user, email: user.email },
+            {
+                _id_user: user._id_user,
+                email: user.email,
+                phone: user.phone,
+            },
             process.env.TOKEN_SECRET,
             { expiresIn: "1w" }
         );
@@ -385,7 +389,7 @@ export const verifyToken = async (req, res) => {
         const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET);
 
         // Token is valid, user can access
-        if (decodedToken) {
+        if (decodedToken._id_user) {
             res.status(200).json({
                 success: true,
                 message: "Token is valid",
@@ -400,7 +404,7 @@ export const verifyToken = async (req, res) => {
         }
         return res.status(401).json({
             success: false,
-            message: "Invalid gei",
+            message: "Token is invalid",
         });
     }
 };

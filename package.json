@@ -4,8 +4,9 @@
   "description": "",
   "main": "api",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon api.js"
+    "dev": "nodemon api.js",
+    "test": "NODE_ENV=testing nodemon api.js",
+    "start": "NODE_ENV=production node api.js"
   },
   "author": "",
   "type": "module",
