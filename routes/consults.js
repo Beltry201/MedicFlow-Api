@@ -5,7 +5,7 @@ import {
     getConsultDetails,
     getUserConsults,
     getPatientConsults,
-    uploadPatientFile,
+    uploadConsultFile,
 } from "../controllers/consult/consults.js";
 import { validateToken } from "../helpers/jwt.js";
 
