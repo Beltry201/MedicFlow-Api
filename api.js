@@ -1,22 +1,46 @@
-import { sequelize } from "./config/db.js";
+// api.js
+
 import express from "express";
 import morgan from "morgan";
 import router from "./routes/routes.js";
+import { sequelize } from "./config/db.js";
 
 const app = express();
 
 // Middlewares
 app.use(morgan("dev"));
 app.use(express.json());
-
-// Aqui estan todas las rutas
 app.use(router);
-// Excepto la de tu corazón
 
 async function main() {
-    await sequelize.sync({ force: false });
-    app.listen(4000);
-    console.log("Server on port", 4000);
+    // Dynamically set the environment based on NODE_ENV
+    const environment = process.env.NODE_ENV || "development";
+
+    // Use different configurations based on the environment
+    const dbConfig = {
+        development: {
+            forceSync: true,
+            port: 4001,
+        },
+        testing: {
+            forceSync: false,
+            port: 4000,
+        },
+        production: {
+            forceSync: false,
+            port: 1523,
+        },
+    };
+
+    // Use the appropriate configuration based on the environment
+    const selectedConfig = dbConfig[environment];
+
+    await sequelize.sync({ force: selectedConfig.forceSync });
+    app.listen(selectedConfig.port, () => {
+        console.log(
+            `Server running in ${environment} mode on port ${selectedConfig.port}`
+        );
+    });
 }
 
 main();
