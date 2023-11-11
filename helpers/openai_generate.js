@@ -30,6 +30,8 @@ export async function generateText(transcript, background, note) {
             ],
             model: "gpt-4",
             temperature: 0.81,
+            // TODO: Agregar limite de tokens por consulta
+            // TODO: Cambiar a gpt-4-1106-preview
         });
 
         console.log(completion.choices);
