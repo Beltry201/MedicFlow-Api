@@ -10,7 +10,6 @@ import {
     getPatientBackgrounds,
     getPatientINF,
     uploadPatientFile,
-    uploadBase64File,
 } from "../controllers/patient/patients.js";
 import {
     createNote,

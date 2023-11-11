@@ -64,34 +64,3 @@ export const Patient = sequelize.define(
         timestamps: true, // Set this to true if you want Sequelize to handle timestamps automatically
     }
 );
-
-// ------------- CONSULT -------------
-
-Consult.belongsTo(Patient, {
-    foreignKey: "_id_patient", // The foreign key in the Consult table that refers to the Patient
-    targetId: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    allowNull: false,
-});
-
-Patient.hasMany(Consult, {
-    foreignKey: "_id_patient",
-});
-
-// ------------- MEDIA FILES -------------
-MediaFile.belongsTo(Patient, {
-    foreignKey: "_id_patient",
-});
-Patient.hasMany(MediaFile, {
-    foreignKey: "_id_patient",
-});
-
-// ------------- NOTE -------------
-Note.belongsTo(Patient, {
-    foreignKey: "_id_patient",
-});
-
-Patient.hasMany(Note, {
-    foreignKey: "_id_patient",
-});
