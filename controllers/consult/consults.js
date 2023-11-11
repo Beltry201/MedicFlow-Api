@@ -8,6 +8,7 @@ import { MediaFile } from "../../models/patients/media_files.js";
 import { ConsultRating } from "../../models/consults/consult_rating.js";
 import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
 import { uploadFile } from "../bucket.js";
+import { canGenerateMoreConsults } from "../../helpers/subscription_handler.js";
 import multer from "multer";
 import GoogleSheetsManager from "../../helpers/sheets.js";
 
@@ -16,16 +17,8 @@ export const generateJsonResponse = async (req, res) => {
     const user = req.user;
 
     try {
-        // const isEligible = await canGenerateMoreConsults(user);
-        const isEligible = true;
-        // const latestSubscription = await SubscriptionRecord.findOne({
-        //     where: { _id_user: user._id_user },
-        //     order: [["createdAt", "DESC"]],
-        // });
-
-        // if (latestSubscription) {
-        //     console.log("\n-- SUBSCRIPTION FOUND: ", latestSubscription);
-        // }
+        const isEligible = await canGenerateMoreConsults(user);
+        // const isEligible = true;
 
         if (isEligible) {
             const backgroundParameterDictionary = {};
@@ -82,6 +75,7 @@ export const generateJsonResponse = async (req, res) => {
         } else {
             res.status(403).json({
                 success: false,
+                // membership: user
                 message: "Monthly consult limit reached",
             });
         }

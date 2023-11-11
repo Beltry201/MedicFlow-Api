@@ -8,16 +8,9 @@ import { uploadFile, getFileInfo } from "../bucket.js";
 // Create a new patient
 export const createPatient = async (req, res) => {
     try {
-        const {
-            is_valid,
-            name,
-            last_name,
-            gender,
-            birth_date,
-            phone_number,
-            _id_doctor,
-        } = req.body;
-
+        const { is_valid, name, last_name, gender, birth_date, phone_number } =
+            req.body;
+        const user = req.user;
         // Create the patient in the database
         const newPatient = await Patient.create({
             is_valid,
@@ -26,7 +19,7 @@ export const createPatient = async (req, res) => {
             gender,
             birth_date,
             phone_number,
-            _id_doctor,
+            _id_doctor: user._id_user,
         });
 
         res.status(201).json({ success: true, patient: newPatient });
@@ -420,55 +413,6 @@ export const uploadPatientFile = async (req, res) => {
             `patients/${_id_patient}`
         );
 
-        if (fileUrl) {
-            await file.update({
-                url: fileUrl,
-            });
-            return res
-                .status(200)
-                .send({ message: "File Uploaded Successfully", url: fileUrl });
-        } else {
-            return res.status(400).send({
-                message: "Unable to upload file",
-            });
-        }
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send({ error: error.message });
-    }
-};
-
-export const uploadBase64File = async (req, res) => {
-    try {
-        const { _id_patient, base64Data } = req.body; // Assuming base64Data is sent in the request body
-
-        // Determine file type
-        const base = btoa(base64Data);
-        const binaryData = atob(base);
-        // Extract file extension
-        const mimeType = binaryData.match(
-            /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/
-        );
-        console.log("\n-- MIMETYPE: ", mimeType);
-        const fileExtension = mimeType ? mimeType[1].split("/")[1] : null;
-
-        // Create a MediaFile entry in the database
-        const file = await MediaFile.create({
-            _id_patient,
-            type: "image",
-            url: "",
-        });
-
-        // Upload file to S3
-        const fullFileName = `${_id_patient}_${file._id_media_file}.${fileExtension}`;
-        const fileUrl = await uploadFile(
-            { file: { buffer: fileBuffer, mimetype: fileType } }, // Creating a mock req object for uploadFile
-            res,
-            fullFileName,
-            "patients"
-        );
-
-        // Update the MediaFile entry with the S3 URL
         if (fileUrl) {
             await file.update({
                 url: fileUrl,
