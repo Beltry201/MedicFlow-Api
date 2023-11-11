@@ -42,12 +42,3 @@ export const Subscription = sequelize.define(
         timestamps: true,
     }
 );
-
-// Define associations
-Subscription.belongsTo(User, { foreignKey: "_id_user" });
-User.hasMany(Subscription, {
-    foreignKey: "_id_user",
-    sourceKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-});

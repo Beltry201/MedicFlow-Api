@@ -35,10 +35,3 @@ export const PaymentRecord = sequelize.define(
         timestamps: true,
     }
 );
-
-// Define associations
-PaymentRecord.belongsTo(User, { foreignKey: "_id_user" });
-PaymentRecord.belongsTo(PaymentMethod, { foreignKey: "_id_payment_method" });
-PaymentRecord.belongsTo(Subscription, {
-    foreignKey: "_id_subscription_record",
-});
