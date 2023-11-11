@@ -9,11 +9,6 @@ export const User = sequelize.define(
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
-        _id_folder: {
-            type: DataTypes.STRING(255),
-            allowNull: true,
-            defaultValue: null,
-        },
         name: {
             type: DataTypes.STRING(255),
             allowNull: false,
@@ -34,7 +29,7 @@ export const User = sequelize.define(
         },
         diploma_organization: {
             type: DataTypes.STRING(255),
-            allowNull: false,
+            allowNull: true,
         },
         office_address: {
             type: DataTypes.STRING(255),
@@ -43,7 +38,7 @@ export const User = sequelize.define(
         },
         profesional_id: {
             type: DataTypes.STRING(255),
-            allowNull: false,
+            allowNull: true,
         },
         profile_picture: {
             type: DataTypes.STRING(255),

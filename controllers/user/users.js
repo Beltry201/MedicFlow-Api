@@ -21,9 +21,6 @@ export const createUser = async (req, res) => {
             password,
             specialty,
             role,
-            diploma_organization,
-            office_address,
-            profesional_id,
         } = req.body;
 
         // Validations
@@ -36,9 +33,6 @@ export const createUser = async (req, res) => {
             password: Joi.string().required(),
             specialty: Joi.string().required(),
             role: Joi.string().required(),
-            diploma_organization: Joi.string().required(),
-            office_address: Joi.string().required(),
-            profesional_id: Joi.string().required(),
         });
 
         const { error } = schema.validate(req.body);
@@ -63,30 +57,6 @@ export const createUser = async (req, res) => {
             });
         }
 
-        const existingOfficeAddressUser = await User.findOne({
-            where: { office_address },
-        });
-
-        if (existingOfficeAddressUser) {
-            return res.status(400).json({
-                success: false,
-                message: "Validation error",
-                error: "Office address already exists.",
-            });
-        }
-
-        const existingProfesionalIdUser = await User.findOne({
-            where: { profesional_id },
-        });
-
-        if (existingProfesionalIdUser) {
-            return res.status(400).json({
-                success: false,
-                message: "Validation error",
-                error: "Profesional ID already exists.",
-            });
-        }
-
         if (error) {
             return res.status(400).json({
                 success: false,
@@ -108,9 +78,6 @@ export const createUser = async (req, res) => {
             password: hashedPassword,
             specialty,
             role,
-            diploma_organization,
-            office_address,
-            profesional_id,
         });
 
         // Free Tier Subsbription
@@ -370,8 +337,6 @@ export const getUser = async (req, res) => {
                         latestSubscription.subscription_end_date,
                     state: latestSubscription.state,
                 },
-
-                // Membership plan information
                 membership_plan: {
                     _id_membership_plan: membershipPlan._id_membership_plan,
                     plan_name: membershipPlan.plan_name,

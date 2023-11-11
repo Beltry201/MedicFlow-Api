@@ -1,24 +1,26 @@
 {
-  "development": {
-    "username": "medicflow",
-    "password": "medic.ADMIN.flow",
-    "database": "medicflow_db",
-    "host": "medic-flow-db-test.coqggqdudqzf.us-east-2.rds.amazonaws.com",
-    "dialect": "postgres",
-    "port": "5432"
-  },
-  "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  },
-  "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  }
+    "development": {
+        "database": "process.env.DB_DEV",
+        "username": "process.env.DB_USER_DEV",
+        "password": "process.env.DB_PASSWORD_DEV",
+        "host": "process.env.DB_HOST_DEV",
+        "port": "process.env.DB_PORT_DEV",
+        "dialect": "postgres"
+    },
+    "testing": {
+        "database": "medicflow_db",
+        "username": "medicflow",
+        "password": "medic.ADMIN.flow",
+        "host": "medic-flow-db-test.coqggqdudqzf.us-east-2.rds.amazonaws.com",
+        "port": "5432",
+        "dialect": "postgres"
+    },
+    "production": {
+        "database": "process.env.DB_PROD",
+        "username": "process.env.DB_USER",
+        "password": "process.env.DB_PASSWORD_PROD",
+        "host": "process.env.DB_HOST_PROD",
+        "port": "process.env.DB_PORT_PROD",
+        "dialect": "postgres"
+    }
 }
