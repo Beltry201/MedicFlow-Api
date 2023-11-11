@@ -1,7 +1,8 @@
 import { User } from "../../models/users/users.js";
 import { generateAccessCode } from "../../helpers/access_code_generator.js";
 import { createDefaultParameters } from "../../helpers/default_parameters.js";
-// import { Subscription } from "../../models/subscriptions/subscriptions.js";
+import { Subscription } from "../../models/subscriptions/subscriptions.js";
+import { MembershipPlan } from "../../models/subscriptions/membership_plans.js";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt, { decode } from "jsonwebtoken";
@@ -31,12 +32,12 @@ export const createUser = async (req, res) => {
             last_name: Joi.string().required(),
             phone: Joi.string().required(),
             email: Joi.string().email().required(),
-            office_address: Joi.string().required(),
             profile_picture: Joi.string().required(),
             password: Joi.string().required(),
             specialty: Joi.string().required(),
             role: Joi.string().required(),
             diploma_organization: Joi.string().required(),
+            office_address: Joi.string().required(),
             profesional_id: Joi.string().required(),
         });
 
@@ -115,13 +116,14 @@ export const createUser = async (req, res) => {
         // Free Tier Subsbription
         const oneYearLater = new Date();
         oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
-        // const newSubscriptionRecord = await Subscription.create({
-        //     _id_user: newUser._id_user,
-        //     subscription_start_date: new Date(),
-        //     subscription_end_date: oneYearLater,
-        //     state: "Free Tier",
-        //     is_active: true,
-        // });
+        const newSubscriptionRecord = await Subscription.create({
+            _id_user: newUser._id_user,
+            subscription_start_date: new Date(),
+            subscription_end_date: oneYearLater,
+            state: "free tier",
+            _id_membership_plan: 1,
+            is_active: true,
+        });
 
         // MVP Access Code
         const accessCode = generateAccessCode();
@@ -318,10 +320,9 @@ export const resetPassword = async (req, res) => {
 
 export const getUser = async (req, res) => {
     try {
-        const userId = req.user._id_user;
-        console.log("\n-- ID USER: ", req.user);
-        // Find the user by ID
-        const user = await User.findByPk(userId);
+        const token = req.user._id_user;
+
+        const user = await User.findByPk(token);
 
         if (!user) {
             return res.status(404).json({
@@ -330,8 +331,56 @@ export const getUser = async (req, res) => {
             });
         }
 
-        // Return the user data
-        res.status(200).json({ success: true, user });
+        const latestSubscription = await Subscription.findOne({
+            where: { _id_user: user._id_user },
+            order: [["createdAt", "DESC"]],
+        });
+
+        if (!latestSubscription) {
+            return res.status(404).json({
+                success: false,
+                message: "Subscription not found",
+            });
+        }
+
+        const membershipPlan = await MembershipPlan.findByPk(
+            latestSubscription._id_membership_plan
+        );
+
+        // Return the user data along with the subscription and membership plan information
+        res.status(200).json({
+            success: true,
+            user: {
+                _id_user: user._id_user,
+                name: user.name,
+                last_name: user.last_name,
+                email: user.email,
+                phone: user.phone,
+                diploma_organization: user.diploma_organization,
+                professional_id: user.professional_id,
+                profile_picture: user.profile_picture,
+                specialty: user.specialty,
+                role: user.role,
+                user_since: user.createdAt,
+                subscription: {
+                    _id_subscription: latestSubscription._id_subscription,
+                    subscription_start_date:
+                        latestSubscription.subscription_start_date,
+                    subscription_end_date:
+                        latestSubscription.subscription_end_date,
+                    state: latestSubscription.state,
+                },
+
+                // Membership plan information
+                membership_plan: {
+                    _id_membership_plan: membershipPlan._id_membership_plan,
+                    plan_name: membershipPlan.plan_name,
+                    consults_limit: membershipPlan.consults_limit,
+                    min_per_consult: membershipPlan.min_per_consult,
+                    is_valid: membershipPlan.is_valid,
+                },
+            },
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({

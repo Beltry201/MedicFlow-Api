@@ -1,9 +1,9 @@
 // api.js
-
 import express from "express";
 import morgan from "morgan";
 import router from "./routes/routes.js";
 import { sequelize } from "./config/db.js";
+import "./models/associations.js";
 
 const app = express();
 
@@ -19,7 +19,7 @@ async function main() {
     // Use different configurations based on the environment
     const dbConfig = {
         development: {
-            forceSync: true,
+            forceSync: false,
             port: 4001,
         },
         testing: {

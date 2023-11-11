@@ -33,12 +33,3 @@ export const Background = sequelize.define(
         timestamps: true,
     }
 );
-
-// ------------- PARAMETER_TYPES -------------
-Background.belongsTo(ParameterType, {
-    foreignKey: "_id_parameter",
-});
-
-ParameterType.hasMany(Background, {
-    foreignKey: "_id_parameter",
-});
