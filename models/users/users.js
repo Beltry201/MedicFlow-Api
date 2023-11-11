@@ -36,7 +36,7 @@ export const User = sequelize.define(
             allowNull: true,
             defaultValue: null,
         },
-        profesional_id: {
+        professional_id: {
             type: DataTypes.STRING(255),
             allowNull: true,
         },
