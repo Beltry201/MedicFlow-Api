@@ -15,23 +15,89 @@ export const generateJsonResponse = async (req, res) => {
     const user = req.user;
 
     try {
-        const isEligible = await canGenerateMoreConsults(user);
+        const eligibilityResult = await canGenerateMoreConsults(user);
 
-        if (isEligible) {
-            // Generate text using audio_transcript and the dictionaries
-            const completion = await generateText(audio_transcript);
+        if (eligibilityResult.success) {
+            let completion;
 
-            res.status(200).json({
+            try {
+                completion = await generateText(audio_transcript);
+            } catch (error) {
+                if (
+                    completion.choices &&
+                    completion.choices[0].finish_reason === "length"
+                ) {
+                    console.error("Error generating text:", error);
+
+                    res.status(400).json({
+                        success: false,
+                        message: "Prompt is too long",
+                    });
+
+                    return;
+                } else {
+                    throw error;
+                }
+            }
+
+            const responsePayload = {
                 success: true,
                 consult_json: JSON.parse(completion.choices[0].message.content),
+                membership: {
+                    plan: eligibilityResult.membership
+                        ? eligibilityResult.membership.plan_name
+                        : "Free Tier",
+                    consult_limit: eligibilityResult.membership
+                        ? eligibilityResult.membership.consults_limit
+                        : null,
+                    minutes_per_consult: eligibilityResult.membership
+                        ? eligibilityResult.membership.min_per_consult
+                        : null,
+                },
+                subscription: {
+                    consult_count: eligibilityResult.consultCount || 0,
+                    start_date: eligibilityResult.subscription
+                        ? eligibilityResult.subscription.subscription_start_date
+                        : null,
+                    end_date: eligibilityResult.subscription
+                        ? eligibilityResult.subscription.subscription_end_date
+                        : null,
+                    state: eligibilityResult.subscription
+                        ? eligibilityResult.subscription.state
+                        : null,
+                },
                 prompt_tokens: completion.usage.prompt_tokens,
                 completion_tokens: completion.usage.completion_tokens,
-            });
+            };
+
+            res.status(200).json(responsePayload);
         } else {
             res.status(403).json({
                 success: false,
-                // membership: user
                 message: "Monthly consult limit reached",
+                membership: {
+                    plan: eligibilityResult.membership
+                        ? eligibilityResult.membership.plan_name
+                        : "Free Tier",
+                    consult_limit: eligibilityResult.membership
+                        ? eligibilityResult.membership.consults_limit
+                        : null,
+                    minutes_per_consult: eligibilityResult.membership
+                        ? eligibilityResult.membership.min_per_consult
+                        : null,
+                },
+                subscription: {
+                    consult_count: eligibilityResult.consultCount || 0,
+                    start_date: eligibilityResult.subscription
+                        ? eligibilityResult.subscription.subscription_start_date
+                        : null,
+                    end_date: eligibilityResult.subscription
+                        ? eligibilityResult.subscription.subscription_end_date
+                        : null,
+                    state: eligibilityResult.subscription
+                        ? eligibilityResult.subscription.state
+                        : null,
+                },
             });
         }
     } catch (error) {

@@ -16,7 +16,7 @@ router.post("/", validateToken, createTreatmentCatalog);
 router.put("/", validateToken, updateTreatmentCatalog);
 router.get("/details", validateToken, getTreatmentCatalogDetails);
 router.delete("/", validateToken, deleteTreatmentCatalog);
-router.get("/list", getDoctorTreatmentCatalogs);
+router.get("/list", validateToken, getDoctorTreatmentCatalogs);
 
 // router.get("/", validateToken, listTreatmentCatalogs);
 export default router;
