@@ -1,12 +1,7 @@
-import {
-    PutObjectCommand,
-    GetObjectCommand,
-    HeadObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { bucketName, bucketRegion, s3 } from "../helpers/s3.js";
-import { upload } from "../helpers/multer.js";
 import { MediaFile } from "../models/patients/media_files.js";
+import { upload } from "../helpers/multer.js";
 
 export const getPatientFiles = async (req, res) => {
     try {
@@ -27,17 +22,6 @@ export const getPatientFiles = async (req, res) => {
                 message: "No valid media files found for the patient",
             });
         }
-
-        // Get file information for each valid media file
-        // const mediaFilesWithInfo = await Promise.all(
-        //     validMediaFiles.map(async (file) => {
-        //         const fileInfo = await getFileInfo(
-        //             file._id_media_file,
-        //             "patients"
-        //         );
-        //         return { ...file, fileInfo };
-        //     })
-        // );
 
         res.status(200).json({
             success: true,
@@ -112,29 +96,6 @@ export const uploadFile = async (req, res, fileName, contentType) => {
         });
     });
 };
-
-// export const getFileInfo = async (_id_media_file, contentType) => {
-//     try {
-//         const params = {
-//             Bucket: bucketName,
-//             Key: `${contentType}/${_id_media_file}`,
-//         };
-//         const command = new HeadObjectCommand(params);
-//         const response = await s3.send(command);
-
-//         const fileInfo = {
-//             ContentLength: response.ContentLength,
-//             ContentType: response.ContentType,
-//             LastModified: response.LastModified,
-//             // Add any other metadata you need here
-//         };
-
-//         return fileInfo;
-//     } catch (error) {
-//         console.error(error);
-//         throw new Error("Failed to get file information");
-//     }
-// };
 
 export const getFileInfo = async (_id_media_file, contentType) => {
     try {

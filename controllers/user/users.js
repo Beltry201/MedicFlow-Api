@@ -1,11 +1,13 @@
-import { User } from "../../models/users/users.js";
-import { generateAccessCode } from "../../helpers/access_code_generator.js";
-import { createDefaultParameters } from "../../helpers/default_parameters.js";
-import { Subscription } from "../../models/subscriptions/subscriptions.js";
 import { MembershipPlan } from "../../models/subscriptions/membership_plans.js";
-import dotenv from "dotenv";
+import { createDefaultParameters } from "../../helpers/default_parameters.js";
+import { generateAccessCode } from "../../helpers/access_code_generator.js";
+import { Subscription } from "../../models/subscriptions/subscriptions.js";
+import { Consult } from "../../models/consults/consults.js";
+import { User } from "../../models/users/users.js";
+import jwt from "jsonwebtoken";
+import { Op } from "sequelize";
 import bcrypt from "bcryptjs";
-import jwt, { decode } from "jsonwebtoken";
+import dotenv from "dotenv";
 import Joi from "joi";
 
 dotenv.config();
@@ -287,9 +289,9 @@ export const resetPassword = async (req, res) => {
 
 export const getUser = async (req, res) => {
     try {
-        const token = req.user._id_user;
+        const { _id_user } = req.user;
 
-        const user = await User.findByPk(token);
+        const user = await User.findByPk(_id_user);
 
         if (!user) {
             return res.status(404).json({
@@ -299,7 +301,7 @@ export const getUser = async (req, res) => {
         }
 
         const latestSubscription = await Subscription.findOne({
-            where: { _id_user: user._id_user },
+            where: { _id_user: _id_user },
             order: [["createdAt", "DESC"]],
         });
 
@@ -313,6 +315,28 @@ export const getUser = async (req, res) => {
         const membershipPlan = await MembershipPlan.findByPk(
             latestSubscription._id_membership_plan
         );
+
+        const currentDate = new Date();
+
+        const firstDayOfMonth = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            1
+        );
+        const lastDayOfMonth = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth() + 1,
+            0
+        );
+
+        const consultCount = await Consult.count({
+            where: {
+                _id_doctor: user._id_user,
+                createdAt: {
+                    [Op.between]: [firstDayOfMonth, lastDayOfMonth],
+                },
+            },
+        });
 
         // Return the user data along with the subscription and membership plan information
         res.status(200).json({
@@ -337,6 +361,7 @@ export const getUser = async (req, res) => {
                     subscription_end_date:
                         latestSubscription.subscription_end_date,
                     state: latestSubscription.state,
+                    used_consults: consultCount,
                 },
                 membership_plan: {
                     _id_membership_plan: membershipPlan._id_membership_plan,

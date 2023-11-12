@@ -1,10 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
-import { Background } from "./backgrounds.js";
-import { ConsultRating } from "./consult_rating.js";
-import { Note } from "../patients/notes.js";
-import { TreatmentCatalog } from "../users/treatments_catalogs.js";
-import { MediaFile } from "../patients/media_files.js";
 
 export const Consult = sequelize.define(
     "Consult",
@@ -28,13 +23,33 @@ export const Consult = sequelize.define(
         },
         treatment_name: {
             type: DataTypes.STRING(255),
-            allowNull: true, // Set to true if null is allowed
-            defaultValue: null, // Set a default value if needed
+            allowNull: true,
+            defaultValue: null,
         },
         treatment_price: {
             type: DataTypes.FLOAT,
-            allowNull: true, // Set to true if null is allowed
-            defaultValue: null, // Set a default value if needed
+            allowNull: true,
+            defaultValue: null,
+        },
+        recording_duration_s: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+            defaultValue: null,
+        },
+        whisper_version: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+            defaultValue: null,
+        },
+        completion_tokens: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: null,
+        },
+        prompt_tokens: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: null,
         },
         is_valid: {
             type: DataTypes.BOOLEAN,
@@ -61,6 +76,6 @@ export const Consult = sequelize.define(
     },
     {
         tableName: "consults",
-        timestamps: true, // Set this to true if you want Sequelize to handle timestamps automatically
+        timestamps: true,
     }
 );
