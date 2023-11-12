@@ -1,16 +1,14 @@
-import { Consult } from "../../models/consults/consults.js";
-import { Background } from "../../models/consults/backgrounds.js";
-import { generateText } from "../../helpers/openai_generate.js";
-import { ParameterType } from "../../models/consults/parameter_types.js";
-import { Patient } from "../../models/patients/patients.js";
-import { Buffer } from "buffer";
-import { MediaFile } from "../../models/patients/media_files.js";
-import { ConsultRating } from "../../models/consults/consult_rating.js";
-import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
-import { uploadFile } from "../bucket.js";
 import { canGenerateMoreConsults } from "../../helpers/subscription_handler.js";
-import multer from "multer";
-import GoogleSheetsManager from "../../helpers/sheets.js";
+import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
+import { ParameterType } from "../../models/consults/parameter_types.js";
+import { ConsultRating } from "../../models/consults/consult_rating.js";
+import { Background } from "../../models/consults/backgrounds.js";
+import { MediaFile } from "../../models/patients/media_files.js";
+import { generateText } from "../../helpers/openai_generate.js";
+import { Consult } from "../../models/consults/consults.js";
+import { Patient } from "../../models/patients/patients.js";
+import { uploadFile } from "../bucket.js";
+import { Buffer } from "buffer";
 
 export const generateJsonResponse = async (req, res) => {
     const { audio_transcript } = req.query;
@@ -18,59 +16,16 @@ export const generateJsonResponse = async (req, res) => {
 
     try {
         const isEligible = await canGenerateMoreConsults(user);
-        // const isEligible = true;
 
         if (isEligible) {
-            const backgroundParameterDictionary = {};
-            const treatmentParameterDictionary = {};
-
-            // Fetch treatment parameters for the doctor
-            const treatmentParameters = await ParameterType.findAll({
-                where: {
-                    _id_doctor: user._id_user,
-                    parameter_belongs_to: "soap",
-                },
-                attributes: ["parameter_type_name", "category"], // Include category in the result
-            });
-
-            const backgroundParameters = await ParameterType.findAll({
-                where: {
-                    parameter_belongs_to: "background",
-                },
-                attributes: ["parameter_type_name", "category"],
-            });
-
-            // Create dictionaries for treatment and background parameters
-            backgroundParameters.forEach((parameter) => {
-                const categoryName = parameter.category;
-                if (!backgroundParameterDictionary[categoryName]) {
-                    backgroundParameterDictionary[categoryName] = {};
-                }
-                backgroundParameterDictionary[categoryName][
-                    parameter.parameter_type_name
-                ] = `[${parameter.parameter_type_name} del paciente]`;
-            });
-
-            treatmentParameters.forEach((parameter) => {
-                const categoryName = parameter.category;
-                if (!treatmentParameterDictionary[categoryName]) {
-                    treatmentParameterDictionary[categoryName] = {};
-                }
-                treatmentParameterDictionary[categoryName][
-                    parameter.parameter_type_name
-                ] = `[${parameter.parameter_type_name} del paciente]`;
-            });
-
             // Generate text using audio_transcript and the dictionaries
-            const generatedText = await generateText(
-                audio_transcript,
-                backgroundParameterDictionary,
-                treatmentParameterDictionary
-            );
+            const completion = await generateText(audio_transcript);
 
             res.status(200).json({
                 success: true,
-                consult_json: generatedText,
+                consult_json: JSON.parse(completion.choices[0].message.content),
+                prompt_tokens: completion.usage.prompt_tokens,
+                completion_tokens: completion.usage.completion_tokens,
             });
         } else {
             res.status(403).json({
@@ -92,37 +47,43 @@ export const generateJsonResponse = async (req, res) => {
 export const storeJsonData = async (req, res) => {
     try {
         const {
-            audio_transcript,
-            _id_doctor,
-            _id_patient,
-            rating,
+            recording_duration_s,
+            whisper_version,
+            completion_tokens,
+            prompt_tokens,
             treatment,
+            rating,
             attributes,
+            audio_transcript,
             consult_json,
+            _id_patient,
             _id_treatment_catalog,
         } = req.body;
 
-        // Check if audio_transcript is defined
+        console.log("\n-- TOKENS: ", completion_tokens, " ", prompt_tokens);
+        const _id_doctor = req.user._id_user;
+
+        let date = new Date();
+
         const decodedAudioTranscript = Buffer.from(
             audio_transcript,
             "base64"
         ).toString("utf-8");
 
-        console.log("\n-- AUDIO TRANSCRIPT: ", decodedAudioTranscript);
-        let date = new Date();
-
         // Create Consult
-        const treatmentCatalogId = _id_treatment_catalog || null;
         const consult = await Consult.create({
             audio_transcript: decodedAudioTranscript,
             consult_json: consult_json,
             date,
             treatment_name: treatment.name,
             treatment_price: treatment.price,
-            is_valid: true,
+            recording_duration_s,
+            whisper_version,
+            completion_tokens,
+            prompt_tokens,
+            _id_treatment_catalog,
             _id_doctor,
             _id_patient,
-            _id_treatment_catalog: treatmentCatalogId,
         });
 
         // Store Background
@@ -132,10 +93,16 @@ export const storeJsonData = async (req, res) => {
             for (let i = 0; i < titles.length; i++) {
                 const title = titles[i];
                 let content = categoryData[title];
+
                 // Replace null or undefined with "Na"
-                if (content === null || content === undefined) {
+                if (
+                    content === null ||
+                    content === undefined ||
+                    content === ""
+                ) {
                     content = "Na";
                 }
+
                 if (content !== "") {
                     let parameter;
                     if (
@@ -145,7 +112,7 @@ export const storeJsonData = async (req, res) => {
                     ) {
                         parameter = await ParameterType.findOne({
                             where: {
-                                _id_doctor: _id_doctor,
+                                _id_doctor,
                                 parameter_belongs_to: "background",
                                 category: categoryName,
                                 parameter_type_name: title,
@@ -310,7 +277,7 @@ export const getConsultDetails = async (req, res) => {
 
 export const getUserConsults = async (req, res) => {
     try {
-        const _id_doctor = req.query._id_doctor;
+        const _id_doctor = req.user._id_user;
 
         // Retrieve all consults for the given doctor
         const consults = await Consult.findAll({
@@ -373,7 +340,7 @@ export const getUserConsults = async (req, res) => {
 
 export const getPatientConsults = async (req, res) => {
     try {
-        const _id_patient = req.query._id_patient; // Assuming you pass the patient ID as a query parameter
+        const _id_patient = req.query._id_patient;
 
         // Retrieve all consults for the given patient
         const consults = await Consult.findAll({

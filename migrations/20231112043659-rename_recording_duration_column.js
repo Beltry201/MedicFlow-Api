@@ -3,17 +3,17 @@
 module.exports = {
     up: async (queryInterface, Sequelize) => {
         await queryInterface.renameColumn(
-            "users",
-            "_id_diploma_organization",
-            "diploma_organization"
+            "consults",
+            "recording_duration",
+            "recording_duration_s"
         );
     },
 
     down: async (queryInterface, Sequelize) => {
         await queryInterface.renameColumn(
-            "users",
-            "diploma_organization",
-            "_id_diploma_organization"
+            "consults",
+            "recording_duration_s",
+            "recording_duration"
         );
     },
 };

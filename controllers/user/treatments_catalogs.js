@@ -2,8 +2,8 @@ import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
 
 export const createTreatmentCatalog = async (req, res) => {
     try {
-        const { name, price, description, _id_doctor } = req.body;
-
+        const { name, price, description } = req.body;
+        const _id_doctor = req.user._id_user;
         // Create a new treatment catalog into catalog in the database
         const newTreatmentCatalog = await TreatmentCatalog.create({
             name,
@@ -60,8 +60,8 @@ export const deleteTreatmentCatalog = async (req, res) => {
 export const updateTreatmentCatalog = async (req, res) => {
     try {
         const treatmentId = req.query._id_treatment_catalog;
-        const { name, price, description, _id_doctor } = req.body;
-
+        const { name, price, description } = req.body;
+        const _id_doctor = req.user._id_user;
         // Find the treatment_catalog by ID
         const treatment_catalog = await TreatmentCatalog.findByPk(treatmentId);
 
@@ -146,12 +146,12 @@ export const listTreatmentCatalogs = async (req, res) => {
 
 export const getDoctorTreatmentCatalogs = async (req, res) => {
     try {
-        const doctorId = req.query._id_doctor;
+        const _id_doctor = req.user._id_user;
 
         // Find all treatments_catalog for the given doctor ID
         const treatments_catalog = await TreatmentCatalog.findAll({
             where: {
-                _id_doctor: doctorId,
+                _id_doctor: _id_doctor,
                 is_valid: true,
             },
             attributes: {

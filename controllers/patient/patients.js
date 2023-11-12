@@ -1,9 +1,7 @@
-import { sequelize } from "../../config/db.js";
-import { Patient } from "../../models/patients/patients.js";
-import { Consult } from "../../models/consults/consults.js";
 import { similarityScore } from "../../helpers/string_similarity.js";
 import { MediaFile } from "../../models/patients/media_files.js";
-import { uploadFile, getFileInfo } from "../bucket.js";
+import { Patient } from "../../models/patients/patients.js";
+import { Consult } from "../../models/consults/consults.js";
 
 // Create a new patient
 export const createPatient = async (req, res) => {
@@ -188,12 +186,12 @@ export const deletePatient = async (req, res) => {
 
 export const getDoctorPatients = async (req, res) => {
     try {
-        const doctorId = req.query._id_doctor;
+        const _id_doctor = req.user._id_user;
 
         // Find all patients for the given doctor ID
         const patients = await Patient.findAll({
             where: {
-                _id_doctor: doctorId,
+                _id_doctor,
                 is_valid: true,
             },
         });

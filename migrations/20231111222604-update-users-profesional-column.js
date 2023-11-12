@@ -2,18 +2,20 @@
 
 module.exports = {
     up: async (queryInterface, Sequelize) => {
+        // Change the column name from profesional_id to professional_id
         await queryInterface.renameColumn(
             "users",
-            "_office_address",
-            "office_address"
+            "profesional_id",
+            "professional_id"
         );
     },
 
     down: async (queryInterface, Sequelize) => {
+        // Change the column name back to profesional_id
         await queryInterface.renameColumn(
             "users",
-            "office_address",
-            "_office_address"
+            "professional_id",
+            "profesional_id"
         );
     },
 };

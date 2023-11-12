@@ -2,11 +2,12 @@ import { ConsultRating } from "../../models/consults/consult_rating.js";
 
 export const createConsultRating = async (req, res) => {
     try {
-        const { rating, attributes, _id_doctor, _id_consult } = req.body;
+        const { rating, attributes, _id_consult } = req.body;
+        const _id_doctor = req.user._id_user;
 
-        // Crear la calificación de consulta en la base de datos
+        // Crear la calificación de consulta
         const newConsultRating = await ConsultRating.create({
-            rating, // Cambio de magnitud a rating
+            rating,
             attributes,
             _id_doctor,
             _id_consult,

@@ -1,13 +1,11 @@
-import { ParameterType } from "../../models/consults/parameter_types.js"; // Import the model
+import { ParameterType } from "../../models/consults/parameter_types.js";
 
 export const createParameterType = async (req, res) => {
     try {
-        const {
-            parameter_type_name,
-            category,
-            _id_doctor,
-            parameter_belongs_to,
-        } = req.body;
+        const { parameter_type_name, category, parameter_belongs_to } =
+            req.body;
+
+        const _id_doctor = req.user._id_user;
 
         // Create a new parameter type in the database
         const newParameterType = await ParameterType.create({
@@ -54,7 +52,7 @@ export const getParameterType = async (req, res) => {
 
 export const getAllParameterTypesForDoctor = async (req, res) => {
     try {
-        const _id_doctor = req.query._id_doctor; // Replace with the correct parameter name
+        const _id_doctor = req.user._id_user;
 
         const parameterTypes = await ParameterType.findAll({
             where: {
@@ -90,8 +88,9 @@ export const getAllParameterTypesForDoctor = async (req, res) => {
 
 export const updateParameterType = async (req, res) => {
     try {
-        const parameterTypeId = req.query._id_parameter_type;
-        const parameterType = await ParameterType.findByPk(parameterTypeId);
+        const parameterType = await ParameterType.findByPk(
+            req.query._id_parameter_type
+        );
 
         if (!parameterType) {
             return res
@@ -127,8 +126,9 @@ export const updateParameterType = async (req, res) => {
 
 export const deleteParameterType = async (req, res) => {
     try {
-        const parameterTypeId = req.query._id_parameter_type;
-        const parameterType = await ParameterType.findByPk(parameterTypeId);
+        const parameterType = await ParameterType.findByPk(
+            req.query._id_parameter_type
+        );
 
         if (!parameterType) {
             return res

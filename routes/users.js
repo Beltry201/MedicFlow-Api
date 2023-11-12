@@ -11,7 +11,7 @@ import {
     updateUser,
     // gtokens,
 } from "../controllers/user/users.js";
-
+import { getUserSubscription } from "../controllers/subscription/subscriptions.js";
 const router = Router();
 
 // Routes
@@ -23,6 +23,8 @@ router.post("/", createUser);
 router.put("/", validateToken, updateUser);
 router.put("/reset_password", validateToken, resetPassword);
 router.delete("/deactivate", validateToken, deactivateUser);
+
+router.get("/subscription", validateToken, getUserSubscription);
 
 // router.put("/:id", validateToken, updateUser);
 // router.get("/gtokens", gtokens);

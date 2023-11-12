@@ -10,13 +10,11 @@ const openai = new OpenAIApi({
 });
 
 // Function to generate the JSON response structure
-const requestJson = (jsonStructure) => `
+const requestJson = (jsonStructure) =>
+    `${JSON.stringify(jsonStructure, null, 2)}`;
 
-${JSON.stringify(jsonStructure, null, 2)}`;
-
-export async function generateText(transcript, background, note) {
-    let prompt = generatePrompt(transcript, background, note);
-    console.log("\n-- PROMPT: ", prompt);
+export async function generateText(transcript) {
+    let prompt = generatePrompt(transcript);
 
     try {
         const completion = await openai.chat.completions.create({
@@ -33,26 +31,14 @@ export async function generateText(transcript, background, note) {
             // TODO: Agregar limite de tokens por consulta
             // TODO: Cambiar a gpt-4-1106-preview
         });
-
-        console.log(completion.choices);
-        console.log("\n-- TOKENS: ", completion.usage);
-        return JSON.parse(completion.choices[0].message.content);
+        return completion;
     } catch (error) {
         console.error("Error generating text:", error);
         return "";
     }
 }
 
-function generatePrompt(transcript, background, note) {
-    console.log(
-        "\n-- TRANSCRIPT: ",
-        transcript,
-        "\n-- BACKGROUND: ",
-        background,
-        "\n-- TREATMENT: ",
-        note
-    );
-
+function generatePrompt(transcript) {
     const instruction = `
     HISTORIA CLÍNICA ELECTRÓNICA
 
@@ -65,22 +51,16 @@ function generatePrompt(transcript, background, note) {
     - Una vez que haya completado el formato JSON, revíselo para asegurarse de que sea 100% preciso y que haya incluido toda la información relevante del diálogo.
     - Evite repetir información, ser redundante o incluir detalles no mencionados en el diálogo.
     - El motivo debe estar presente siempre y debe ser un formato corto (10 palabras aprox).
+    - Obligatoriamente identifica todos los diagnósticos del paciente y agrégalos en el formato CIE-10 con descripción.
     - NO OMITA NINGÚN DATO, incluso si parece redundante o poco relevante.
 
-    INF:
-    Motivo: Razón principal por la que el paciente busca atención médica (obligatorio)
-    Estado Civil.
-    Ocupación.
-    Escolaridad.
-    Religión.
-    Lugar de Origen.
-
+    
     Diálogo Médico-Paciente:
     ["${transcript}"]
     
     Por favor, cree una historia clínica estructurada con los siguientes apartados, usando el formato JSON proporcionado a continuación:
-
-    Datos del paciente
+    
+    Datos del paciente (INF): Motivo: Razón principal por la que el paciente busca atención médica (obligatorio), Estado Civil, Ocupación, Escolaridad, Religión, Lugar de Origen.
     Antecedentes Familiares (AHF): Mencione enfermedades o condiciones relevantes de familiares directos, como padre, madre, hermanos o abuelos.
     Antecedentes Patológicos Personales (APP): Incluye patologías, alergias, cirugías y hospitalizaciones e inmunizaciones.
     Antecedentes Personales No Patológicos (APNP): En caso de estar presente, incluir hábitos, medicación actual y otras características relevantes mencionadas.
@@ -111,6 +91,5 @@ function generatePrompt(transcript, background, note) {
 
     const prompt = instruction + requestJson(jsonStructure);
 
-    console.log(prompt);
     return prompt;
 }

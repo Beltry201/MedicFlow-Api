@@ -1,11 +1,13 @@
-import { User } from "../../models/users/users.js";
-import { generateAccessCode } from "../../helpers/access_code_generator.js";
-import { createDefaultParameters } from "../../helpers/default_parameters.js";
-import { Subscription } from "../../models/subscriptions/subscriptions.js";
 import { MembershipPlan } from "../../models/subscriptions/membership_plans.js";
-import dotenv from "dotenv";
+import { createDefaultParameters } from "../../helpers/default_parameters.js";
+import { generateAccessCode } from "../../helpers/access_code_generator.js";
+import { Subscription } from "../../models/subscriptions/subscriptions.js";
+import { Consult } from "../../models/consults/consults.js";
+import { User } from "../../models/users/users.js";
+import jwt from "jsonwebtoken";
+import { Op } from "sequelize";
 import bcrypt from "bcryptjs";
-import jwt, { decode } from "jsonwebtoken";
+import dotenv from "dotenv";
 import Joi from "joi";
 
 dotenv.config();
@@ -21,9 +23,6 @@ export const createUser = async (req, res) => {
             password,
             specialty,
             role,
-            diploma_organization,
-            office_address,
-            profesional_id,
         } = req.body;
 
         // Validations
@@ -36,9 +35,6 @@ export const createUser = async (req, res) => {
             password: Joi.string().required(),
             specialty: Joi.string().required(),
             role: Joi.string().required(),
-            diploma_organization: Joi.string().required(),
-            office_address: Joi.string().required(),
-            profesional_id: Joi.string().required(),
         });
 
         const { error } = schema.validate(req.body);
@@ -63,30 +59,6 @@ export const createUser = async (req, res) => {
             });
         }
 
-        const existingOfficeAddressUser = await User.findOne({
-            where: { office_address },
-        });
-
-        if (existingOfficeAddressUser) {
-            return res.status(400).json({
-                success: false,
-                message: "Validation error",
-                error: "Office address already exists.",
-            });
-        }
-
-        const existingProfesionalIdUser = await User.findOne({
-            where: { profesional_id },
-        });
-
-        if (existingProfesionalIdUser) {
-            return res.status(400).json({
-                success: false,
-                message: "Validation error",
-                error: "Profesional ID already exists.",
-            });
-        }
-
         if (error) {
             return res.status(400).json({
                 success: false,
@@ -108,9 +80,6 @@ export const createUser = async (req, res) => {
             password: hashedPassword,
             specialty,
             role,
-            diploma_organization,
-            office_address,
-            profesional_id,
         });
 
         // Free Tier Subsbription
@@ -320,9 +289,9 @@ export const resetPassword = async (req, res) => {
 
 export const getUser = async (req, res) => {
     try {
-        const token = req.user._id_user;
+        const { _id_user } = req.user;
 
-        const user = await User.findByPk(token);
+        const user = await User.findByPk(_id_user);
 
         if (!user) {
             return res.status(404).json({
@@ -332,7 +301,7 @@ export const getUser = async (req, res) => {
         }
 
         const latestSubscription = await Subscription.findOne({
-            where: { _id_user: user._id_user },
+            where: { _id_user: _id_user },
             order: [["createdAt", "DESC"]],
         });
 
@@ -347,6 +316,28 @@ export const getUser = async (req, res) => {
             latestSubscription._id_membership_plan
         );
 
+        const currentDate = new Date();
+
+        const firstDayOfMonth = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            1
+        );
+        const lastDayOfMonth = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth() + 1,
+            0
+        );
+
+        const consultCount = await Consult.count({
+            where: {
+                _id_doctor: user._id_user,
+                createdAt: {
+                    [Op.between]: [firstDayOfMonth, lastDayOfMonth],
+                },
+            },
+        });
+
         // Return the user data along with the subscription and membership plan information
         res.status(200).json({
             success: true,
@@ -356,11 +347,12 @@ export const getUser = async (req, res) => {
                 last_name: user.last_name,
                 email: user.email,
                 phone: user.phone,
-                diploma_organization: user.diploma_organization,
-                professional_id: user.professional_id,
                 profile_picture: user.profile_picture,
                 specialty: user.specialty,
                 role: user.role,
+                professional_id: user.professional_id,
+                diploma_organization: user.diploma_organization,
+                office_address: user.office_address,
                 user_since: user.createdAt,
                 subscription: {
                     _id_subscription: latestSubscription._id_subscription,
@@ -369,9 +361,8 @@ export const getUser = async (req, res) => {
                     subscription_end_date:
                         latestSubscription.subscription_end_date,
                     state: latestSubscription.state,
+                    used_consults: consultCount,
                 },
-
-                // Membership plan information
                 membership_plan: {
                     _id_membership_plan: membershipPlan._id_membership_plan,
                     plan_name: membershipPlan.plan_name,

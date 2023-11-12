@@ -9,9 +9,11 @@ export const createCalendarEvent = async (req, res) => {
             start_date,
             end_date,
             description,
-            _id_doctor,
+
             _id_patient,
         } = req.body;
+
+        const _id_doctor = req.user._id_user;
 
         if (!title || !start_date || !end_date) {
             return res.status(400).json({
@@ -48,7 +50,8 @@ export const createCalendarEvent = async (req, res) => {
 
 export const getCalendarEvents = async (req, res) => {
     try {
-        const { doctorId, patientId } = req.query;
+        const { patientId } = req.query;
+        const _id_doctor = req.user._id_user;
 
         // Get the current date to determine the start and end of the month
         const today = new Date();
@@ -68,7 +71,7 @@ export const getCalendarEvents = async (req, res) => {
         };
 
         if (doctorId) {
-            filters._id_doctor = doctorId;
+            filters._id_doctor = _id_doctor;
         }
 
         if (patientId) {
@@ -91,15 +94,9 @@ export const getCalendarEvents = async (req, res) => {
 export const updateCalendarEvent = async (req, res) => {
     try {
         const { id } = req.params;
-        const {
-            title,
-            start_date,
-            end_date,
-            description,
-            _id_doctor,
-            _id_patient,
-        } = req.body;
-
+        const { title, start_date, end_date, description, _id_patient } =
+            req.body;
+        const _id_doctor = req.user._id_user;
         // Validate request body
         if (!title || !start_date || !end_date) {
             return res.status(400).json({
@@ -166,8 +163,7 @@ export const deleteCalendarEvent = async (req, res) => {
 
 export const getClosestEventByDate = async (req, res) => {
     try {
-        const { _id_doctor } = req.query;
-
+        const _id_doctor = req.user._id_user;
         // Validate if _id_doctor is provided
         if (!_id_doctor) {
             return res.status(400).json({
