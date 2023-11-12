@@ -16,11 +16,11 @@
         "dialect": "postgres"
     },
     "production": {
-        "database": "process.env.DB_PROD",
-        "username": "process.env.DB_USER",
-        "password": "process.env.DB_PASSWORD_PROD",
-        "host": "process.env.DB_HOST_PROD",
-        "port": "process.env.DB_PORT_PROD",
+        "database": "medicflow_db_prod",
+        "username": "medicflow",
+        "password": "2dF4wEk7NxeLgGTD3Kk1",
+        "host": "localhost",
+        "port": "5432",
         "dialect": "postgres"
     }
 }
