@@ -60,6 +60,7 @@ export const storeJsonData = async (req, res) => {
             _id_treatment_catalog,
         } = req.body;
 
+        console.log("\n-- TOKENS: ", completion_tokens, " ", prompt_tokens);
         const _id_doctor = req.user._id_user;
 
         let date = new Date();
