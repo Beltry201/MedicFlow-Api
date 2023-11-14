@@ -5,7 +5,6 @@ import {
     deleteTreatmentCatalog,
     updateTreatmentCatalog,
     getTreatmentCatalogDetails,
-    listTreatmentCatalogs,
     getDoctorTreatmentCatalogs,
 } from "../controllers/user/treatments_catalogs.js";
 
@@ -18,5 +17,4 @@ router.get("/details", validateToken, getTreatmentCatalogDetails);
 router.delete("/", validateToken, deleteTreatmentCatalog);
 router.get("/list", validateToken, getDoctorTreatmentCatalogs);
 
-// router.get("/", validateToken, listTreatmentCatalogs);
 export default router;
