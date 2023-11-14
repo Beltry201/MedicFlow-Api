@@ -124,26 +124,6 @@ export const getTreatmentCatalogDetails = async (req, res) => {
     }
 };
 
-export const listTreatmentCatalogs = async (req, res) => {
-    try {
-        // Retrieve all treatments from the database
-        const treatments_catalog = await TreatmentCatalog.findAll({
-            attributes: {
-                exclude: ["duration_weeks"],
-            },
-        });
-
-        res.status(200).json({ success: true, treatments_catalog });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to retrieve treatments catalog",
-            error: error.message,
-        });
-    }
-};
-
 export const getDoctorTreatmentCatalogs = async (req, res) => {
     try {
         const _id_doctor = req.user._id_user;

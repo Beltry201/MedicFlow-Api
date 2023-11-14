@@ -1,7 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
-import { Consult } from "./consults.js";
-import { ParameterType } from "./parameter_types.js";
 
 export const Background = sequelize.define(
     "Background",

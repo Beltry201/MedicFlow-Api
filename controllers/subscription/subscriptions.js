@@ -26,6 +26,13 @@ export const getUserSubscription = async (req, res) => {
         where: { _id_user: _id_user },
         order: [["createdAt", "DESC"]],
     });
+    const latestPayment = await PaymentRecord.findOne({
+        where: { _id_user },
+        order: [["payment_date", "DESC"]],
+    });
+    const membershipPlan = await MembershipPlan.findByPk(
+        latestSubscription._id_membership_plan
+    );
 
     if (latestSubscription.state === "free tier") {
         // Step 5: Check if the subscription is in the "Free" plan
@@ -64,16 +71,7 @@ export const getUserSubscription = async (req, res) => {
             });
         }
     } else if (latestSubscription.state) {
-        const latestPayment = await PaymentRecord.findOne({
-            where: { _id_user },
-            order: [["payment_date", "DESC"]],
-        });
         if (latestPayment) {
-            // Step 3: Get the associated membership plan and consult limit
-            const membershipPlan = await MembershipPlan.findByPk(
-                latestSubscription._id_membership_plan
-            );
-
             if (membershipPlan) {
                 const consultLimit = membershipPlan.monthly_consult_limit;
 
@@ -90,11 +88,169 @@ export const getUserSubscription = async (req, res) => {
                 res.status(201).json({
                     success: true,
                     subscription: {
-                        latestSubscription,
+                        _id_subscription: latestSubscription._id_subscription,
+                        subscription_start_date:
+                            latestSubscription.subscription_start_date,
+                        subscription_end_date:
+                            latestSubscription.subscription_end_date,
+                        state: latestSubscription.state,
+                        used_consults: consultCount,
                     },
-                    consult: formattedConsult,
+                    membership_plan: {
+                        id_plan: freePlan._id_membership_plan,
+                        plan_name: freePlan.plan_name,
+                        consults_limit: freePlan.consults_limit,
+                        min_per_consult: freePlan.min_per_consult,
+                        is_valid: freePlan.is_valid,
+                    },
                 });
             }
         }
     }
 };
+
+export async function canGenerateMoreConsults(_id_user) {
+    const currentDate = new Date();
+    const firstDayOfMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+    );
+    const lastDayOfMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0
+    );
+
+    let latestSubscription, membershipPlan, consultCount, user;
+
+    try {
+        latestSubscription = await Subscription.findOne({
+            where: { _id_user: _id_user },
+            order: [["createdAt", "DESC"]],
+        });
+
+        if (!latestSubscription) {
+            throw new Error("No subscription found for the user");
+        }
+
+        membershipPlan = await MembershipPlan.findByPk(
+            latestSubscription._id_membership_plan
+        );
+
+        if (!membershipPlan) {
+            throw new Error("No membership plan found");
+        }
+
+        consultCount = await Consult.count({
+            where: {
+                _id_doctor: _id_user,
+                createdAt: {
+                    [Op.between]: [firstDayOfMonth, lastDayOfMonth],
+                },
+            },
+        });
+
+        user = await User.findByPk(_id_user);
+
+        if (!user) {
+            throw new Error("No user found");
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message,
+            membership: membershipPlan,
+            consultCount,
+            subscription: latestSubscription,
+        };
+    }
+    try {
+        if (user.role === "admin") {
+            console.log("Es admin");
+            return {
+                success: true,
+                membership: membershipPlan,
+                consultCount,
+                subscription: latestSubscription,
+            };
+        }
+
+        if (!latestSubscription) {
+            return {
+                success: false,
+                message: "No subscription found for the user",
+                membership: membershipPlan,
+                consultCount,
+                subscription: latestSubscription,
+            };
+        }
+
+        if (
+            latestSubscription.state === "active" ||
+            latestSubscription.state === "free tier"
+        ) {
+            if (latestSubscription.state === "active") {
+                // Step 2: Get the latest payment record for active subscriptions
+                const latestPayment = await PaymentRecord.findOne({
+                    where: { _id_user: user._id_user },
+                    order: [["payment_date", "DESC"]],
+                });
+
+                if (
+                    !latestPayment ||
+                    latestPayment.payment_status !== "approved"
+                ) {
+                    return {
+                        success: false,
+                        message:
+                            "Payment not approved or no payment record found",
+                        membership: membershipPlan,
+                        consultCount,
+                        subscription: latestSubscription,
+                    };
+                }
+
+                console.log("\n-- LATEST PAYMENT: ", latestPayment.state);
+            }
+
+            if (!membershipPlan) {
+                return {
+                    success: false,
+                    message: "No membership plan found",
+                    membership: membershipPlan,
+                    consultCount,
+                    subscription: latestSubscription,
+                };
+            }
+
+            const consultLimit = membershipPlan.consults_limit;
+
+            if (consultCount < consultLimit) {
+                return {
+                    success: true,
+                    membership: membershipPlan,
+                    consultCount,
+                    subscription: latestSubscription,
+                };
+            }
+        }
+    } catch (error) {
+        console.error("Error in canGenerateMoreConsults:", error);
+        return {
+            success: false,
+            message: "Internal server error",
+            membership: membershipPlan,
+            consultCount,
+            subscription: latestSubscription,
+        };
+    }
+
+    return {
+        success: false,
+        message: "User is not eligible to generate more consults",
+        membership: membershipPlan,
+        consultCount,
+        subscription: latestSubscription,
+    };
+}

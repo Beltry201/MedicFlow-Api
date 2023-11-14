@@ -1,4 +1,4 @@
-import { canGenerateMoreConsults } from "../../helpers/subscription_handler.js";
+import { canGenerateMoreConsults } from "../subscription/subscriptions.js";
 import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
 import { ParameterType } from "../../models/consults/parameter_types.js";
 import { ConsultRating } from "../../models/consults/consult_rating.js";
@@ -15,7 +15,7 @@ export const generateJsonResponse = async (req, res) => {
     const user = req.user;
 
     try {
-        const eligibilityResult = await canGenerateMoreConsults(user);
+        const eligibilityResult = await canGenerateMoreConsults(user._id_user);
 
         if (eligibilityResult.success) {
             let completion;
@@ -87,7 +87,7 @@ export const generateJsonResponse = async (req, res) => {
                         : null,
                 },
                 subscription: {
-                    consult_count: eligibilityResult.consultCount || 0,
+                    consult_count: eligibilityResult.consultCount,
                     start_date: eligibilityResult.subscription
                         ? eligibilityResult.subscription.subscription_start_date
                         : null,
