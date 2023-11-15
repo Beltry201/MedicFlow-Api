@@ -140,9 +140,10 @@ export const getDoctorTreatmentCatalogs = async (req, res) => {
         });
 
         if (treatments_catalog.length === 0) {
-            return res.status(404).json({
+            return res.status(200).json({
                 success: false,
                 message: "No treatments catalog found for this doctor",
+                treatments_catalog: [],
             });
         }
 
