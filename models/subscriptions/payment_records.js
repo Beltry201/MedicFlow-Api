@@ -1,9 +1,8 @@
+// models/subscriptions/payment_records.js
+
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
-import { User } from "../users/users.js";
 import { MembershipPlan } from "./membership_plans.js";
-import { Subscription } from "./subscriptions.js";
-import { PaymentMethod } from "./payment_methods.js";
 
 export const PaymentRecord = sequelize.define(
     "PaymentRecord",
@@ -13,21 +12,26 @@ export const PaymentRecord = sequelize.define(
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
-        plan_name: {
-            type: DataTypes.STRING(),
-            allowNull: false,
-        },
         payment_date: {
             type: DataTypes.DATE,
             allowNull: false,
         },
         payment_amount: {
-            type: DataTypes.DECIMAL(10, 2), // Adjust precision and scale as needed
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         payment_status: {
-            type: DataTypes.ENUM("approved, declined, pending"),
+            type: DataTypes.ENUM("approved", "declined", "pending"),
             allowNull: false,
+        },
+        discount_amount: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true,
+            defaultValue: 0.0,
+        },
+        discount_type: {
+            type: DataTypes.ENUM("percentage", "fixed"),
+            allowNull: true,
         },
     },
     {

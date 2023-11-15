@@ -36,7 +36,6 @@ const requestJson = (jsonStructure) =>
     `${JSON.stringify(jsonStructure, null, 2)}`;
 
 export async function generateText(transcript) {
-    console.log("\n-- SENDIND PROMPT");
     try {
         const completion = await openai.chat.completions.create({
             messages: [

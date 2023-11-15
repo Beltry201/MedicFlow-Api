@@ -29,6 +29,26 @@ export const PaymentMethod = sequelize.define(
             type: DataTypes.UUID,
             allowNull: false,
         },
+        entity: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+        description: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+        payment_type: {
+            type: DataTypes.ENUM("credit", "debit", "cash", "other"),
+            allowNull: true,
+        },
+        name: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+        is_valid: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+        },
     },
     {
         tableName: "payment_methods",

@@ -6,7 +6,7 @@ import { MediaFile } from "./patients/media_files.js";
 import { Background } from "./consults/backgrounds.js";
 import { CalendarEvent } from "./users/calendar_events.js";
 import { ConsultRating } from "./consults/consult_rating.js";
-import { ParameterType } from "./consults/parameter_types.js";
+// import { ParameterType } from "./consults/parameter_types.js";
 import { Subscription } from "./subscriptions/subscriptions.js";
 import { TreatmentCatalog } from "./users/treatments_catalogs.js";
 import { PaymentRecord } from "./subscriptions/payment_records.js";
@@ -93,22 +93,22 @@ Consult.belongsTo(User, {
 
 // ------------- 1 USER * PARAMETER TYPE -------------
 // Each user (doctor) can define multiple parameter types.
-User.hasMany(ParameterType, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each user (doctor) can define multiple parameter types.",
-});
+// User.hasMany(ParameterType, {
+//     foreignKey: "_id_doctor",
+//     targetKey: "_id_user",
+//     onDelete: "CASCADE",
+//     onUpdate: "CASCADE",
+//     description: "Each user (doctor) can define multiple parameter types.",
+// });
 
-// Each parameter type belongs to a single user (doctor).
-ParameterType.belongsTo(User, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each parameter type belongs to a single user (doctor).",
-});
+// // Each parameter type belongs to a single user (doctor).
+// ParameterType.belongsTo(User, {
+//     foreignKey: "_id_doctor",
+//     targetKey: "_id_user",
+//     onDelete: "CASCADE",
+//     onUpdate: "CASCADE",
+//     description: "Each parameter type belongs to a single user (doctor).",
+// });
 
 // ------------- 1 USER * CONSULT RATING -------------
 // Each user (doctor) can receive multiple consult ratings.
@@ -150,17 +150,17 @@ CalendarEvent.belongsTo(User, {
 
 // ------------- 1 BACKGROUND 1 PARAMETER_TYPES -------------
 // Each background belongs to a specific parameter type.
-Background.belongsTo(ParameterType, {
-    foreignKey: "_id_parameter",
-    onDelete: "CASCADE",
-    description: "Each background belongs to a specific parameter type.",
-});
+// Background.belongsTo(ParameterType, {
+//     foreignKey: "_id_parameter",
+//     onDelete: "CASCADE",
+//     description: "Each background belongs to a specific parameter type.",
+// });
 
-ParameterType.hasMany(Background, {
-    foreignKey: "_id_parameter",
-    onDelete: "CASCADE",
-    description: "Each parameter type can have multiple backgrounds.",
-});
+// ParameterType.hasMany(Background, {
+//     foreignKey: "_id_parameter",
+//     onDelete: "CASCADE",
+//     description: "Each parameter type can have multiple backgrounds.",
+// });
 
 // ------------- 1 CONSULT * BACKGROUND -------------
 // Each background belongs to a specific consult.
@@ -330,4 +330,11 @@ User.hasMany(Subscription, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
     description: "Each user can have multiple subscriptions.",
+});
+
+// ------------- 1 MEMBERSHIP PLAN * PAYMENT RECORDS -------------
+// Define association with MembershipPlan
+PaymentRecord.belongsTo(MembershipPlan, {
+    foreignKey: "_id_membership_plan",
+    as: "membership_plan",
 });
