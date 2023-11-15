@@ -33,6 +33,14 @@ export const getNotesForPatient = async (req, res) => {
             },
         });
 
+        if (notes.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: "No notes found for this patient",
+                notes: [],
+            });
+        }
+
         res.status(200).json({
             success: true,
             notes,
