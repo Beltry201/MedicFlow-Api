@@ -290,14 +290,6 @@ export const getConsultDetails = async (req, res) => {
                 {
                     model: Patient,
                 },
-                {
-                    model: Background,
-                    include: [
-                        {
-                            model: ParameterType,
-                        },
-                    ],
-                },
             ],
         });
 
