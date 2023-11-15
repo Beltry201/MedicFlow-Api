@@ -86,14 +86,16 @@ export const createUser = async (req, res) => {
         const oneYearLater = new Date();
         oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
 
-        const newSubscriptionRecord = await Subscription.create({
-            _id_user: newUser._id_user,
-            subscription_start_date: new Date(),
-            subscription_end_date: oneYearLater,
-            state: "free tier",
-            _id_membership_plan: 1,
-            is_active: true,
-        });
+        if (role !== "admin") {
+            const newSubscriptionRecord = await Subscription.create({
+                _id_user: newUser._id_user,
+                subscription_start_date: new Date(),
+                subscription_end_date: oneYearLater,
+                state: "free tier",
+                _id_membership_plan: 1,
+                is_active: true,
+            });
+        }
 
         // MVP Access Code
         const accessCode = generateAccessCode();

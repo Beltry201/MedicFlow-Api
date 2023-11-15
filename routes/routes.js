@@ -6,6 +6,7 @@ import consultRoutes from "./consults.js";
 import parameterTypesRoutes from "./parameter_types.js";
 import consultRatingRoutes from "./consult_rating.js";
 import calendarEventRoutes from "./calendar_event.js";
+import adminRoutes from "./admin.js";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use("/consults", consultRoutes);
 router.use("/parameters", parameterTypesRoutes);
 router.use("/ratings", consultRatingRoutes);
 router.use("/calendar_events", calendarEventRoutes);
+router.use("/admin", adminRoutes);
 
 export default router;

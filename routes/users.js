@@ -10,13 +10,18 @@ import {
     verifyToken,
     updateUser,
 } from "../controllers/user/users.js";
-import { getUserSubscription } from "../controllers/subscription/subscriptions.js";
+import {
+    getUserSubscription,
+    createSubscription,
+    updateSubscription,
+} from "../controllers/subscription/subscriptions.js";
 import {
     createPaymentMethod,
     getPaymentMethods,
     updatePaymentMethod,
     deletePaymentMethod,
 } from "../controllers/subscription/payment_methods.js";
+import { createPaymentRecord } from "../controllers/subscription/payment_records.js";
 const router = Router();
 
 // Routes
@@ -27,10 +32,13 @@ router.get("/", validateToken, getUser);
 router.get("/access_code", access_code);
 
 router.post("/payment_method", validateToken, createPaymentMethod);
+router.post("/subscription", validateToken, createSubscription);
+router.post("/purchase", validateToken, createPaymentRecord);
 router.post("/login", loginUser);
 router.post("/", createUser);
 
 router.put("/payment_method", validateToken, updatePaymentMethod);
+router.put("/subscription", validateToken, updateSubscription);
 router.put("/reset_password", validateToken, resetPassword);
 router.put("/:id", validateToken, updateUser);
 router.put("/", validateToken, updateUser);

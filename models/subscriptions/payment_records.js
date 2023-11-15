@@ -24,16 +24,6 @@ export const PaymentRecord = sequelize.define(
             type: DataTypes.ENUM("approved", "declined", "pending"),
             allowNull: false,
         },
-        _id_membership_plan: {
-            type: DataTypes.UUID,
-            allowNull: true,
-            references: {
-                model: MembershipPlan,
-                key: "_id_membership_plan",
-            },
-            onUpdate: "CASCADE",
-            onDelete: "SET NULL",
-        },
         discount_amount: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: true,
