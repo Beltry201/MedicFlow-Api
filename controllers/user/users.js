@@ -85,6 +85,7 @@ export const createUser = async (req, res) => {
         // Free Tier Subsbription
         const oneYearLater = new Date();
         oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+
         const newSubscriptionRecord = await Subscription.create({
             _id_user: newUser._id_user,
             subscription_start_date: new Date(),
