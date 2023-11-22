@@ -2,6 +2,12 @@
 
 module.exports = {
     up: async (queryInterface, Sequelize) => {
+        // Drop foreign key constraint on 'backgrounds'
+        await queryInterface.removeConstraint(
+            "backgrounds",
+            "backgrounds__id_parameter_fkey"
+        );
+
         // Remove the 'parameter_types' table
         await queryInterface.dropTable("parameters_types");
 
@@ -76,6 +82,17 @@ module.exports = {
                 type: Sequelize.DATE,
                 allowNull: false,
             },
+        });
+
+        await queryInterface.addConstraint("backgrounds", {
+            fields: ["_id_parameter"],
+            type: "foreign key",
+            name: "backgrounds__id_parameter_fkey",
+            references: {
+                table: "parameters_types",
+                field: "_id_parameter_type",
+            },
+            onDelete: "cascade",
         });
     },
 };
