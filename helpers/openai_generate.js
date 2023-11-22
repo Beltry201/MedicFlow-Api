@@ -17,12 +17,15 @@ const jsonStructure = {
         Escolaridad: "",
         Religión: "",
         "Lugar de Origen": "",
-        "CIE-10": "",
     },
     AHF: {},
     APP: {},
     APNP: {},
     EF: {},
+    DGN: {
+        "CIE-10": "",
+        Comentarios: "",
+    },
     SOAP: {
         Subjetivo: "",
         Objetivo: "",
@@ -82,7 +85,7 @@ export async function generateText(transcript) {
                 {
                     role: "user",
                     content:
-                        "7. Obligatoriamente identifica todos los diagnósticos del paciente y agrégalos en el formato CIE-10 con descripción dentro de Exploracion Fisica",
+                        "7. Obligatoriamente identifica todos los diagnósticos del paciente y agrégalos en el formato CIE-10 con descripción dentro de DGN",
                 },
                 {
                     role: "user",
@@ -102,17 +105,22 @@ export async function generateText(transcript) {
                 {
                     role: "user",
                     content:
-                        "Antecedentes Patológicos Personales (APP): Incluye patologías, alergias, cirugías y hospitalizaciones e inmunizaciones.",
+                        "- Antecedentes Patológicos Personales (APP): Incluye patologías, alergias, cirugías y hospitalizaciones e inmunizaciones.",
                 },
                 {
                     role: "user",
                     content:
-                        "Antecedentes Personales No Patológicos (APNP): En caso de estar presente, incluir hábitos, medicación actual y otras características relevantes mencionadas.",
+                        "- Antecedentes Personales No Patológicos (APNP): En caso de estar presente, incluir hábitos, medicación actual y otras características relevantes mencionadas.",
                 },
                 {
                     role: "user",
                     content:
-                        "Exploración Física (EF): Solo los datos de exploración física.",
+                        "- Exploración Física (EF): Revisión del cuerpo del paciente para determinar si tiene o no un problema físico.",
+                },
+                {
+                    role: "user",
+                    content:
+                        "- Diagnóstico (DGN): Identifica una enfermedad o el estado del paciente con la ayuda de los comentarios del doctor y su cuadro clínico.",
                 },
                 {
                     role: "user",
@@ -128,7 +136,7 @@ export async function generateText(transcript) {
                 },
             ],
             response_format: { type: "json_object" },
-            model: "gpt-3.5-turbo-1106",
+            model: "gpt-4-1106-preview",
             temperature: 0.81,
         });
         console.log("\n-- COMPLETION: ", completion);
