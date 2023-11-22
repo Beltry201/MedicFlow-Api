@@ -1,5 +1,4 @@
 import { MembershipPlan } from "../../models/subscriptions/membership_plans.js";
-import { createDefaultParameters } from "../../helpers/default_parameters.js";
 import { generateAccessCode } from "../../helpers/access_code_generator.js";
 import { Subscription } from "../../models/subscriptions/subscriptions.js";
 import { Consult } from "../../models/consults/consults.js";
@@ -101,9 +100,6 @@ export const createUser = async (req, res) => {
         const accessCode = generateAccessCode();
         newUser.access_code = accessCode;
         await newUser.save();
-
-        //TODO: Quitar esta función, sustituir por default value (?)
-        await createDefaultParameters(newUser);
 
         // Sign Token
         const token = jwt.sign(

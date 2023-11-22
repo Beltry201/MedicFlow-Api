@@ -1,8 +1,6 @@
-import { canGenerateMoreConsults } from "../subscription/subscriptions.js";
 import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
-import { ParameterType } from "../../models/consults/parameter_types.js";
+import { canGenerateMoreConsults } from "../subscription/subscriptions.js";
 import { ConsultRating } from "../../models/consults/consult_rating.js";
-import { Background } from "../../models/consults/backgrounds.js";
 import { MediaFile } from "../../models/patients/media_files.js";
 import { generateText } from "../../helpers/openai_generate.js";
 import { Consult } from "../../models/consults/consults.js";
@@ -29,14 +27,13 @@ export const generateJsonResponse = async (req, res) => {
                 ) {
                     console.error("Error generating text:", error);
 
-                    res.status(400).json({
+                    return res.status(400).json({
                         success: false,
                         message: "Prompt is too long",
                     });
-
-                    return;
                 } else {
-                    throw error;
+                    console.error("Error generating text:", error);
+                    throw error; // Rethrow the error for unexpected cases
                 }
             }
 
@@ -101,7 +98,7 @@ export const generateJsonResponse = async (req, res) => {
             });
         }
     } catch (error) {
-        console.error(error);
+        console.error("Error in generateJsonResponse:", error);
         res.status(500).json({
             success: false,
             message: "Failed to generate JSON response",
@@ -152,78 +149,6 @@ export const storeJsonData = async (req, res) => {
             _id_patient,
         });
 
-        // Store Background
-        for (const categoryName in consult_json) {
-            const categoryData = consult_json[categoryName];
-            const titles = Object.keys(categoryData);
-            for (let i = 0; i < titles.length; i++) {
-                const title = titles[i];
-                let content = categoryData[title];
-
-                // Replace null or undefined with "Na"
-                if (
-                    content === null ||
-                    content === undefined ||
-                    content === ""
-                ) {
-                    content = "Na";
-                }
-
-                if (content !== "") {
-                    let parameter;
-                    if (
-                        categoryName === "AHF" ||
-                        categoryName === "APNP" ||
-                        categoryName === "APP"
-                    ) {
-                        parameter = await ParameterType.findOne({
-                            where: {
-                                _id_doctor,
-                                parameter_belongs_to: "background",
-                                category: categoryName,
-                                parameter_type_name: title,
-                            },
-                        });
-
-                        if (!parameter) {
-                            // Si el parámetro no existe, créalo
-                            parameter = await ParameterType.create({
-                                _id_doctor: _id_doctor,
-                                parameter_belongs_to: "background",
-                                category: categoryName,
-                                parameter_type_name: title,
-                            });
-                        }
-
-                        await Background.create({
-                            _id_consult: consult._id_consult,
-                            _id_parameter: parameter._id_parameter_type,
-                            title,
-                            content,
-                        });
-                    } else if (categoryName === "SOAP") {
-                        parameter = await ParameterType.findOne({
-                            where: {
-                                _id_doctor: _id_doctor,
-                                parameter_belongs_to: "soap",
-                                category: categoryName,
-                                parameter_type_name: title,
-                            },
-                        });
-
-                        if (!parameter) {
-                            parameter = await ParameterType.create({
-                                _id_doctor: _id_doctor,
-                                parameter_belongs_to: "soap",
-                                category: categoryName,
-                                parameter_type_name: title,
-                            });
-                        }
-                    }
-                }
-            }
-        }
-
         // Create Rating
         if (rating !== undefined && attributes !== undefined) {
             await ConsultRating.create({
@@ -239,11 +164,7 @@ export const storeJsonData = async (req, res) => {
         }
         const newConsult = await Consult.findOne({
             where: { _id_consult: consult._id_consult },
-            include: [
-                { model: Patient },
-                { model: Background },
-                // { model: Note },
-            ],
+            include: [{ model: Patient }],
         });
 
         const formattedConsult = {

@@ -345,7 +345,7 @@ export const getPatientINF = async (req, res) => {
             });
         }
 
-        let backgrounds = {
+        let patientInfo = {
             INF: [],
         };
 
@@ -359,7 +359,7 @@ export const getPatientINF = async (req, res) => {
                         ([key, value]) => {
                             if (value && key !== "Motivo") {
                                 // Check for similarity with existing titles
-                                const similarTitle = backgrounds[category].find(
+                                const similarTitle = patientInfo[category].find(
                                     (item) =>
                                         similarityScore(item.title, key) > 0.9
                                 );
@@ -368,7 +368,7 @@ export const getPatientINF = async (req, res) => {
                                     // If similar title is found, update the content
                                     similarTitle.content = value;
                                 } else {
-                                    backgrounds[category].push({
+                                    patientInfo[category].push({
                                         title: key,
                                         content: value,
                                     });
@@ -380,10 +380,10 @@ export const getPatientINF = async (req, res) => {
             });
         });
 
-        console.log("\n-- INF: ", backgrounds);
+        console.log("\n-- INF: ", patientInfo);
         return res.json({
             success: true,
-            patientBackgrounds: backgrounds,
+            patient_info: patientInfo,
         });
     } catch (error) {
         return res.status(500).json({
