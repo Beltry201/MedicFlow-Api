@@ -6,12 +6,11 @@ dotenv.config();
 export const validateToken = (req, res, next) => {
     const token = req.headers.authorization;
     if (!token) {
-        return res.status(401).json({
+        return res.status(400).json({
             success: false,
             message: "No token provided",
         });
     }
-    console.log(token);
 
     jwt.verify(token, process.env.TOKEN_SECRET, (err, decodedToken) => {
         if (err) {
@@ -21,7 +20,6 @@ export const validateToken = (req, res, next) => {
         }
 
         req.user = decodedToken;
-        console.log(req.user);
         next();
     });
 };

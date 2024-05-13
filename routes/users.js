@@ -13,7 +13,7 @@ import {
 const router = Router();
 
 // Routes
-router.get("/token", validateToken, verifyToken);
+router.get("/token", verifyToken);
 router.get("/", validateToken, getUser);
 
 router.post("/login", loginUser);

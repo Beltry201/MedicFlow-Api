@@ -4,6 +4,7 @@ import { Patient } from "../../models/patients/patients.js";
 import { Consult } from "../../models/consults/consults.js";
 import { PatientService } from "../../services/patients/patients.js";
 import { Op } from "sequelize";
+import { sequelize } from "../../config/db.js";
 const patientService = new PatientService();
 
 // Create a new patient
@@ -30,10 +31,41 @@ export const createPatient = async (req, res) => {
 // Get a list of all patients
 export const getAllPatients = async (req, res) => {
     try {
-        // Retrieve all patients from the database
-        const patients = await Patient.findAll();
+        const patients = await Patient.findAll({
+            include: [
+                {
+                    model: Consult,
+                    order: [["createdAt", "DESC"]],
+                    limit: 1,
+                },
+            ],
+            attributes: {
+                include: [
+                    [
+                        sequelize.cast(
+                            sequelize.literal(
+                                `(SELECT count(*) 
+                                AS "count" FROM "consults" AS "Consult" 
+                                WHERE ("Consult"."_id_patient" = "Patient"."_id_patient" 
+                                AND "Consult"."deletedAt" IS NULL)
+                                )`
+                            ),
+                            "INTEGER"
+                        ),
+                        "consultCount",
+                    ],
+                ],
+            },
+        });
 
-        res.status(200).json({ success: true, patients: patients || [] }); // Return an empty list if patients is falsy
+        // Iterate over patients
+        patients.forEach((patient) => {
+            console.log(patient);
+            patient.dataValues.last_consult = patient.Consults[0];
+            delete patient.dataValues.Consults;
+        });
+
+        res.status(200).json({ success: true, patients: patients || [] });
     } catch (error) {
         console.error(error);
         res.status(500).json({

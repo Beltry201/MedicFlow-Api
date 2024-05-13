@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
 
 export const Consult = sequelize.define(
-    "consults",
+    "Consult",
     {
         _id_consult: {
             type: DataTypes.UUID,

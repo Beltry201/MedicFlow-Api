@@ -2,6 +2,11 @@ import { Doctor } from "../../models/clinic/doctors.js";
 import { User } from "../../models/users/users.js";
 import { UserService } from "../../services/users/users.js";
 
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 const userService = new UserService();
 
 export const createUser = async (req, res) => {
@@ -188,37 +193,28 @@ export const deactivateUser = async (req, res) => {
     }
 };
 
-export const verifyToken = async (req, res) => {
-    console.log("Entre a validate");
-    try {
-        const token = req.headers.authorization;
-        if (!token) {
-            return res.status(400).json({
-                success: false,
-                message: "Token not provided gei",
-            });
-        }
+dotenv.config();
 
-        // Verify and decode the token
-        const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET);
-
-        // Token is valid, user can access
-        if (decodedToken._id_user) {
-            res.status(200).json({
-                success: true,
-                message: "Token is valid",
-            });
-        }
-    } catch (error) {
-        if (error.name === "TokenExpiredError") {
-            return res.status(401).json({
-                success: false,
-                message: "Token has expired",
-            });
-        }
-        return res.status(401).json({
+export const verifyToken = (req, res) => {
+    const token = req.headers.authorization;
+    if (!token) {
+        return res.status(400).json({
             success: false,
-            message: "Token is invalid",
+            message: "No token provided",
         });
     }
+
+    jwt.verify(token, process.env.TOKEN_SECRET, (err, decodedToken) => {
+        if (err) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Invalid token" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Token is valid",
+            user: decodedToken,
+        });
+    });
 };
