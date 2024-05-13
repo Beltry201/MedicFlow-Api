@@ -23,8 +23,8 @@ async function main() {
             port: 4001,
         },
         testing: {
-            forceSync: false,
-            port: 4000,
+            forceSync: true,
+            port: 4091,
         },
         production: {
             forceSync: false,
