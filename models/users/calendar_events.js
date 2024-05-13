@@ -26,15 +26,10 @@ export const CalendarEvent = sequelize.define(
             allowNull: true,
             defaultValue: null,
         },
-        _id_doctor: {
-            type: DataTypes.UUID,
-        },
-        _id_pacient: {
-            type: DataTypes.UUID,
-        },
     },
     {
         tableName: "calendar_events",
         timestamps: true,
+        paranoid: true,
     }
 );

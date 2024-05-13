@@ -11,6 +11,7 @@ export const validateToken = (req, res, next) => {
             message: "No token provided",
         });
     }
+    console.log(token);
 
     jwt.verify(token, process.env.TOKEN_SECRET, (err, decodedToken) => {
         if (err) {
@@ -20,6 +21,7 @@ export const validateToken = (req, res, next) => {
         }
 
         req.user = decodedToken;
+        console.log(req.user);
         next();
     });
 };

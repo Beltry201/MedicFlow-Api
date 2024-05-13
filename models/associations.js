@@ -1,198 +1,13 @@
 import { User } from "./users/users.js";
 import { Note } from "./patients/notes.js";
+import { Clinic } from "./clinic/clinics.js";
+import { Doctor } from "./clinic/doctors.js";
 import { Patient } from "./patients/patients.js";
 import { Consult } from "./consults/consults.js";
+import { Template } from "./clinic/templates.js";
 import { MediaFile } from "./patients/media_files.js";
 import { CalendarEvent } from "./users/calendar_events.js";
 import { ConsultRating } from "./consults/consult_rating.js";
-import { Subscription } from "./subscriptions/subscriptions.js";
-import { TreatmentCatalog } from "./users/treatments_catalogs.js";
-import { PaymentRecord } from "./subscriptions/payment_records.js";
-import { PaymentMethod } from "./subscriptions/payment_methods.js";
-import { MembershipPlan } from "./subscriptions/membership_plans.js";
-
-// ------------- 1 USER * PAYMENT METHOD -------------
-// Each user can have multiple payment methods.
-User.hasMany(PaymentMethod, {
-    foreignKey: "_id_doctor",
-    sourceKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each user (doctor) can have multiple payment methods.",
-});
-
-// Each payment method belongs to a single user (doctor).
-PaymentMethod.belongsTo(User, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each payment method belongs to a single user (doctor).",
-});
-
-// ------------- 1 USER * PATIENT -------------
-// Each user (doctor) can have multiple patients.
-User.hasMany(Patient, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each user (doctor) can have multiple patients.",
-});
-
-// Each patient belongs to a single user (doctor).
-Patient.belongsTo(User, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each patient belongs to a single user (doctor).",
-});
-
-// ------------- 1 USER * TREATMENT CATALOG -------------
-// Each user (doctor) can have multiple entries in the treatment catalog.
-User.hasMany(TreatmentCatalog, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description:
-        "Each user (doctor) can have multiple entries in the treatment catalog.",
-});
-
-// Each entry in the treatment catalog belongs to a single user (doctor).
-TreatmentCatalog.belongsTo(User, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description:
-        "Each entry in the treatment catalog belongs to a single user (doctor).",
-});
-
-// ------------- 1 USER * CONSULT -------------
-// Each user (doctor) can have multiple consultations.
-User.hasMany(Consult, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each user (doctor) can have multiple consultations.",
-});
-
-// Each consultation belongs to a single user (doctor).
-Consult.belongsTo(User, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each consultation belongs to a single user (doctor).",
-});
-
-// ------------- 1 USER * CONSULT RATING -------------
-// Each user (doctor) can receive multiple consult ratings.
-User.hasMany(ConsultRating, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each user (doctor) can receive multiple consult ratings.",
-});
-
-// Each consult rating belongs to a single user (doctor).
-ConsultRating.belongsTo(User, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each consult rating belongs to a single user (doctor).",
-});
-
-// ------------- 1 USER * CALENDAR EVENT -------------
-// Each user (doctor) can have multiple calendar events.
-User.hasMany(CalendarEvent, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each user (doctor) can have multiple calendar events.",
-});
-
-// Each calendar event belongs to a single user (doctor).
-CalendarEvent.belongsTo(User, {
-    foreignKey: "_id_doctor",
-    targetKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each calendar event belongs to a single user (doctor).",
-});
-
-// ------------- 1 CONSULT 1 CONSULT RATING -------------
-// Each consult rating belongs to a specific consult.
-ConsultRating.belongsTo(Consult, {
-    foreignKey: "_id_consult",
-    targetKey: "_id_consult",
-    onDelete: "CASCADE",
-    description: "Each consult rating belongs to a specific consult.",
-});
-
-Consult.hasOne(ConsultRating, {
-    foreignKey: "_id_consult",
-    targetKey: "_id_consult",
-    onDelete: "CASCADE",
-    description: "Each consult can have one consult ratings.",
-});
-
-// ------------- 1 TREATMENT CATALOG * CONSULT -------------
-// Each consult is associated with a specific treatment catalog entry.
-Consult.belongsTo(TreatmentCatalog, {
-    foreignKey: "_id_treatment_catalog",
-    targetKey: "_id_treatment_catalog",
-    onDelete: "CASCADE",
-    description:
-        "Each consult is associated with a specific treatment catalog entry.",
-});
-
-TreatmentCatalog.hasMany(Consult, {
-    foreignKey: "_id_treatment_catalog",
-    sourceKey: "_id_treatment_catalog",
-    onDelete: "CASCADE",
-    description:
-        "Each treatment catalog entry can be associated with multiple consults.",
-});
-
-// ------------- 1 CONSULT * MEDIA FILES -------------
-// Each media file is associated with a specific consult.
-MediaFile.belongsTo(Consult, {
-    foreignKey: "_id_consult",
-    targetKey: "_id_consult",
-    onDelete: "CASCADE",
-    description: "Each media file is associated with a specific consult.",
-});
-
-Consult.hasMany(MediaFile, {
-    foreignKey: "_id_consult",
-    sourceKey: "_id_consult",
-    onDelete: "CASCADE",
-    description: "Each consult can have multiple associated media files.",
-});
-
-// ------------- 1 PATIENT * CONSULT -------------
-// Each consult is associated with a specific patient.
-Consult.belongsTo(Patient, {
-    foreignKey: "_id_patient",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    allowNull: false,
-    description: "Each consult is associated with a specific patient.",
-});
-
-Patient.hasMany(Consult, {
-    foreignKey: "_id_patient",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each patient can have multiple associated consults.",
-});
 
 // ------------- 1 PATIENT * MEDIA FILES -------------
 // Each media file is associated with a specific patient.
@@ -226,66 +41,58 @@ Patient.hasMany(Note, {
     description: "Each patient can have multiple associated notes.",
 });
 
-// ------------- 1 SUBSCRIPTION 1 MEMBERSHIP PLAN -------------
-// Each subscription belongs to a specific membership plan.
-MembershipPlan.hasMany(Subscription, {
-    foreignKey: "_id_membership_plan",
-    targetKey: "_id_membership_plan",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    allowNull: false,
-    description: "Each subscription belongs to a specific membership plan.",
+// ------------- 1 CLINIC * TEMPLATES -------------
+Clinic.hasMany(Template, {
+    foreignKey: "_id_clinic",
+});
+Template.belongsTo(Clinic, {
+    foreignKey: "_id_clinic",
 });
 
-Subscription.belongsTo(MembershipPlan, {
-    foreignKey: "_id_membership_plan",
-    targetKey: "_id_membership_plan",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    allowNull: false,
-    description:
-        "Each subscription is associated with a specific membership plan.",
+// ------------- 1 CLINIC * USERS -------------
+Clinic.hasMany(User, {
+    foreignKey: "_id_clinic",
+});
+User.belongsTo(Clinic, {
+    foreignKey: "_id_clinic",
 });
 
-// ------------- 1 USER * PAYMENT RECORD -------------
-// Each payment record belongs to a specific user, payment method, and subscription.
-PaymentRecord.belongsTo(User, { foreignKey: "_id_user", onDelete: "CASCADE" });
-
-// ------------- 1 PAYMENT RECORD 1 PAYMENT MEHTOD -------------
-PaymentRecord.belongsTo(PaymentMethod, {
-    foreignKey: "_id_payment_method",
-    onDelete: "CASCADE",
+// ------------- 1 CLINIC * PATIENTS -------------
+Clinic.hasMany(Patient, {
+    foreignKey: "_id_clinic",
+});
+Patient.belongsTo(Clinic, {
+    foreignKey: "_id_clinic",
 });
 
-// ------------- 1 PAYMENT RECORD 1 SUBSCRIPTION -------------
-PaymentRecord.belongsTo(Subscription, {
-    foreignKey: "_id_subscription_record",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description:
-        "Each payment record belongs to a specific user, payment method, and subscription.",
-});
+// ------------- 1 USER 1 DOCTOR -------------
+User.hasOne(Doctor, { foreignKey: "_id_user" });
+Doctor.belongsTo(User, { foreignKey: "_id_user" });
 
-// ------------- 1 SUBSCRIPTION 1 USER -------------
-// Each subscription belongs to a specific user.
-Subscription.belongsTo(User, {
-    foreignKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each subscription belongs to a specific user.",
-});
+// ------------- * CALENDAR EVENTS 1 DOCTOR -------------
+Doctor.hasMany(CalendarEvent, { foreignKey: "_id_doctor" });
+CalendarEvent.belongsTo(Doctor, { foreignKey: "_id_doctor" });
 
-User.hasMany(Subscription, {
-    foreignKey: "_id_user",
-    sourceKey: "_id_user",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    description: "Each user can have multiple subscriptions.",
-});
+// ------------- * CALENDAR EVENTS 1 USER -------------
+User.hasMany(CalendarEvent, { foreignKey: "_id_assistant" });
+CalendarEvent.belongsTo(User, { foreignKey: "_id_assistant" });
 
-// ------------- 1 MEMBERSHIP PLAN * PAYMENT RECORDS -------------
-// Define association with MembershipPlan
-PaymentRecord.belongsTo(MembershipPlan, {
-    foreignKey: "_id_membership_plan",
-    as: "membership_plan",
-});
+// ------------- * CALENDAR EVENTS 1 PATIENT -------------
+Patient.hasMany(CalendarEvent, { foreignKey: "_id_patient" });
+CalendarEvent.belongsTo(Patient, { foreignKey: "_id_patient" });
+
+// ------------- * CONSULTS 1 DOCTOR -------------
+Doctor.hasMany(Consult, { foreignKey: "_id_doctor" });
+Consult.belongsTo(User, { foreignKey: "_id_doctor" });
+
+// ------------- * CONSULT 1 TEMPLATE -------------
+Template.hasMany(Consult, { foreignKey: "_id_template" });
+Consult.belongsTo(Template, { foreignKey: "_id_template" });
+
+// ------------- 1 CONSULT 1 PATIENT -------------
+Patient.hasMany(Consult, { foreignKey: "_id_patient" });
+Consult.belongsTo(Patient, { foreignKey: "_id_patient" });
+
+// ------------- 1 CONSULT 1 CONSULT RATING -------------
+Consult.hasOne(ConsultRating, { foreignKey: "id_consult" });
+ConsultRating.belongsTo(Consult, { foreignKey: "id_consult" });

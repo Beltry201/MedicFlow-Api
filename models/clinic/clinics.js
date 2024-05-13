@@ -1,14 +1,14 @@
-// Assuming you have already imported Sequelize and established a connection
+import { DataTypes } from "sequelize";
+import { sequelize } from "../../config/db.js";
 
-const { DataTypes } = require("sequelize");
-
-const Clinic = sequelize.define(
+export const Clinic = sequelize.define(
     "Clinic",
     {
         _id_clinic: {
             type: DataTypes.UUID,
             primaryKey: true,
             allowNull: false,
+            defaultValue: DataTypes.UUIDV4,
         },
         name: {
             type: DataTypes.STRING,
@@ -20,17 +20,12 @@ const Clinic = sequelize.define(
         },
         logo_url: {
             type: DataTypes.STRING,
-            allowNull: true, // Assuming logo URL is optional
-        },
-        is_valid: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
+            allowNull: true,
         },
     },
     {
-        tableName: "clinics", // Assuming your table is named 'clinics'
-        timestamps: true, // Sequelize will automatically manage timestamps
+        tableName: "clinics",
+        timestamps: true,
+        paranoid: true,
     }
 );
-
-module.exports = Clinic;

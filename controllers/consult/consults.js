@@ -1,113 +1,52 @@
-import { TreatmentCatalog } from "../../models/users/treatments_catalogs.js";
-import { canGenerateMoreConsults } from "../subscription/subscriptions.js";
 import { ConsultRating } from "../../models/consults/consult_rating.js";
 import { MediaFile } from "../../models/patients/media_files.js";
-import { generateText } from "../../helpers/openai_generate.js";
 import { Consult } from "../../models/consults/consults.js";
 import { Patient } from "../../models/patients/patients.js";
 import { uploadFile } from "../bucket.js";
 import { Buffer } from "buffer";
+import { BedrockService } from "../../services/prompts/aws_claude3.js";
+import { Template } from "../../models/clinic/templates.js";
+import { ConsultService } from "../../services/consults/consults.js";
 
-export const generateJsonResponse = async (req, res) => {
-    const { audio_transcript } = req.query;
+const consultService = new ConsultService();
+
+export const generateConsultTemplate = async (req, res) => {
+    const clientData = req.body;
     const user = req.user;
-
     try {
-        const eligibilityResult = await canGenerateMoreConsults(user._id_user);
+        const template = await Template.findByPk(clientData._id_template);
 
-        if (eligibilityResult.success) {
-            let completion;
-
-            try {
-                completion = await generateText(audio_transcript);
-            } catch (error) {
-                if (
-                    completion.choices &&
-                    completion.choices[0].finish_reason === "length"
-                ) {
-                    console.error("Error generating text:", error);
-
-                    return res.status(400).json({
-                        success: false,
-                        message: "Prompt is too long",
-                    });
-                } else {
-                    console.error("Error generating text:", error);
-                    throw error; // Rethrow the error for unexpected cases
-                }
-            }
-
-            const responsePayload = {
-                success: true,
-                consult_json: JSON.parse(completion.choices[0].message.content),
-                membership: {
-                    plan: eligibilityResult.membership
-                        ? eligibilityResult.membership.plan_name
-                        : "Free Tier",
-                    consult_limit: eligibilityResult.membership
-                        ? eligibilityResult.membership.consults_limit
-                        : null,
-                    minutes_per_consult: eligibilityResult.membership
-                        ? eligibilityResult.membership.min_per_consult
-                        : null,
-                },
-                subscription: {
-                    consult_count: eligibilityResult.consultCount || 0,
-                    start_date: eligibilityResult.subscription
-                        ? eligibilityResult.subscription.subscription_start_date
-                        : null,
-                    end_date: eligibilityResult.subscription
-                        ? eligibilityResult.subscription.subscription_end_date
-                        : null,
-                    state: eligibilityResult.subscription
-                        ? eligibilityResult.subscription.state
-                        : null,
-                },
-                prompt_tokens: completion.usage.prompt_tokens,
-                completion_tokens: completion.usage.completion_tokens,
-            };
-
-            res.status(200).json(responsePayload);
-        } else {
-            res.status(403).json({
-                success: false,
-                message: "Monthly consult limit reached",
-                membership: {
-                    plan: eligibilityResult.membership
-                        ? eligibilityResult.membership.plan_name
-                        : "Free Tier",
-                    consult_limit: eligibilityResult.membership
-                        ? eligibilityResult.membership.consults_limit
-                        : null,
-                    minutes_per_consult: eligibilityResult.membership
-                        ? eligibilityResult.membership.min_per_consult
-                        : null,
-                },
-                subscription: {
-                    consult_count: eligibilityResult.consultCount,
-                    start_date: eligibilityResult.subscription
-                        ? eligibilityResult.subscription.subscription_start_date
-                        : null,
-                    end_date: eligibilityResult.subscription
-                        ? eligibilityResult.subscription.subscription_end_date
-                        : null,
-                    state: eligibilityResult.subscription
-                        ? eligibilityResult.subscription.state
-                        : null,
-                },
-            });
-        }
+        const bedrockService = new BedrockService();
+        const consult_json = await bedrockService.runPrompt(
+            template.prompt,
+            clientData.audio_transcript,
+            template.template_json
+        );
+        const userData = {
+            consult_json,
+            audio_transcript: clientData.audio_transcript,
+            template,
+            _id_patient: clientData._id_patient,
+            _id_doctor: user._id_doctor,
+        };
+        const newConsult = await consultService.createConsult(userData);
+        console.log(newConsult);
+        res.status(200).json({
+            success: true,
+            message: "Consult datasheet created successfully",
+            consult: newConsult,
+        });
     } catch (error) {
-        console.error("Error in generateJsonResponse:", error);
+        console.error("Error in generateConsultTemplate:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to generate JSON response",
+            message: "Failed to generate consult template",
             error: error.message,
         });
     }
 };
 
-export const storeJsonData = async (req, res) => {
+export const createConsult = async (req, res) => {
     try {
         const {
             recording_duration_s,
@@ -256,7 +195,7 @@ export const getConsultDetails = async (req, res) => {
 
 export const getUserConsults = async (req, res) => {
     try {
-        const _id_doctor = req.user._id_user;
+        const _id_doctor = req.user._id_doctor;
 
         // Retrieve all consults for the given doctor
         const consults = await Consult.findAll({
@@ -268,11 +207,6 @@ export const getUserConsults = async (req, res) => {
                     model: Patient,
                     as: "Patient",
                     attributes: ["name", "last_name", "birth_date", "gender"],
-                },
-                {
-                    model: TreatmentCatalog,
-                    attributes: ["name"],
-                    as: "TreatmentCatalog",
                 },
             ],
         });
@@ -286,26 +220,7 @@ export const getUserConsults = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            consults: consults.map((consult) => {
-                console.log(
-                    "\n-- CONSULTA: ",
-                    consult.consult_json.INF["Motivo"]
-                );
-                return {
-                    _id_consult: consult._id_consult,
-                    date: consult.date,
-                    patient: {
-                        name: consult.Patient.name,
-                        last_name: consult.Patient.last_name,
-                        birth_date: consult.Patient.birth_date,
-                        gender: consult.Patient.gender,
-                    },
-                    motivo: consult.consult_json.INF["Motivo"],
-                    treatment: consult.TreatmentCatalog
-                        ? consult.TreatmentCatalog.name
-                        : null,
-                };
-            }),
+            consults,
         });
     } catch (error) {
         console.error(error);
@@ -331,11 +246,6 @@ export const getPatientConsults = async (req, res) => {
                     model: Patient,
                     as: "Patient",
                     attributes: ["name", "last_name", "birth_date", "gender"],
-                },
-                {
-                    model: TreatmentCatalog,
-                    attributes: ["name"],
-                    as: "TreatmentCatalog",
                 },
             ],
         });
@@ -402,6 +312,28 @@ export const uploadConsultFile = async (req, res) => {
             return res
                 .status(200)
                 .send({ message: "File Uploaded Successfully", url: fileUrl });
+        } else {
+            return res.status(400).send({
+                message: "Unable to upload file",
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: error.message });
+    }
+};
+
+export const claudeprompt = async (req, res) => {
+    try {
+        const { prompt, model } = req.body;
+        let bds = new BedrockService();
+        const answer = await bds.runPrompt(prompt, model);
+        console.log("Answer from Bedrock Sonnet model:", answer);
+
+        if (answer) {
+            return res
+                .status(200)
+                .send({ message: "Prompt Success", answer: answer });
         } else {
             return res.status(400).send({
                 message: "Unable to upload file",

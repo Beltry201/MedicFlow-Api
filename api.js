@@ -19,11 +19,11 @@ async function main() {
     // Use different configurations based on the environment
     const dbConfig = {
         development: {
-            forceSync: true,
+            forceSync: false,
             port: 4001,
         },
         testing: {
-            forceSync: true,
+            forceSync: false,
             port: 4000,
         },
         production: {

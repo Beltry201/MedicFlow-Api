@@ -2,36 +2,33 @@ import { similarityScore } from "../../helpers/string_similarity.js";
 import { MediaFile } from "../../models/patients/media_files.js";
 import { Patient } from "../../models/patients/patients.js";
 import { Consult } from "../../models/consults/consults.js";
+import { PatientService } from "../../services/patients/patients.js";
+import { Op } from "sequelize";
+const patientService = new PatientService();
 
 // Create a new patient
 export const createPatient = async (req, res) => {
     try {
-        const { is_valid, name, last_name, gender, birth_date, phone_number } =
-            req.body;
-        const user = req.user;
-        // Create the patient in the database
-        const newPatient = await Patient.create({
-            is_valid,
-            name,
-            last_name,
-            gender,
-            birth_date,
-            phone_number,
-            _id_doctor: user._id_user,
-        });
+        const userData = req.body;
+        const newPatient = await patientService.createPatient(userData);
 
-        res.status(201).json({ success: true, patient: newPatient });
+        res.status(201).json({
+            success: true,
+            message: "Patient created successfully",
+            patient: newPatient,
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).json({
-            message: "Failed to create patient",
+        res.status(400).json({
+            success: false,
+            message: "Failed to create user",
             error: error.message,
         });
     }
 };
 
 // Get a list of all patients
-export const listPatients = async (req, res) => {
+export const getAllPatients = async (req, res) => {
     try {
         // Retrieve all patients from the database
         const patients = await Patient.findAll();
@@ -42,6 +39,53 @@ export const listPatients = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to retrieve patients",
+            error: error.message,
+        });
+    }
+};
+
+export const searchPatients = async (req, res) => {
+    try {
+        const searchText = req.query.searchText;
+        console.log(searchText);
+        // Define the search criteria
+        const searchCriteria = {
+            [Op.or]: [
+                {
+                    name: {
+                        [Op.like]: `%${searchText}%`,
+                    },
+                },
+                {
+                    last_name: {
+                        [Op.like]: `%${searchText}%`,
+                    },
+                },
+                {
+                    mail: {
+                        [Op.like]: `%${searchText}%`,
+                    },
+                },
+                // Add more search criteria as needed
+            ],
+        };
+
+        // Perform the search
+        const patients = await Patient.findAll({
+            where: searchCriteria,
+        });
+
+        // Return the search results
+        res.status(200).json({
+            success: true,
+            message: "Patients found successfully",
+            patients: patients,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to search patients",
             error: error.message,
         });
     }
@@ -58,12 +102,6 @@ export const getPatientDetails = async (req, res) => {
             return res
                 .status(404)
                 .json({ success: false, message: "Patient not found" });
-        }
-
-        if (!patient.is_valid) {
-            return res
-                .status(400)
-                .json({ success: false, message: "Invalid patient" });
         }
 
         const consultCount = await Consult.count({

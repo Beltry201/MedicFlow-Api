@@ -1,22 +1,23 @@
 import { Router } from "express";
 import {
-    generateJsonResponse,
-    storeJsonData,
+    generateConsultTemplate,
     getConsultDetails,
     getUserConsults,
     getPatientConsults,
     uploadConsultFile,
+    claudeprompt,
 } from "../controllers/consult/consults.js";
 import { validateToken } from "../helpers/jwt.js";
 
 const router = Router();
 
 // Routes
-router.post("/", validateToken, storeJsonData);
-router.get("/", validateToken, generateJsonResponse);
+// router.post("/", validateToken, storeJsonData);
+router.post("/", validateToken, generateConsultTemplate);
 router.get("/consult_details", validateToken, getConsultDetails);
-router.get("/consults_list", validateToken, getUserConsults);
+router.get("/", validateToken, getUserConsults);
 router.get("/consults_list/patient", validateToken, getPatientConsults);
 router.post("/media", validateToken, uploadConsultFile);
+router.post("/claude", validateToken, claudeprompt);
 
 export default router;

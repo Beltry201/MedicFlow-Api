@@ -1,8 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
-import { Consult } from "../consults/consults.js";
-import { MediaFile } from "./media_files.js";
-import { Note } from "./notes.js";
 
 export const Patient = sequelize.define(
     "Patient",
@@ -28,12 +25,8 @@ export const Patient = sequelize.define(
             type: DataTypes.DATE,
             allowNull: false,
         },
-        job: {
+        occupation: {
             type: DataTypes.STRING(255),
-            allowNull: true,
-        },
-        job_date: {
-            type: DataTypes.DATE,
             allowNull: true,
         },
         civil_status: {
@@ -48,19 +41,10 @@ export const Patient = sequelize.define(
             type: DataTypes.STRING(255),
             allowNull: true,
         },
-        is_valid: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false,
-            allowNull: false,
-        },
-        _id_doctor: {
-            type: DataTypes.UUID,
-            allowNull: false,
-            // You can add a foreign key constraint here if necessary
-        },
     },
     {
         tableName: "patients",
-        timestamps: true, // Set this to true if you want Sequelize to handle timestamps automatically
+        timestamps: true,
+        paranoid: true,
     }
 );

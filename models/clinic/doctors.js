@@ -1,16 +1,18 @@
-const { DataTypes } = require("sequelize");
+import { DataTypes } from "sequelize";
+import { sequelize } from "../../config/db.js";
 
-const Doctor = sequelize.define(
+export const Doctor = sequelize.define(
     "Doctor",
     {
         _id_doctor: {
             type: DataTypes.UUID,
             primaryKey: true,
             allowNull: false,
+            defaultValue: DataTypes.UUIDV4,
         },
         professional_id: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         department: {
             type: DataTypes.ENUM(
@@ -32,10 +34,6 @@ const Doctor = sequelize.define(
             ),
             allowNull: false,
         },
-        is_valid: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-        },
     },
     {
         tableName: "doctors",
@@ -43,11 +41,3 @@ const Doctor = sequelize.define(
         paranoid: true,
     }
 );
-
-// Define association with the User model
-Doctor.belongsTo(User, {
-    foreignKey: "id_user",
-    onDelete: "CASCADE",
-});
-
-module.exports = Doctor;

@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/db.js";
+import bcrypt from "bcrypt";
 
 export const User = sequelize.define(
     "User",
@@ -27,49 +28,25 @@ export const User = sequelize.define(
             allowNull: false,
             unique: true,
         },
-        diploma_organization: {
-            type: DataTypes.STRING(255),
-            allowNull: true,
-        },
-        office_address: {
-            type: DataTypes.STRING(255),
-            allowNull: true,
-            defaultValue: null,
-        },
-        professional_id: {
-            type: DataTypes.STRING(255),
-            allowNull: true,
-        },
-        profile_picture: {
+        profile_picture_url: {
             type: DataTypes.STRING(255),
         },
-        password: {
+        pass_token: {
             type: DataTypes.STRING(255),
             allowNull: false,
-        },
-        specialty: {
-            type: DataTypes.STRING(255),
         },
         role: {
-            type: DataTypes.ENUM("doctor", "admin", "staff", "patient"),
+            type: DataTypes.ENUM("doctor", "admin", "staff"),
             allowNull: false,
-        },
-        access_code: {
-            type: DataTypes.STRING(255),
-            allowNull: true,
-            unique: true,
-        },
-        is_valid: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: true, // Set a default value of true for new users
         },
     },
     {
         tableName: "users",
         timestamps: true,
+        paranoid: true,
     }
 );
 
 User.prototype.comparePassword = function (password) {
-    return this.password === password;
+    return bcrypt.compare(password, this.pass_token);
 };
