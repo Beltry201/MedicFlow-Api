@@ -46,6 +46,38 @@ export const generateConsultTemplate = async (req, res) => {
     }
 };
 
+export const saveConsult = async (req, res) => {
+    try {
+        const { _id_consult, consult_json } = req.body;
+
+        // Check if _id_consult is provided
+        if (!_id_consult) {
+            return res.status(400).json({
+                success: false,
+                message: "_id_consult is required",
+            });
+        }
+
+        const consult = await consultService.updateConsult(
+            _id_consult,
+            consult_json
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Consult updated successfully",
+            consult,
+        });
+    } catch (error) {
+        console.error("Error in saveConsult:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to save consult",
+            error: error.message,
+        });
+    }
+};
+
 export const createConsult = async (req, res) => {
     try {
         const {

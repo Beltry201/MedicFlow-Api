@@ -1,6 +1,7 @@
 import Joi from "joi";
 import dotenv from "dotenv";
 import { Consult } from "../../models/consults/consults.js";
+import { Template } from "../../models/clinic/templates.js";
 
 dotenv.config();
 
@@ -67,7 +68,52 @@ export class ConsultService {
             return consult;
         } catch (error) {
             console.error(error);
-            throw new Error("Failed to create or update consult");
+            throw new Error("Failed to create consult");
+        }
+    }
+
+    async updateConsult(_id_consult, consult_json) {
+        try {
+            // Retrieve the consult
+            const consult = await Consult.findOne({
+                where: { _id_consult },
+                include: [
+                    {
+                        model: Template,
+                    },
+                ],
+            });
+            if (!consult) {
+                throw new Error("Consult not found");
+            }
+
+            // Check if consult_json is provided
+            if (!consult_json) {
+                // Update is_valid attribute
+                consult.is_valid = true;
+            } else {
+                // Retrieve the template associated with the consult
+                const template = consult.template;
+                console.log("-- ALPHA", consult_json);
+                console.log("-- TEMPLATE", template);
+                // Compare new consult_json with the original template
+                const corrected_json =
+                    await this.compareAndCorrectConsultWithTemplate(
+                        template.template_json,
+                        consult_json
+                    );
+
+                // Update consult_json
+                consult.consult_json = corrected_json;
+            }
+
+            // Save the updated consult
+            await consult.save();
+
+            return consult;
+        } catch (error) {
+            console.error(error);
+            throw new Error("Failed to update consult");
         }
     }
 

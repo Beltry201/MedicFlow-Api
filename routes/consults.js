@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
     generateConsultTemplate,
+    saveConsult,
     getConsultDetails,
     getUserConsults,
     getPatientConsults,
@@ -14,6 +15,7 @@ const router = Router();
 // Routes
 // router.post("/", validateToken, storeJsonData);
 router.post("/", validateToken, generateConsultTemplate);
+router.put("/", validateToken, saveConsult);
 router.get("/consult_details", validateToken, getConsultDetails);
 router.get("/", validateToken, getUserConsults);
 router.get("/consults_list/patient", validateToken, getPatientConsults);
