@@ -9,21 +9,21 @@ export class ConsultService {
     async createConsult(userData) {
         try {
             const {
+                title,
                 audio_transcript,
                 consult_json,
                 template,
                 _id_doctor,
-                _id_patient,
                 _id_consult,
             } = userData;
 
             // Validations
             const schema = Joi.object({
+                title: Joi.string().required(),
                 audio_transcript: Joi.string().required(),
                 consult_json: Joi.object(),
                 template: Joi.object().required(),
                 _id_doctor: Joi.string().uuid().required(),
-                _id_patient: Joi.string().uuid().required(),
                 _id_consult: Joi.string().uuid().allow("", null),
             });
 
@@ -39,7 +39,6 @@ export class ConsultService {
                     consult_json
                 );
 
-            console.log("WHAT ----", corrected_json);
             // Create or update the consult
             let consult;
             if (_id_consult && _id_consult !== "") {
@@ -56,10 +55,10 @@ export class ConsultService {
             } else {
                 // Create new consult
                 consult = await Consult.create({
+                    title,
                     audio_transcript,
                     consult_json: corrected_json,
                     _id_doctor,
-                    _id_patient,
                     _id_template: template._id_template,
                     is_valid: false,
                 });
@@ -94,8 +93,6 @@ export class ConsultService {
             } else {
                 // Retrieve the template associated with the consult
                 const template = consult.template;
-                console.log("-- ALPHA", consult_json);
-                console.log("-- TEMPLATE", template);
                 // Compare new consult_json with the original template
                 const corrected_json =
                     await this.compareAndCorrectConsultWithTemplate(

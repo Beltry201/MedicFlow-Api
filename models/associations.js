@@ -66,10 +66,6 @@ Consult.belongsTo(User, { foreignKey: "_id_doctor" });
 Template.hasMany(Consult, { foreignKey: "_id_template" });
 Consult.belongsTo(Template, { foreignKey: "_id_template" });
 
-// ------------- 1 CONSULT 1 PATIENT -------------
-Patient.hasMany(Consult, { foreignKey: "_id_patient" });
-Consult.belongsTo(Patient, { foreignKey: "_id_patient" });
-
 // ------------- 1 CONSULT 1 CONSULT RATING -------------
 Consult.hasOne(ConsultRating, { foreignKey: "id_consult" });
 ConsultRating.belongsTo(Consult, { foreignKey: "id_consult" });

@@ -10,6 +10,10 @@ export const Consult = sequelize.define(
             allowNull: false,
             defaultValue: DataTypes.UUIDV4,
         },
+        title: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
         audio_transcript: {
             type: DataTypes.TEXT,
             allowNull: true,
