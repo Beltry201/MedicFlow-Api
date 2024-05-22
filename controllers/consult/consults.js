@@ -23,6 +23,7 @@ export const generateConsultTemplate = async (req, res) => {
             template.template_json
         );
         const userData = {
+            title: clientData.title,
             consult_json,
             audio_transcript: clientData.audio_transcript,
             template,
