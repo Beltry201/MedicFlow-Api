@@ -6,7 +6,8 @@ module.exports = {
             {
                 _id_membership_plan: 1,
                 plan_name: "Free",
-                monthly_price: 0,
+                billing_price: 0,
+                consults_cycle: "monthly",
                 billing_cycle: "monthly",
                 consults_limit: 10,
                 min_per_consult: 20,
@@ -17,7 +18,8 @@ module.exports = {
             {
                 _id_membership_plan: 2,
                 plan_name: "Basic",
-                monthly_price: 29,
+                billing_price: 29,
+                consults_cycle: "monthly",
                 billing_cycle: "monthly",
                 consults_limit: 50,
                 min_per_consult: 20,
@@ -28,7 +30,8 @@ module.exports = {
             {
                 _id_membership_plan: 3,
                 plan_name: "Premium",
-                monthly_price: 199,
+                billing_price: 199,
+                consults_cycle: "monthly",
                 billing_cycle: "monthly",
                 consults_limit: -1,
                 min_per_consult: 20,
@@ -39,7 +42,8 @@ module.exports = {
             {
                 _id_membership_plan: 4,
                 plan_name: "Pro",
-                monthly_price: 99,
+                billing_price: 99,
+                consults_cycle: "monthly",
                 billing_cycle: "monthly",
                 consults_limit: -1,
                 min_per_consult: 20,
@@ -50,7 +54,8 @@ module.exports = {
             {
                 _id_membership_plan: 5,
                 plan_name: "Growth",
-                monthly_price: 79,
+                billing_price: 79,
+                consults_cycle: "monthly",
                 billing_cycle: "monthly",
                 consults_limit: 100,
                 min_per_consult: 20,

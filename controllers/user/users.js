@@ -1,23 +1,33 @@
 import { Doctor } from "../../models/clinic/doctors.js";
 import { User } from "../../models/users/users.js";
 import { UserService } from "../../services/users/users.js";
-
+import { SubscriptionService } from "../../services/users/subscriptions.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const userService = new UserService();
+const subscriptionService = new SubscriptionService();
 
 export const createUser = async (req, res) => {
     try {
         const userData = req.body;
         const { newUser, token } = await userService.createUser(userData);
-        const userResponse = { ...newUser.toJSON() };
+
         if (userData.role === "doctor" && newUser.doctor) {
-            userResponse.doctor = newUser.doctor.toJSON();
+            console.log(newUser.doctor);
+            const doctor = newUser.doctor;
+
+            // Subscribe the doctor to the free plan
+            const subscriptionService = new SubscriptionService();
+            await subscriptionService.createFreeSubscription(
+                newUser.doctor._id_doctor
+            );
+            newUser.doctor = doctor.toJSON();
         }
 
+        const userResponse = { ...newUser.toJSON() };
         res.status(201).json({
             success: true,
             message: "User created successfully",
@@ -129,35 +139,39 @@ export const resetPassword = async (req, res) => {
 };
 
 export const getUser = async (req, res) => {
-    try {
-        const { _id_user } = req.user;
+    const { _id_user } = req.user;
 
-        const user = await User.findByPk(_id_user, {
-            attributes: { exclude: ["pass_token"] },
+    try {
+        const user = await User.findOne({
+            where: { _id_user },
             include: {
                 model: Doctor,
                 required: false,
             },
         });
-
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found",
-            });
+            return res.status(404).json({ message: "User not found" });
         }
 
-        res.status(200).json({
-            success: true,
-            user,
-        });
+        let subscriptionDetails = null;
+        console.log(user.role);
+        console.log(user.Doctor._id_doctor);
+        if (user.role === "doctor" && user.Doctor) {
+            subscriptionDetails =
+                await subscriptionService.getActiveSubscriptionDetails(
+                    user.Doctor._id_doctor
+                );
+        }
+
+        // Return the user details along with subscription information
+        return res
+            .status(200)
+            .json({ user, subscription_details: subscriptionDetails });
     } catch (error) {
         console.error(error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to get user",
-            error: error.message,
-        });
+        return res
+            .status(500)
+            .json({ message: "Failed to fetch user", error: error.message });
     }
 };
 

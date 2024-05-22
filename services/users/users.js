@@ -5,11 +5,13 @@ import jwt from "jsonwebtoken";
 import { User } from "../../models/users/users.js";
 import { Doctor } from "../../models/clinic/doctors.js";
 import { sequelize } from "../../config/db.js";
-
+import { SubscriptionService } from "../users/subscriptions.js";
 dotenv.config();
 
 export class UserService {
     async createUser(userData) {
+        const subscriptionService = new SubscriptionService();
+
         let transaction;
 
         try {
@@ -88,6 +90,7 @@ export class UserService {
 
             let doctor;
             if (role === "doctor") {
+                // Create the doctor record
                 doctor = await Doctor.create(
                     {
                         professional_id,
@@ -97,28 +100,12 @@ export class UserService {
                     },
                     { transaction }
                 );
+                newUser.doctor = doctor;
             }
-
-            // Generate JWT token
-            const payload = {
-                _id_user: newUser._id_user,
-                email: newUser.email,
-                phone: newUser.phone,
-            };
-
-            if (doctor && doctor._id_doctor) {
-                payload._id_doctor = doctor._id_doctor;
-            }
-
-            const token = jwt.sign(payload, process.env.TOKEN_SECRET, {
-                expiresIn: "1w",
-            });
 
             await transaction.commit();
 
-            if (role === "doctor") {
-                newUser.doctor = doctor;
-            }
+            const token = this.generateToken(newUser);
 
             return { newUser, token };
         } catch (error) {
@@ -162,17 +149,22 @@ export class UserService {
         }
     }
 
-    generateToken(user) {
-        let payload = {
+    generateToken(user, doctor) {
+        // Generate JWT token with payload
+        const payload = {
             _id_user: user._id_user,
             email: user.email,
             phone: user.phone,
         };
 
-        if (user.role === "doctor") {
-            payload._id_doctor = user.Doctor._id_doctor;
+        if (doctor && doctor._id_doctor) {
+            payload._id_doctor = doctor._id_doctor;
         }
 
-        return jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "1w" });
+        const token = jwt.sign(payload, process.env.TOKEN_SECRET, {
+            expiresIn: "1w",
+        });
+
+        return token;
     }
 }

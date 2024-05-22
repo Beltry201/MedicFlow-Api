@@ -8,6 +8,8 @@ import { Template } from "./clinic/templates.js";
 import { MediaFile } from "./patients/media_files.js";
 import { CalendarEvent } from "./users/calendar_events.js";
 import { ConsultRating } from "./consults/consult_rating.js";
+import { SubscriptionRecord } from "./subscriptions/subscriptions.js";
+import { MembershipPlan } from "./subscriptions/membership_plans.js";
 
 // ------------- 1 PATIENT * MEDIA FILES -------------
 // Each media file is associated with a specific patient.
@@ -96,3 +98,25 @@ Consult.belongsTo(Patient, { foreignKey: "_id_patient" });
 // ------------- 1 CONSULT 1 CONSULT RATING -------------
 Consult.hasOne(ConsultRating, { foreignKey: "id_consult" });
 ConsultRating.belongsTo(Consult, { foreignKey: "id_consult" });
+
+// ------------- 1 MEMBERSHIP * SUBSCRIPTIONS -------------
+SubscriptionRecord.belongsTo(MembershipPlan, {
+    foreignKey: "_id_membership_plan",
+    targetKey: "_id_membership_plan", // Targeting the primary key of MembershipPlan
+});
+
+// SubscriptionRecord.hasOne(MembershipPlan, {
+//     foreignKey: "_id_membership_plan",
+//     as: "Membership",
+// });
+// MembershipPlan.belongsTo(SubscriptionRecord, {
+//     foreignKey: "_id_membership_plan",
+// });
+
+// ------------- 1 DOCTOR * SUBSCRIPTIONS -------------
+Doctor.hasMany(SubscriptionRecord, {
+    foreignKey: "_id_doctor",
+});
+SubscriptionRecord.belongsTo(Doctor, {
+    foreignKey: "_id_doctor",
+});
