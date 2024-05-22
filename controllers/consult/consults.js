@@ -27,7 +27,6 @@ export const generateConsultTemplate = async (req, res) => {
             consult_json,
             audio_transcript: clientData.audio_transcript,
             template,
-            _id_patient: clientData._id_patient,
             _id_doctor: user._id_doctor,
         };
         const newConsult = await consultService.createConsult(userData);
