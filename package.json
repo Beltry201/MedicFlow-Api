@@ -9,7 +9,7 @@
     "start": "NODE_ENV=production node api.js"
   },
   "author": "",
-  "type": "module",
+  "type": "commonjs",
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.572.0",

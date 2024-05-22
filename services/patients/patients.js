@@ -5,7 +5,7 @@ import { Patient } from "../../models/patients/patients.js";
 dotenv.config();
 
 export class PatientService {
-    async createPatient(userData) {
+    async createPatient(userData, _id_doctor) {
         try {
             const {
                 name,
@@ -16,9 +16,8 @@ export class PatientService {
                 civil_status,
                 phone_number,
                 mail,
-                _id_clinic,
             } = userData;
-
+            userData._id_doctor = _id_doctor;
             // Validations
             const schema = Joi.object({
                 name: Joi.string().required(),
@@ -31,7 +30,7 @@ export class PatientService {
                 civil_status: Joi.string().allow(null, ""),
                 phone_number: Joi.string().required(),
                 mail: Joi.string().email().allow(null, ""),
-                _id_clinic: Joi.string().uuid().required(),
+                _id_doctor: Joi.string().uuid().required(),
             });
 
             const { error } = schema.validate(userData);
@@ -50,9 +49,8 @@ export class PatientService {
                 civil_status,
                 phone_number,
                 mail,
-                _id_clinic,
+                _id_doctor,
             });
-            console.log(newPatient);
             return newPatient;
         } catch (error) {
             console.error(error);

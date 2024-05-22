@@ -1,6 +1,5 @@
 import { User } from "./users/users.js";
 import { Note } from "./patients/notes.js";
-import { Clinic } from "./clinic/clinics.js";
 import { Doctor } from "./clinic/doctors.js";
 import { Patient } from "./patients/patients.js";
 import { Consult } from "./consults/consults.js";
@@ -43,30 +42,6 @@ Patient.hasMany(Note, {
     description: "Each patient can have multiple associated notes.",
 });
 
-// ------------- 1 CLINIC * TEMPLATES -------------
-Clinic.hasMany(Template, {
-    foreignKey: "_id_clinic",
-});
-Template.belongsTo(Clinic, {
-    foreignKey: "_id_clinic",
-});
-
-// ------------- 1 CLINIC * USERS -------------
-Clinic.hasMany(User, {
-    foreignKey: "_id_clinic",
-});
-User.belongsTo(Clinic, {
-    foreignKey: "_id_clinic",
-});
-
-// ------------- 1 CLINIC * PATIENTS -------------
-Clinic.hasMany(Patient, {
-    foreignKey: "_id_clinic",
-});
-Patient.belongsTo(Clinic, {
-    foreignKey: "_id_clinic",
-});
-
 // ------------- 1 USER 1 DOCTOR -------------
 User.hasOne(Doctor, { foreignKey: "_id_user" });
 Doctor.belongsTo(User, { foreignKey: "_id_user" });
@@ -102,21 +77,29 @@ ConsultRating.belongsTo(Consult, { foreignKey: "id_consult" });
 // ------------- 1 MEMBERSHIP * SUBSCRIPTIONS -------------
 SubscriptionRecord.belongsTo(MembershipPlan, {
     foreignKey: "_id_membership_plan",
-    targetKey: "_id_membership_plan", // Targeting the primary key of MembershipPlan
+    targetKey: "_id_membership_plan",
 });
-
-// SubscriptionRecord.hasOne(MembershipPlan, {
-//     foreignKey: "_id_membership_plan",
-//     as: "Membership",
-// });
-// MembershipPlan.belongsTo(SubscriptionRecord, {
-//     foreignKey: "_id_membership_plan",
-// });
 
 // ------------- 1 DOCTOR * SUBSCRIPTIONS -------------
 Doctor.hasMany(SubscriptionRecord, {
     foreignKey: "_id_doctor",
 });
 SubscriptionRecord.belongsTo(Doctor, {
+    foreignKey: "_id_doctor",
+});
+
+// ------------- 1 DOCTOR * PATIENTS -------------
+Doctor.hasMany(Patient, {
+    foreignKey: "_id_doctor",
+});
+Patient.belongsTo(Doctor, {
+    foreignKey: "_id_doctor",
+});
+
+// ------------- 1 DOCTOR * TEMPLATES -------------
+Doctor.hasMany(Template, {
+    foreignKey: "_id_doctor",
+});
+Template.belongsTo(Doctor, {
     foreignKey: "_id_doctor",
 });

@@ -1,9 +1,14 @@
 import { Router } from "express";
-import { createTemplate } from "../controllers/consult/templates.js";
+import {
+    createTemplate,
+    getTemplatesForDoctor,
+} from "../controllers/consult/templates.js";
+import { validateToken } from "../helpers/jwt.js";
 
 const router = Router();
 
 // Routes
-router.post("/", createTemplate);
+router.post("/", validateToken, createTemplate);
+router.get("/:doctorId", validateToken, getTemplatesForDoctor);
 
 export default router;

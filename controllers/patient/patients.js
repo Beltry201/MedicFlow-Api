@@ -10,8 +10,12 @@ const patientService = new PatientService();
 // Create a new patient
 export const createPatient = async (req, res) => {
     try {
+        const _id_doctor = req.user._id_doctor;
         const userData = req.body;
-        const newPatient = await patientService.createPatient(userData);
+        const newPatient = await patientService.createPatient(
+            userData,
+            _id_doctor
+        );
 
         res.status(201).json({
             success: true,
@@ -52,7 +56,7 @@ export const getAllPatients = async (req, res) => {
                             ),
                             "INTEGER"
                         ),
-                        "consultCount",
+                        "consult_count",
                     ],
                 ],
             },
@@ -60,7 +64,6 @@ export const getAllPatients = async (req, res) => {
 
         // Iterate over patients
         patients.forEach((patient) => {
-            console.log(patient);
             patient.dataValues.last_consult = patient.Consults[0];
             delete patient.dataValues.Consults;
         });

@@ -20,15 +20,13 @@ export class UserService {
                 last_name,
                 phone,
                 email,
-                profile_picture,
+                profile_picture_url,
                 password,
                 role,
                 professional_id,
                 department,
                 specialty,
-                _id_clinic,
             } = userData;
-            console.log(professional_id);
             // Validate role
             if (role === "doctor") {
                 if (!professional_id || !department || !specialty) {
@@ -42,13 +40,12 @@ export class UserService {
                 last_name: Joi.string().required(),
                 phone: Joi.string().required(),
                 email: Joi.string().email().required(),
-                profile_picture: Joi.string().required(),
+                profile_picture_url: Joi.string().required(),
                 password: Joi.string().required(),
                 role: Joi.string().required(),
                 professional_id: Joi.string(),
                 department: Joi.string(),
                 specialty: Joi.string(),
-                _id_clinic: Joi.string().uuid().required(),
             });
 
             const { error } = schema.validate(userData);
@@ -80,10 +77,9 @@ export class UserService {
                     last_name,
                     phone,
                     email,
-                    profile_picture,
+                    profile_picture_url,
                     pass_token: hashedPassword,
                     role,
-                    _id_clinic,
                 },
                 { transaction }
             );
@@ -100,7 +96,7 @@ export class UserService {
                     },
                     { transaction }
                 );
-                newUser.doctor = doctor;
+                newUser.Doctor = doctor;
             }
 
             await transaction.commit();
@@ -134,7 +130,7 @@ export class UserService {
             if (!isPasswordValid) {
                 return { success: false, message: "Invalid password" };
             }
-
+            console.log(user);
             // Generate JWT token
             const token = this.generateToken(user);
             console.log(token);
@@ -149,16 +145,17 @@ export class UserService {
         }
     }
 
-    generateToken(user, doctor) {
+    generateToken(user) {
         // Generate JWT token with payload
+        console.log(user._id_user);
         const payload = {
             _id_user: user._id_user,
             email: user.email,
             phone: user.phone,
         };
 
-        if (doctor && doctor._id_doctor) {
-            payload._id_doctor = doctor._id_doctor;
+        if (user.Doctor && user.Doctor._id_doctor) {
+            payload._id_doctor = user.Doctor._id_doctor;
         }
 
         const token = jwt.sign(payload, process.env.TOKEN_SECRET, {

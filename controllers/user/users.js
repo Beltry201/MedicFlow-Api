@@ -15,23 +15,26 @@ export const createUser = async (req, res) => {
         const userData = req.body;
         const { newUser, token } = await userService.createUser(userData);
 
-        if (userData.role === "doctor" && newUser.doctor) {
-            console.log(newUser.doctor);
-            const doctor = newUser.doctor;
+        if (userData.role === "doctor" && newUser.Doctor) {
+            const doctor = newUser.Doctor;
 
-            // Subscribe the doctor to the free plan
-            const subscriptionService = new SubscriptionService();
-            await subscriptionService.createFreeSubscription(
-                newUser.doctor._id_doctor
-            );
-            newUser.doctor = doctor.toJSON();
+            try {
+                await subscriptionService.createFreeSubscription(
+                    doctor._id_doctor
+                );
+            } catch (subscriptionError) {
+                // If subscription fails, rollback user creation
+                await newUser.destroy();
+                throw new Error(
+                    "Failed to subscribe doctor. User creation rolled back."
+                );
+            }
         }
 
-        const userResponse = { ...newUser.toJSON() };
         res.status(201).json({
             success: true,
             message: "User created successfully",
-            user: userResponse,
+            user: newUser,
             token,
         });
     } catch (error) {

@@ -133,10 +133,7 @@ export const createConsult = async (req, res) => {
                 "Rating or attributes missing. Skipping consult rating creation."
             );
         }
-        const newConsult = await Consult.findOne({
-            where: { _id_consult: consult._id_consult },
-            include: [{ model: Patient }],
-        });
+        clin;
 
         const formattedConsult = {
             id_consult: consult._id_consult,
