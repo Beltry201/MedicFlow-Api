@@ -231,13 +231,6 @@ export const getUserConsults = async (req, res) => {
             where: {
                 _id_doctor: _id_doctor,
             },
-            include: [
-                {
-                    model: Patient,
-                    as: "Patient",
-                    attributes: ["name", "last_name", "birth_date", "gender"],
-                },
-            ],
         });
 
         if (consults.length === 0) {
