@@ -1,5 +1,6 @@
 import { Doctor } from "../../models/clinic/doctors.js";
 import { Template } from "../../models/clinic/templates.js";
+import { Op } from "sequelize";
 
 export const createTemplate = async (req, res) => {
     try {
@@ -30,6 +31,7 @@ export const getTemplatesForDoctor = async (req, res) => {
     try {
         const { doctorId } = req.params;
         console.log(doctorId);
+
         // Find the doctor to verify existence
         const doctor = await Doctor.findByPk(doctorId);
         if (!doctor) {
@@ -38,9 +40,10 @@ export const getTemplatesForDoctor = async (req, res) => {
             });
         }
 
+        // Find both global templates and personal templates
         const templates = await Template.findAll({
             where: {
-                _id_doctor: doctorId,
+                [Op.or]: [{ _id_doctor: null }, { _id_doctor: doctorId }],
             },
         });
 

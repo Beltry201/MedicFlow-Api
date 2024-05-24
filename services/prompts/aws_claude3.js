@@ -38,7 +38,20 @@ export class BedrockService {
             const response = await this.client.send(command);
             const jsonString = new TextDecoder().decode(response.body);
             const parsedResponse = JSON.parse(jsonString);
-            const answer = JSON.parse(parsedResponse.content[0].text);
+
+            console.log(parsedResponse);
+
+            // Ensure the response content is properly formatted
+            const answerText = parsedResponse.content[0].text.trim();
+            let answer;
+
+            try {
+                answer = JSON.parse(answerText);
+            } catch (e) {
+                console.error("Response is not valid JSON:", answerText);
+                throw new Error("Invalid response format");
+            }
+
             return answer;
         } catch (error) {
             console.error("Error running prompt:", error);
