@@ -4,7 +4,8 @@ import { Op } from "sequelize";
 
 export const createTemplate = async (req, res) => {
     try {
-        const { name, prompt, template_json, _id_doctor } = req.body;
+        const { name, prompt, template_json, description, _id_doctor } =
+            req.body;
 
         // Create a new template record in the database
         const template = await Template.create({
