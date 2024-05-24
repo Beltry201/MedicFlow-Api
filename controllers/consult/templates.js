@@ -11,6 +11,7 @@ export const createTemplate = async (req, res) => {
             name,
             prompt,
             template_json,
+            description,
             _id_doctor,
         });
 

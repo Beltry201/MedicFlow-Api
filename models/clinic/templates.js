@@ -22,6 +22,10 @@ export const Template = sequelize.define(
             type: DataTypes.JSON,
             allowNull: false,
         },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
     },
     {
         tableName: "templates",
