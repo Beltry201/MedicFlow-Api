@@ -9,6 +9,6 @@ const router = Router();
 
 // Routes
 router.post("/", validateToken, createTemplate);
-router.get("/:doctorId", validateToken, getTemplatesForDoctor);
+router.get("/", validateToken, getTemplatesForDoctor);
 
 export default router;

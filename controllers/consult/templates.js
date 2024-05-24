@@ -29,8 +29,7 @@ export const createTemplate = async (req, res) => {
 
 export const getTemplatesForDoctor = async (req, res) => {
     try {
-        const { doctorId } = req.params;
-        console.log(doctorId);
+        const doctorId = req.user._id_doctor;
 
         // Find the doctor to verify existence
         const doctor = await Doctor.findByPk(doctorId);
