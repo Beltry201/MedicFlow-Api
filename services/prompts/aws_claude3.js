@@ -42,9 +42,14 @@ export class BedrockService {
             console.log(parsedResponse);
 
             // Ensure the response content is properly formatted
-            const answerText = parsedResponse.content[0].text.trim();
-            let answer;
+            const answerText = parsedResponse.content[0]?.text?.trim();
+            if (!answerText) {
+                throw new Error(
+                    "Response content is missing or not properly formatted"
+                );
+            }
 
+            let answer;
             try {
                 answer = JSON.parse(answerText);
             } catch (e) {
