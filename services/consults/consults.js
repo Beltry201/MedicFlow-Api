@@ -134,16 +134,40 @@ export class ConsultService {
                                     correctedJson[key] = []; // Correct to an empty array
                                 } else {
                                     console.log(`Traversing array '${key}'.`);
-                                    // Recursively traverse each object in the array
-                                    for (
-                                        let i = 0;
-                                        i < clientObj[key].length;
-                                        i++
+                                    // Check if array elements are objects or primitives
+                                    if (
+                                        typeof templateObj[key][0] === "object"
                                     ) {
-                                        traverse(
-                                            templateObj[key][0],
-                                            clientObj[key][i]
-                                        );
+                                        // Recursively traverse each object in the array
+                                        for (
+                                            let i = 0;
+                                            i < clientObj[key].length;
+                                            i++
+                                        ) {
+                                            traverse(
+                                                templateObj[key][0],
+                                                clientObj[key][i]
+                                            );
+                                        }
+                                    } else {
+                                        // Replace array with the template array if types do not match
+                                        for (
+                                            let i = 0;
+                                            i < clientObj[key].length;
+                                            i++
+                                        ) {
+                                            if (
+                                                typeof clientObj[key][i] !==
+                                                typeof templateObj[key][0]
+                                            ) {
+                                                console.log(
+                                                    `Correcting array '${key}' with template values.`
+                                                );
+                                                correctedJson[key] =
+                                                    templateObj[key];
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
                             } else {
