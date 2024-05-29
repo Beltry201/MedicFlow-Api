@@ -32,8 +32,8 @@ export class UserService {
             ) {
                 // Default values for missing doctor fields
                 userData.professional_id = userData.professional_id || "na";
-                userData.department = userData.department || "general";
-                userData.specialty = userData.specialty || "general";
+                userData.department = userData.department || "Other";
+                userData.specialty = userData.specialty || "Other";
             }
 
             // Validations
