@@ -5,13 +5,10 @@ import jwt from "jsonwebtoken";
 import { User } from "../../models/users/users.js";
 import { Doctor } from "../../models/clinic/doctors.js";
 import { sequelize } from "../../config/db.js";
-import { SubscriptionService } from "../users/subscriptions.js";
 dotenv.config();
 
 export class UserService {
     async createUser(userData) {
-        const subscriptionService = new SubscriptionService();
-
         let transaction;
 
         try {
@@ -27,25 +24,30 @@ export class UserService {
                 department,
                 specialty,
             } = userData;
-            // Validate role
-            if (role === "doctor") {
-                if (!professional_id || !department || !specialty) {
-                    throw new Error("Doctor information is required");
-                }
+
+            // Validate role-specific fields
+            if (
+                role === "doctor" &&
+                (!professional_id || !department || !specialty)
+            ) {
+                // Default values for missing doctor fields
+                userData.professional_id = userData.professional_id || "na";
+                userData.department = userData.department || "general";
+                userData.specialty = userData.specialty || "general";
             }
 
             // Validations
             const schema = Joi.object({
-                name: Joi.string().required(),
-                last_name: Joi.string().required(),
-                phone: Joi.string().required(),
+                name: Joi.string().optional(),
+                last_name: Joi.string().optional(),
+                phone: Joi.string().optional(),
                 email: Joi.string().email().required(),
-                profile_picture_url: Joi.string().required(),
+                profile_picture_url: Joi.string().optional(),
                 password: Joi.string().required(),
-                role: Joi.string().required(),
-                professional_id: Joi.string(),
-                department: Joi.string(),
-                specialty: Joi.string(),
+                role: Joi.string().valid("doctor", "admin", "staff").required(),
+                professional_id: Joi.string().optional(),
+                department: Joi.string().optional(),
+                specialty: Joi.string().optional(),
             });
 
             const { error } = schema.validate(userData);
@@ -55,9 +57,13 @@ export class UserService {
             }
 
             // Check if phone number already exists
-            const existingPhoneUser = await User.findOne({ where: { phone } });
-            if (existingPhoneUser) {
-                throw new Error("Phone number already exists.");
+            if (phone) {
+                const existingPhoneUser = await User.findOne({
+                    where: { phone },
+                });
+                if (existingPhoneUser) {
+                    throw new Error("Phone number already exists.");
+                }
             }
 
             // Check if email already exists
@@ -89,9 +95,9 @@ export class UserService {
                 // Create the doctor record
                 doctor = await Doctor.create(
                     {
-                        professional_id,
-                        department,
-                        specialty,
+                        professional_id: userData.professional_id,
+                        department: userData.department,
+                        specialty: userData.specialty,
                         _id_user: newUser._id_user,
                     },
                     { transaction }
