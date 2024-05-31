@@ -97,6 +97,8 @@ export class SubscriptionService {
                 subscription_end_date,
                 consults_limit,
                 consults_left: consultsLeft,
+                max_min_per_consult:
+                    activeSubscription.MembershipPlan.min_per_consult,
                 days_left_to_cycle: daysLeftToConsultCycle,
                 days_left_to_subscription_end: daysLeftToSubscriptionEnd,
             };
