@@ -20,14 +20,9 @@ export class BedrockService {
                 messages: [
                     {
                         role: "user",
-                        content: [
-                            {
-                                type: "text",
-                                text: `${String(audio_transcript)}\n${String(
-                                    prompt
-                                )}\n${JSON.stringify(template_json)}`,
-                            },
-                        ],
+                        content: `${audio_transcript}\n${prompt}\n${JSON.stringify(
+                            template_json
+                        )}`,
                     },
                 ],
             }),
@@ -38,8 +33,6 @@ export class BedrockService {
             const response = await this.client.send(command);
             const jsonString = new TextDecoder().decode(response.body);
             const parsedResponse = JSON.parse(jsonString);
-
-            console.log(parsedResponse);
 
             // Ensure the response content is properly formatted
             const answerText = parsedResponse.content[0]?.text?.trim();
@@ -60,7 +53,7 @@ export class BedrockService {
             return answer;
         } catch (error) {
             console.error("Error running prompt:", error);
-            return null;
+            throw new Error("Failed to run prompt");
         }
     }
 }

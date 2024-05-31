@@ -9,7 +9,6 @@ import { Template } from "../../models/clinic/templates.js";
 import { ConsultService } from "../../services/consults/consults.js";
 
 const consultService = new ConsultService();
-
 export const generateConsultTemplate = async (req, res) => {
     const clientData = req.body;
     const user = req.user;
@@ -22,6 +21,11 @@ export const generateConsultTemplate = async (req, res) => {
             clientData.audio_transcript,
             template.template_json
         );
+
+        if (!consult_json || typeof consult_json !== "object") {
+            throw new Error("Invalid consult_json format");
+        }
+
         const userData = {
             title: clientData.title,
             consult_json,
