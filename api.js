@@ -4,6 +4,7 @@ import morgan from "morgan";
 import router from "./routes/routes.js";
 import { sequelize } from "./config/db.js";
 import "./models/associations.js";
+import cors from "cors";
 
 const app = express();
 
