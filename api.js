@@ -11,6 +11,13 @@ const app = express();
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(router);
+app.use(
+    cors({
+        origin: "*",
+        methods: "GET, POST, PUT, DELETE, PATCH",
+        allowedHeaders: "Content-Type, Authorization",
+    })
+);
 
 async function main() {
     // Dynamically set the environment based on NODE_ENV
