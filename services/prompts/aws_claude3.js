@@ -9,6 +9,9 @@ export class BedrockService {
     }
 
     async runPrompt(prompt, audio_transcript, template_json) {
+        const instruction = "Please respond in JSON format as specified.";
+        const example = JSON.stringify(template_json, null, 2); // Pretty-print JSON for clarity
+
         const input = {
             modelId: "anthropic.claude-3-sonnet-20240229-v1:0",
             contentType: "application/json",
@@ -20,9 +23,7 @@ export class BedrockService {
                 messages: [
                     {
                         role: "user",
-                        content: `${audio_transcript}\n${prompt}\n${JSON.stringify(
-                            template_json
-                        )}`,
+                        content: `${audio_transcript}\n${prompt}\n${instruction}\nExample:\n${example}`,
                     },
                 ],
             }),
