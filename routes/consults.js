@@ -13,7 +13,6 @@ import { validateToken } from "../helpers/jwt.js";
 const router = Router();
 
 // Routes
-// router.post("/", validateToken, storeJsonData);
 router.post("/", validateToken, generateConsultTemplate);
 router.put("/", validateToken, saveConsult);
 router.get("/consult_details", validateToken, getConsultDetails);

@@ -1,14 +1,56 @@
 import { ConsultRating } from "../../models/consults/consult_rating.js";
-import { MediaFile } from "../../models/patients/media_files.js";
 import { Consult } from "../../models/consults/consults.js";
 import { Patient } from "../../models/patients/patients.js";
-import { uploadFile } from "../bucket.js";
 import { Buffer } from "buffer";
 import { BedrockService } from "../../services/prompts/aws_claude3.js";
 import { Template } from "../../models/clinic/templates.js";
 import { ConsultService } from "../../services/consults/consults.js";
+import { MediaService } from "../../services/medias/medias.js";
 
 const consultService = new ConsultService();
+const mediaService = new MediaService();
+
+export const uploadAudio = async (req, res) => {
+    const clientData = req.body;
+    const user = req.user;
+    try {
+        const template = await Template.findByPk(clientData._id_template);
+
+        const bedrockService = new BedrockService();
+        const consult_json = await bedrockService.runPrompt(
+            template.prompt,
+            clientData.audio_transcript,
+            template.template_json
+        );
+
+        if (!consult_json || typeof consult_json !== "object") {
+            throw new Error("Invalid consult_json format");
+        }
+
+        const userData = {
+            title: clientData.title,
+            consult_json,
+            audio_transcript: clientData.audio_transcript,
+            template,
+            _id_doctor: user._id_doctor,
+        };
+        const newConsult = await consultService.createConsult(userData);
+        console.log(newConsult);
+        res.status(200).json({
+            success: true,
+            message: "Consult datasheet created successfully",
+            consult: newConsult,
+        });
+    } catch (error) {
+        console.error("Error in generateConsultTemplate:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to generate consult template",
+            error: error.message,
+        });
+    }
+};
+
 export const generateConsultTemplate = async (req, res) => {
     const clientData = req.body;
     const user = req.user;
@@ -314,38 +356,19 @@ export const getPatientConsults = async (req, res) => {
 };
 
 export const uploadConsultFile = async (req, res) => {
+    const _id_doctor = req.user._id_doctor;
     try {
-        const { _id_patient, _id_consult } = req.query;
-
-        const file = await MediaFile.create({
-            _id_patient,
-            _id_consult,
-            type: "image",
-            url: "",
+        const fileUrl = await mediaService.uploadWavFile(req, res, _id_doctor);
+        res.status(200).json({
+            success: true,
+            message: "File uploaded successfully",
+            fileUrl,
         });
-
-        const fileUrl = await uploadFile(
-            req,
-            res,
-            file._id_media_file,
-            `consults/${_id_patient}/${_id_consult}`
-        );
-
-        if (fileUrl) {
-            await file.update({
-                url: fileUrl,
-            });
-            return res
-                .status(200)
-                .send({ message: "File Uploaded Successfully", url: fileUrl });
-        } else {
-            return res.status(400).send({
-                message: "Unable to upload file",
-            });
-        }
     } catch (error) {
-        console.error(error);
-        return res.status(500).send({ error: error.message });
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
     }
 };
 
