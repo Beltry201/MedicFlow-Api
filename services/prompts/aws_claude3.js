@@ -43,6 +43,8 @@ export class BedrockService {
                 );
             }
 
+            console.info("Prompt response:", answerText);
+
             let answer;
             try {
                 answer = JSON.parse(answerText);

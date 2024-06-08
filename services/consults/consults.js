@@ -21,7 +21,7 @@ export class ConsultService {
             const schema = Joi.object({
                 title: Joi.string().required(),
                 audio_transcript: Joi.string().required(),
-                consult_json: Joi.object(),
+                consult_json: Joi.object(), // Remove strict validation
                 template: Joi.object().required(),
                 _id_doctor: Joi.string().uuid().required(),
                 _id_consult: Joi.string().uuid().allow("", null),
@@ -30,7 +30,9 @@ export class ConsultService {
             const { error } = schema.validate(userData);
 
             if (error) {
-                throw new Error(error.details[0].message);
+                throw new Error(
+                    `Validation error: ${error.details[0].message}`
+                );
             }
 
             // Create or update the consult
@@ -60,7 +62,16 @@ export class ConsultService {
             console.log(consult);
             return consult;
         } catch (error) {
-            console.error(error);
+            console.error(`Error in createConsult: ${error.message}`);
+            if (error.details) {
+                error.details.forEach((detail) => {
+                    console.error(
+                        `Field: ${detail.path.join(".")}, Issue: ${
+                            detail.message
+                        }`
+                    );
+                });
+            }
             throw new Error("Failed to create consult");
         }
     }
