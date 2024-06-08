@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { validateToken } from "../helpers/jwt.js"; // Import the validateToken middleware
+import { validateToken } from "../helpers/jwt.js";
 import {
     getUser,
     createUser,
@@ -8,6 +8,7 @@ import {
     deactivateUser,
     verifyToken,
     updateUser,
+    startNewSubscription,
 } from "../controllers/user/users.js";
 
 const router = Router();
@@ -18,6 +19,7 @@ router.get("/", validateToken, getUser);
 
 router.post("/login", loginUser);
 router.post("/", createUser);
+router.post("/subscription", validateToken, startNewSubscription);
 
 router.put("/reset_password", validateToken, resetPassword);
 router.put("/:id", validateToken, updateUser);

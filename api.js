@@ -4,6 +4,7 @@ import morgan from "morgan";
 import router from "./routes/routes.js";
 import { sequelize } from "./config/db.js";
 import "./models/associations.js";
+import "./helpers/subscription_schedule.js";
 import cors from "cors";
 
 const app = express();
@@ -28,7 +29,7 @@ async function main() {
     const dbConfig = {
         development: {
             forceSync: false,
-            port: 4001,
+            port: 4091,
         },
         testing: {
             forceSync: false,

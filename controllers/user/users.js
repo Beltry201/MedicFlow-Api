@@ -210,8 +210,6 @@ export const deactivateUser = async (req, res) => {
     }
 };
 
-dotenv.config();
-
 export const verifyToken = (req, res) => {
     const token = req.headers.authorization;
     if (!token) {
@@ -234,4 +232,52 @@ export const verifyToken = (req, res) => {
             user: decodedToken,
         });
     });
+};
+
+export const startNewSubscription = async (req, res) => {
+    try {
+        const { _id_doctor, _id_membership_plan } = req.body;
+        let doctorId = _id_doctor;
+
+        // If doctor ID is not provided, use the one from the JWT token
+        if (!doctorId) {
+            doctorId = req.user._id_doctor;
+            console.info(
+                "Doctor ID not provided. Using ID from JWT token: ",
+                doctorId
+            );
+        }
+
+        if (!doctorId) {
+            return res.status(400).json({
+                success: false,
+                message: "Doctor ID is required",
+            });
+        }
+
+        if (!_id_membership_plan) {
+            return res.status(400).json({
+                success: false,
+                message: "Membership Plan ID is required",
+            });
+        }
+
+        const newSubscription = await subscriptionService.startNewSubscription(
+            doctorId,
+            _id_membership_plan
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "Subscription started successfully",
+            subscription: newSubscription,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({
+            success: false,
+            message: "Failed to start new subscription",
+            error: error.message,
+        });
+    }
 };

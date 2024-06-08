@@ -1,10 +1,113 @@
 import { SubscriptionRecord } from "../../models/subscriptions/subscriptions.js";
 import { MembershipPlan } from "../../models/subscriptions/membership_plans.js";
-import { sequelize } from "../../config/db.js";
 import { Consult } from "../../models/consults/consults.js";
+import { sequelize } from "../../config/db.js";
 import { Op } from "sequelize";
 
 export class SubscriptionService {
+    async handleExpiredSubscriptions() {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const now = new Date();
+            now.setHours(6, 0, 0, 0); // Ensure we are working with 06:00:00
+
+            const expiredSubscriptions = await SubscriptionRecord.findAll({
+                where: {
+                    subscription_end_date: {
+                        [Op.lte]: now,
+                    },
+                    is_active: true,
+                },
+                transaction,
+            });
+
+            for (const subscription of expiredSubscriptions) {
+                // Deactivate the expired subscription
+                subscription.is_active = false;
+                subscription.state = "expired";
+                await subscription.save({ transaction });
+
+                // Create a new subscription based on the expired one
+                const newSubscription = await this.startNewSubscription(
+                    subscription._id_doctor,
+                    subscription._id_membership_plan
+                );
+
+                console.log("Created new subscription:", newSubscription);
+            }
+
+            await transaction.commit();
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    async startNewSubscription(_id_doctor, _id_membership_plan) {
+        let transaction;
+
+        try {
+            transaction = await sequelize.transaction();
+
+            // Fetch the latest active subscription
+            const activeSubscription = await SubscriptionRecord.findOne({
+                where: {
+                    _id_doctor,
+                    is_active: true,
+                },
+                order: [["subscription_start_date", "DESC"]],
+                transaction,
+            });
+
+            if (activeSubscription) {
+                // Deactivate the latest active subscription
+                activeSubscription.is_active = false;
+                await activeSubscription.save({ transaction });
+            }
+
+            const membershipPlan = await MembershipPlan.findByPk(
+                _id_membership_plan,
+                { transaction }
+            );
+
+            if (!membershipPlan) {
+                throw new Error("Membership plan not found");
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const endDate = new Date(today);
+
+            if (membershipPlan.billing_cycle === "monthly") {
+                endDate.setMonth(endDate.getMonth() + 1);
+            } else if (membershipPlan.billing_cycle === "yearly") {
+                endDate.setFullYear(endDate.getFullYear() + 1);
+            }
+
+            const newSubscription = await SubscriptionRecord.create(
+                {
+                    _id_doctor,
+                    _id_membership_plan,
+                    subscription_start_date: today,
+                    subscription_end_date: endDate,
+                    state: "active",
+                    is_active: true,
+                },
+                { transaction }
+            );
+
+            await transaction.commit();
+            return newSubscription;
+        } catch (error) {
+            if (transaction) await transaction.rollback();
+            console.error(error);
+            throw new Error(
+                error.message || "Failed to start new subscription"
+            );
+        }
+    }
+
     async createFreeSubscription(_id_doctor) {
         let transaction;
 
@@ -16,8 +119,10 @@ export class SubscriptionService {
                 throw new Error("Free membership plan not found");
             }
 
-            // Calculate subscription dates (from today to one month later)
+            // Calculate subscription dates (from today to one month later) and set time to 00:00:00
             const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
             const oneMonthLater = new Date(today);
             oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
 
