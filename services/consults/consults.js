@@ -33,12 +33,6 @@ export class ConsultService {
                 throw new Error(error.details[0].message);
             }
 
-            const corrected_json =
-                await this.compareAndCorrectConsultWithTemplate(
-                    template.template_json,
-                    consult_json
-                );
-
             // Create or update the consult
             let consult;
             if (_id_consult && _id_consult !== "") {
@@ -48,7 +42,7 @@ export class ConsultService {
                     throw new Error("Consult not found");
                 }
                 if (consult_json) {
-                    consult.consult_json = corrected_json;
+                    consult.consult_json = consult_json; // Use consult_json as is
                 }
                 consult.is_valid = true;
                 await consult.save();
@@ -57,7 +51,7 @@ export class ConsultService {
                 consult = await Consult.create({
                     title,
                     audio_transcript,
-                    consult_json: corrected_json,
+                    consult_json: consult_json, // Use consult_json as is
                     _id_doctor,
                     _id_template: template._id_template,
                     is_valid: false,

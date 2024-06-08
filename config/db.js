@@ -34,18 +34,6 @@ const dbConfig = {
 // Use the appropriate configuration based on the environment
 const selectedConfig = dbConfig[environment];
 
-// export const sequelize = new Sequelize(
-//     selectedConfig.database,
-//     selectedConfig.username,
-//     selectedConfig.password,
-//     {
-//         host: selectedConfig.host,
-//         dialect: "postgres",
-//         port: selectedConfig.port,
-//         ssl: true,
-//     }
-// );
-
 export const sequelize = new Sequelize({
     database: selectedConfig.database,
     username: selectedConfig.username,
