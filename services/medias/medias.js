@@ -1,13 +1,12 @@
 import { s3, bucketName, bucketRegion } from "../../helpers/s3.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import multer from "multer";
-import { v4 as uuidv4 } from "uuid";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 export class MediaService {
-    async uploadWavFile(req, res, _id_doctor) {
+    async uploadAudioFile(req, res, _id_doctor, fileName) {
         return new Promise((resolve, reject) => {
             upload.single("file")(req, res, async (err) => {
                 if (err) {
@@ -17,7 +16,7 @@ export class MediaService {
                     try {
                         // Get file and check its type.
                         const fileType = req.file.mimetype;
-                        console.log("\n--FILE TYPE: ", fileType);
+                        console.info("\n--FILE TYPE: ", fileType);
 
                         // Define a mapping of MIME types to file extensions
                         const mimeToExt = {
@@ -35,10 +34,7 @@ export class MediaService {
                             });
                         }
 
-                        console.log("File type: ", fileType);
-
                         // Generate a unique file name
-                        const fileName = uuidv4();
                         const fullFileName = `${_id_doctor}/${fileName}.${fileExtension}`;
                         console.log("\n-- FULL NAME: ", fullFileName);
 
@@ -59,7 +55,7 @@ export class MediaService {
                         );
 
                         const fileUrl = `https://${bucketName}.s3.${bucketRegion}.amazonaws.com/${fullFileName}`;
-                        resolve(fileUrl);
+                        resolve({ fileUrl, key: fullFileName });
                     } catch (error) {
                         console.error(error);
                         reject({ message: error.message });

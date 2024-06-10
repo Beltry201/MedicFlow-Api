@@ -1,14 +1,36 @@
-import { ConsultRating } from "../../models/consults/consult_rating.js";
 import { Consult } from "../../models/consults/consults.js";
 import { Patient } from "../../models/patients/patients.js";
-import { Buffer } from "buffer";
 import { BedrockService } from "../../services/prompts/aws_claude3.js";
 import { Template } from "../../models/clinic/templates.js";
 import { ConsultService } from "../../services/consults/consults.js";
 import { MediaService } from "../../services/medias/medias.js";
+import { TranscriptionService } from "../../services/transcriptions/transcriptions.js";
+import { generatePresignedUrl } from "../../helpers/s3.js";
 
 const consultService = new ConsultService();
 const mediaService = new MediaService();
+const transcriptionService = new TranscriptionService();
+const bedrockService = new BedrockService();
+
+export const transcribeAudio = async (req, res) => {
+    const audioUrl = req.body.audioUrl;
+    try {
+        const trnasecriptionResult =
+            await transcriptionService.transcribeAudioFromUrl(audioUrl);
+        res.status(200).json({
+            success: true,
+            message: "Audio transcribed successfully",
+            data: trnasecriptionResult,
+        });
+    } catch (error) {
+        console.error("Error in transcribeAudio:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to transcribe audio",
+            error: error.message,
+        });
+    }
+};
 
 export const uploadAudio = async (req, res) => {
     const clientData = req.body;
@@ -46,6 +68,84 @@ export const uploadAudio = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to generate consult template",
+            error: error.message,
+        });
+    }
+};
+
+export const createConsult = async (req, res) => {
+    const { patientName, _id_template } = req.query;
+    const user = req.user;
+    try {
+        // Step 1: Create consult with initial state and data
+        const consult = await Consult.create({
+            title: patientName,
+            _id_doctor: user._id_doctor,
+            _id_template: _id_template,
+        });
+
+        const fileName = `${patientName.replace(/\s/g, "")}_${
+            consult._id_consult
+        }_${new Date().toISOString()}`;
+
+        // Step 2: Upload the file to S3 and get the file URL and key
+        const { fileUrl, key } = await mediaService.uploadAudioFile(
+            req,
+            res,
+            user._id_doctor,
+            fileName
+        );
+
+        console.info("\nFile uploaded succesfullt, URL:", fileUrl);
+
+        // Step 3: Update the consult with the audio URL
+        await consult.update({ audio_url: fileUrl });
+
+        // Step 4: Generate a presigned URL using the key
+        const presignedUrl = await generatePresignedUrl(key);
+
+        console.info("\nPresigned URL generated successfully:", presignedUrl);
+
+        // Step 5: Transcribe the audio using the presigned URL
+        let audio_transcript =
+            await transcriptionService.transcribeAudioFromUrl(presignedUrl);
+
+        console.info(
+            "\nAudio transcribed successfully:\n",
+            audio_transcript.results.channels[0].alternatives[0].transcript
+        );
+
+        audio_transcript =
+            audio_transcript.results.channels[0].alternatives[0].transcript;
+
+        // Step 6: Update the consult with the audio transcript
+        await consult.update({ audio_transcript });
+
+        // Step 7: Generate the consult using the Claude prompt
+        const template = await Template.findByPk(_id_template);
+        const consult_json = await bedrockService.runPrompt(
+            template.prompt,
+            audio_transcript,
+            template.template_json
+        );
+
+        if (!consult_json || typeof consult_json !== "object") {
+            throw new Error("Invalid consult_json format");
+        }
+
+        // Step 8: Update the consult with the consult template
+        await consult.update({ consult_json });
+
+        res.status(200).json({
+            success: true,
+            message: "Consult created successfully",
+            consult,
+        });
+    } catch (error) {
+        console.error("Error in createConsult:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to create consult",
             error: error.message,
         });
     }
@@ -120,96 +220,6 @@ export const saveConsult = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to save consult",
-            error: error.message,
-        });
-    }
-};
-
-export const createConsult = async (req, res) => {
-    try {
-        const {
-            recording_duration_s,
-            whisper_version,
-            completion_tokens,
-            prompt_tokens,
-            treatment,
-            rating,
-            attributes,
-            audio_transcript,
-            consult_json,
-            _id_patient,
-            _id_treatment_catalog,
-        } = req.body;
-
-        console.log("\n-- TOKENS: ", completion_tokens, " ", prompt_tokens);
-        const _id_doctor = req.user._id_user;
-
-        let date = new Date();
-
-        const decodedAudioTranscript = Buffer.from(
-            audio_transcript,
-            "base64"
-        ).toString("utf-8");
-
-        // Create Consult
-        const consult = await Consult.create({
-            audio_transcript: decodedAudioTranscript,
-            consult_json: consult_json,
-            date,
-            treatment_name: treatment.name,
-            treatment_price: treatment.price,
-            recording_duration_s,
-            whisper_version,
-            completion_tokens,
-            prompt_tokens,
-            _id_treatment_catalog,
-            _id_doctor,
-            _id_patient,
-        });
-
-        // Create Rating
-        if (rating !== undefined && attributes !== undefined) {
-            await ConsultRating.create({
-                rating,
-                attributes,
-                _id_doctor,
-                _id_consult: consult._id_consult,
-            });
-        } else {
-            console.log(
-                "Rating or attributes missing. Skipping consult rating creation."
-            );
-        }
-        clin;
-
-        const formattedConsult = {
-            id_consult: consult._id_consult,
-            date: consult.date,
-            treatment: {
-                name: consult.treatment_name,
-                price: consult.treatment_price,
-            },
-            patient: {
-                _id_patient,
-                name: newConsult.Patient.name,
-                last_name: newConsult.Patient.last_name,
-                birth_date: newConsult.Patient.birth_date,
-                gender: newConsult.Patient.gender,
-                phone_number: newConsult.Patient.phone_number,
-            },
-            consult_json,
-        };
-
-        res.status(201).json({
-            success: true,
-            message: "JSON data stored successfully",
-            consult: formattedConsult,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to store JSON data",
             error: error.message,
         });
     }
@@ -359,7 +369,11 @@ export const getPatientConsults = async (req, res) => {
 export const uploadConsultFile = async (req, res) => {
     const _id_doctor = req.user._id_doctor;
     try {
-        const fileUrl = await mediaService.uploadWavFile(req, res, _id_doctor);
+        const fileUrl = await mediaService.uploadAudioFile(
+            req,
+            res,
+            _id_doctor
+        );
         res.status(200).json({
             success: true,
             message: "File uploaded successfully",

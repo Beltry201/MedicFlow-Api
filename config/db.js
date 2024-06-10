@@ -41,10 +41,10 @@ export const sequelize = new Sequelize({
     host: selectedConfig.host,
     port: selectedConfig.port,
     dialect: "postgres",
-    dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false,
-        },
-    },
+    // dialectOptions: {
+    //     ssl: {
+    //         require: true,
+    //         rejectUnauthorized: false,
+    //     },
+    // },
 });

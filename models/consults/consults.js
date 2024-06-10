@@ -18,9 +18,13 @@ export const Consult = sequelize.define(
             type: DataTypes.TEXT,
             allowNull: true,
         },
+        audio_url: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         consult_json: {
             type: DataTypes.JSON,
-            allowNull: false,
+            allowNull: true,
         },
         is_valid: {
             type: DataTypes.BOOLEAN,
