@@ -2,6 +2,7 @@ import {
     BedrockRuntimeClient,
     InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
+import { response } from "express";
 
 export class BedrockService {
     constructor(region = "us-east-1") {
@@ -56,7 +57,7 @@ export class BedrockService {
             return answer;
         } catch (error) {
             console.error("Error running prompt:", error);
-            console.error("Claude response:", answerText);
+            console.error("Claude response:", response);
             throw new Error("Failed to run prompt");
         }
     }
