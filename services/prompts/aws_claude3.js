@@ -56,6 +56,7 @@ export class BedrockService {
             return answer;
         } catch (error) {
             console.error("Error running prompt:", error);
+            console.error("Claude response:", answerText);
             throw new Error("Failed to run prompt");
         }
     }

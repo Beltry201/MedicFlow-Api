@@ -88,6 +88,7 @@ export const generateConsultTemplate = async (req, res) => {
             success: false,
             message: "Failed to generate consult template",
             error: error.message,
+            claude_response: error,
         });
     }
 };
