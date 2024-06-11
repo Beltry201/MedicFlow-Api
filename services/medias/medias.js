@@ -23,6 +23,8 @@ export class MediaService {
                             "audio/wav": "wav",
                             "audio/mpeg": "mp3",
                             "audio/mp4": "m4a",
+                            "audio/x-wav": "wav",
+                            "audio/x-mpeg": "mp3",
                         };
 
                         // Get the file extension from MIME type
